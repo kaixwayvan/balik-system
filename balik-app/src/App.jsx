@@ -1,23 +1,22 @@
-import RootLayout from './shared/components/layouts/RootLayout'
-import { Routes, Route, Link } from 'react-router-dom'
-import Home from './pages/Home'
-import About from './pages/About'
-import Contact from './pages/Contact'
+import { Routes, Route } from "react-router-dom";
+import RootLayout from "./shared/components/layouts/RootLayout";
+import Home from "./pages/Home";
+import Login from "./pages/auth/Login";
+import Signup from "./pages/auth/Signup";
 
 function App() {
-
   return (
-    <>
-      <RootLayout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-        </Routes>
+    <Routes>
+      {/* Pages with layout */}
+      <Route element={<RootLayout />}>
+        <Route path="/" element={<Home />} />
+      </Route>
 
-      </ RootLayout>
-    </>
-  )
+      {/* Pages without layout */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+    </Routes>
+  );
 }
 
-export default App
+export default App;
