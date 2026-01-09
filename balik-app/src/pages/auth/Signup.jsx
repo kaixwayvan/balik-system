@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useGoogleLogin } from "@react-oauth/google";
 import { loginWithGoogle } from "../auth/services/authService";
@@ -18,6 +18,11 @@ export default function Signup() {
   const [captchaValue, setCaptchaValue] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const navigate = useNavigate();
 
   // VALIDATION FUNCTIONS
   const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -85,6 +90,8 @@ export default function Signup() {
       setError("");
       // BACKEND: Replace with actual signup function
       console.log("Signup data:", form, "Captcha:", captchaValue);
+      // Simulate successful signup: show success modal
+      setShowSuccess(true);
     } catch {
       setError("Signup failed. Please try again.");
     } finally {
@@ -98,6 +105,9 @@ export default function Signup() {
     setForm({ ...form, [id]: value });
     setErrors({ ...errors, [id]: validateField(id, value) });
   };
+
+  const toggleShowPassword = () => setShowPassword((s) => !s);
+  const toggleShowConfirmPassword = () => setShowConfirmPassword((s) => !s);
 
   return (
     <main className="relative min-h-screen flex flex-col lg:flex-row">
@@ -212,15 +222,35 @@ export default function Signup() {
               <label htmlFor="password" className="text-sm font-medium text-gray-700">
                 Password
               </label>
-              <input
-                id="password"
-                type="password"
-                value={form.password}
-                onChange={handleChange}
-                className={`w-full border rounded-md px-3 py-2 focus:ring-2 focus:outline-none ${
-                  errors.password ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-600"
-                }`}
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={form.password}
+                  onChange={handleChange}
+                  className={`w-full pr-10 border rounded-md px-3 py-2 focus:ring-2 focus:outline-none ${
+                    errors.password ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-600"
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={toggleShowPassword}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0 1 12 19c-5 0-9-3.5-10-8 1.03-2.76 3.1-4.97 5.56-6.33M6.1 6.1L18 18" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
+                      <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </button>
+              </div>
               {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
             </div>
 
@@ -229,15 +259,35 @@ export default function Signup() {
               <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
                 Confirm Password
               </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                className={`w-full border rounded-md px-3 py-2 focus:ring-2 focus:outline-none ${
-                  errors.confirmPassword ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-600"
-                }`}
-              />
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  className={`w-full pr-10 border rounded-md px-3 py-2 focus:ring-2 focus:outline-none ${
+                    errors.confirmPassword ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-600"
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={toggleShowConfirmPassword}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                >
+                  {showConfirmPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0 1 12 19c-5 0-9-3.5-10-8 1.03-2.76 3.1-4.97 5.56-6.33M6.1 6.1L18 18" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
+                      <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </button>
+              </div>
               {errors.confirmPassword && (
                 <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
               )}
@@ -298,6 +348,42 @@ export default function Signup() {
           </p>
         </div>
       </section>
+      {/* Success Modal */}
+      {showSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black opacity-30" onClick={() => setShowSuccess(false)} />
+          <div className="relative bg-gradient-to-b from-yellow-100 to-yellow-50 rounded-lg w-11/12 max-w-md p-6 shadow-2xl">
+            <button
+              onClick={() => setShowSuccess(false)}
+              className="absolute right-3 top-3 text-gray-600 hover:text-gray-800 focus:outline-none"
+              aria-label="Close"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div className="flex flex-col items-center text-center pt-4">
+              <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
+                  <circle cx="12" cy="12" r="9" />
+                </svg>
+              </div>
+
+              <h3 className="text-xl font-semibold text-gray-800">Account successfully Created</h3>
+              <p className="text-sm text-gray-600 mt-2">Thanks for Joining us!</p>
+
+              <button
+                onClick={() => navigate('/login')}
+                className="mt-6 bg-blue-600 text-white px-6 py-2 rounded-md shadow-md hover:bg-blue-700 focus:outline-none"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
