@@ -1,11 +1,12 @@
+import { Outlet } from "react-router-dom"
 import Header from "../partials/Header"
 import Footer from "../partials/Footer"
 
-function RootLayout({ children }) {
+function RootLayout() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-1">{children}</main>
+      <Outlet />
       <Footer />
     </div>
   )
