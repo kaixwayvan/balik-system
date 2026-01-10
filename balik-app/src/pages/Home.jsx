@@ -174,7 +174,7 @@ function Home() {
     if (file) setImagePreview(URL.createObjectURL(file))
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     // validate final step
     if (!validateStep(3)) {
@@ -183,32 +183,51 @@ function Home() {
       return
     }
 
-    // Basic submission stub
     const fullPhone = formData.phone ? `${formData.phoneCountry} ${formData.phone}` : ""
-    const payload = { mode: formMode, ...formData, fullPhone }
-    console.log("Submitting report:", payload)
-    // show styled confirmation modal instead of simple alert
-    setSubmitted({ show: true, anonymous: formData.anonymous, mode: formMode })
-    // reset
-    setFormData({
-      itemType: "",
-      category: "",
-      brand: "",
-      color: "",
-      dateFound: "",
-      location: "",
-      time: "",
-      additionalInfo: "",
-      whereTurned: "",
-      anonymous: false,
-      fullName: "",
-      email: "",
-      phone: "",
-      phoneCountry: "+63",
-      imageFile: null,
+
+    // Build FormData for file upload
+    const fd = new FormData()
+    fd.append('mode', formMode)
+    Object.keys(formData).forEach((k) => {
+      if (k === 'imageFile') {
+        if (formData.imageFile) fd.append('imageFile', formData.imageFile)
+      } else {
+        fd.append(k, formData[k])
+      }
     })
-    setImagePreview(null)
-    setStep(1)
+    fd.append('fullPhone', fullPhone)
+
+    try {
+      const res = await fetch('http://localhost/BALIK/balik-system/balik-app/backend/report.php', { method: 'POST', body: fd })
+      const json = await res.json()
+      if (res.ok && json.success) {
+        setSubmitted({ show: true, anonymous: formData.anonymous, mode: formMode })
+        // reset
+        setFormData({
+          itemType: "",
+          category: "",
+          brand: "",
+          color: "",
+          dateFound: "",
+          location: "",
+          time: "",
+          additionalInfo: "",
+          whereTurned: "",
+          anonymous: false,
+          fullName: "",
+          email: "",
+          phone: "",
+          phoneCountry: "+63",
+          imageFile: null,
+        })
+        setImagePreview(null)
+        setStep(1)
+      } else {
+        alert('Submission failed: ' + (json.message || 'Server error'))
+      }
+    } catch (err) {
+      alert('Submission failed: ' + err.message)
+    }
   }
 
 

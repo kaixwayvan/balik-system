@@ -3,6 +3,7 @@ import RootLayout from "./shared/components/layouts/RootLayout";
 import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
+import ForgotPassword from "./pages/auth/ForgotPassword";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
 
       {/* Pages without layout */}
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/signup" element={<Signup />} />
     </Routes>
   );
