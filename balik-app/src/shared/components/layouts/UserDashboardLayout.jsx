@@ -1,5 +1,5 @@
-import UserDashboardHeader from "./UserDashboardHeader";
-import UserDashboardSidebar from "./UserDashboardSidebar";
+import UserDashboardHeader from "../user-dashboard/UserDashboardHeader";
+import UserDashboardSidebar from "../user-dashboard/UserDashboardSidebar";
 
 export default function UserDashboardLayout({ children }) {
   return (

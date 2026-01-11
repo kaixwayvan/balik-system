@@ -218,13 +218,15 @@ export default function Login() {
             </div>
 
             {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 text-white py-2.5 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-            >
-              {loading ? "Logging in..." : "Login"}
-            </button>
+            <Link to="/dashboard">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-blue-600 text-white py-2.5 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+              >
+                {loading ? "Logging in..." : "Login"}
+              </button>
+            </Link>
           </form>
 
           {/* Divider */}

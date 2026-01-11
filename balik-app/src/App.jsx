@@ -4,6 +4,11 @@ import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 
+import DashboardHome from "./pages/user-dashboard/DashboardHome";
+import UserDashboardLayout from "./shared/components/layouts/UserDashboardLayout";
+
+import ComingSoonPage from "./pages/ComingSoonPage";
+
 function App() {
   return (
     <Routes>
@@ -15,6 +20,17 @@ function App() {
       {/* Pages without layout */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/comingsoon" element={<ComingSoonPage />} />
+
+      {/* Dashboard with its own layout */}
+      <Route
+        path="/dashboard"
+        element={
+          <UserDashboardLayout>
+            <DashboardHome />
+          </UserDashboardLayout>
+        }
+      />
     </Routes>
   );
 }
