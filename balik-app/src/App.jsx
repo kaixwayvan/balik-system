@@ -3,9 +3,11 @@ import RootLayout from "./shared/components/layouts/RootLayout";
 import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
-import ForgotPassword from "./pages/auth/ForgotPassword";
-import Dashboard from "./pages/Dashboard";
-import RequireAuth from "./shared/components/RequireAuth";
+
+import DashboardHome from "./pages/user-dashboard/DashboardHome";
+import UserDashboardLayout from "./shared/components/layouts/UserDashboardLayout";
+
+import ComingSoonPage from "./pages/ComingSoonPage";
 
 function App() {
   return (
@@ -17,13 +19,18 @@ function App() {
 
       {/* Pages without layout */}
       <Route path="/login" element={<Login />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/signup" element={<Signup />} />
-      <Route path="/dashboard" element={
-        <RequireAuth>
-          <Dashboard />
-        </RequireAuth>
-      } />
+      <Route path="/comingsoon" element={<ComingSoonPage />} />
+
+      {/* Dashboard with its own layout */}
+      <Route
+        path="/dashboard"
+        element={
+          <UserDashboardLayout>
+            <DashboardHome />
+          </UserDashboardLayout>
+        }
+      />
     </Routes>
   );
 }

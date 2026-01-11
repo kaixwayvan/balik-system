@@ -17,19 +17,19 @@ function Header() {
             HOME
           </Link>
           <Link
-            to="/about"
+            to="/comingsoon"
             className="font-extrabold text-[#230000de] hover:text-[#cb7300ff] transition-colors duration-300"
           >
             ABOUT
           </Link>
           <Link
-            to="/contact"
+            to="/comingsoon"
             className="font-extrabold text-[#230000de] hover:text-[#cb7300ff] transition-colors duration-300"
           >
             CONTACT
           </Link>
           <Link
-            to="/learnmore"
+            to="/comingsoon"
             className="font-extrabold text-[#230000de] hover:text-[#cb7300ff] transition-colors duration-300"
           >
             LEARN MORE
