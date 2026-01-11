@@ -28,7 +28,7 @@ export default function UserDashboardSidebar() {
       <nav className="space-y-6">
         {/* OVERVIEW */}
         <div>
-          <p className="text-sm font-extrabold text-yellow-700 mb-2 uppercase">
+          <p className="text-lg font-extrabold text-yellow-700 mb-2 uppercase">
             Overview
           </p>
           <div className="space-y-1">
@@ -61,16 +61,16 @@ export default function UserDashboardSidebar() {
 
         {/* MY ACTIVITY */}
         <div>
-          <p className="text-sm font-extrabold text-yellow-700 mb-2 uppercase">
+          <p className="text-lg font-extrabold text-yellow-700 mb-2 uppercase">
             My Activity
           </p>
           <div className="space-y-1">
-            <NavLink to="/dashboard/claims" className={linkClass}>
+            <NavLink to="/comingsoon" className={linkClass}>
               <ClipboardCheck size={18} />
               My Claims
             </NavLink>
 
-            <NavLink to="/dashboard/history" className={linkClass}>
+            <NavLink to="/comingsoon" className={linkClass}>
               <History size={18} />
               Activity History
             </NavLink>
@@ -79,7 +79,7 @@ export default function UserDashboardSidebar() {
 
         {/* ACHIEVEMENTS */}
         <div>
-          <p className="text-sm font-extrabold text-yellow-700 mb-2 uppercase">
+          <p className="text-lg font-extrabold text-yellow-700 mb-2 uppercase">
             Achievements
           </p>
 

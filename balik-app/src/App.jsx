@@ -6,7 +6,7 @@ import Signup from "./pages/auth/Signup";
 
 import DashboardHome from "./pages/user-dashboard/DashboardHome";
 import UserDashboardLayout from "./shared/components/layouts/UserDashboardLayout";
-
+import SubmitReport from "./components/UserDashboardHome/SubmitReport";
 import ComingSoonPage from "./pages/ComingSoonPage";
 
 function App() {
@@ -21,6 +21,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/comingsoon" element={<ComingSoonPage />} />
+      <Route path="/submitreport" element={<SubmitReport />} />
 
       {/* Dashboard with its own layout */}
       <Route
