@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
 import {
   loginWithGoogle,
@@ -14,6 +14,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
   // VALIDATION FUNCTIONS
   const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -45,6 +46,8 @@ export default function Login() {
         setLoading(true);
         setError("");
         await loginWithGoogle(tokenResponse.access_token);
+        // on success navigate to dashboard
+        navigate('/dashboard', { replace: true })
       } catch {
         setError("Google login failed. Please try again.");
       } finally {
@@ -63,13 +66,19 @@ export default function Login() {
     try {
       setLoading(true);
       setError("");
-      await loginWithPassword(form);
+      const res = await loginWithPassword(form);
+      if (res?.data?.success) {
+        navigate('/dashboard', { replace: true })
+      } else {
+        setError(res?.data?.message || 'Invalid credentials. Please try again.')
+      }
     } catch {
       setError("Invalid credentials. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <main className="relative min-h-screen flex flex-col lg:flex-row">
