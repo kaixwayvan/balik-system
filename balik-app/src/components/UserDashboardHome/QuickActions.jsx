@@ -6,12 +6,13 @@ import {
   User,
 } from "lucide-react";
 
-export default function QuickActions() {
+export default function QuickActions({ onReportClick }) {
   const actions = [
     {
       text: "Report Item",
       color: "bg-blue-600",
       icon: Plus,
+      onClick: onReportClick,
     },
     {
       text: "Browse Found Items",
@@ -46,6 +47,7 @@ export default function QuickActions() {
           return (
             <button
               key={i}
+              onClick={a.onClick}
               className={`${a.color} cursor-pointer text-white w-full py-3 px-4 rounded-lg font-medium flex items-center gap-3 hover:opacity-60 transition`}
             >
               <Icon size={18} />
