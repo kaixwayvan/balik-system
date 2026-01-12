@@ -1,9 +1,9 @@
-import WelcomeBanner from "../../components/UserDashboardHome/WelcomeBanner";
-import StatsCards from "../../components/UserDashboardHome/StatsCards";
-import QuickActions from "../../components/UserDashboardHome/QuickActions";
-import PointsPanel from "../../components/UserDashboardHome/PointsPanel";
-import RecentActivity from "../../components/UserDashboardHome/RecentActivity";
-import AchievementsPanel from "../../components/UserDashboardHome/AchievementsPanel";
+import WelcomeBanner from "../../components/UserDashboard/Home/WelcomeBanner";
+import StatsCards from "../../components/UserDashboard/Home/StatsCards";
+import QuickActions from "../../components/UserDashboard/Home/QuickActions";
+import PointsPanel from "../../components/UserDashboard/Home/PointsPanel";
+import RecentActivity from "../../components/UserDashboard/Home/RecentActivity";
+import AchievementsPanel from "../../components/UserDashboard/Home/AchievementsPanel";
 
 export default function DashboardHome() {
   return (

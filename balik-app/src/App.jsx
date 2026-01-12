@@ -5,8 +5,10 @@ import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 
 import DashboardHome from "./pages/user-dashboard/DashboardHome";
+import DashboardSearch from "./components/UserDashboard/SearchItems/SearchItems"
+
 import UserDashboardLayout from "./shared/components/layouts/UserDashboardLayout";
-import SubmitReport from "./components/UserDashboardHome/SubmitReport";
+import SubmitReport from "./components/UserDashboard/Home/SubmitReport";
 import ComingSoonPage from "./pages/ComingSoonPage";
 
 function App() {
@@ -24,14 +26,10 @@ function App() {
       <Route path="/submitreport" element={<SubmitReport />} />
 
       {/* Dashboard with its own layout */}
-      <Route
-        path="/dashboard"
-        element={
-          <UserDashboardLayout>
-            <DashboardHome />
-          </UserDashboardLayout>
-        }
-      />
+      <Route element={<UserDashboardLayout />}>
+        <Route path="/dashboard" element={<DashboardHome />} />
+        <Route path="/dashboard/search" element={<DashboardSearch />} />
+      </Route>
     </Routes>
   );
 }

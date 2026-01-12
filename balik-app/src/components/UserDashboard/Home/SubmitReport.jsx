@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import BALIKLogo from "../../assets/BALIK.png";
+import BALIKLogo from "../../../assets/BALIK.png";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 

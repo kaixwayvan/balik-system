@@ -32,27 +32,27 @@ export default function UserDashboardSidebar() {
             Overview
           </p>
           <div className="space-y-1">
-            <NavLink to="/dashboard" className={linkClass}>
+            <NavLink to="/dashboard" end className={linkClass}>
               <LayoutDashboard size={18} />
               Dashboard
             </NavLink>
 
-            <NavLink to="/comingsoon" className={linkClass}>
+            <NavLink to="/dashboard/search" end className={linkClass}>
               <Search size={18} />
               Search Items
             </NavLink>
 
-            <NavLink to="/comingsoon" className={linkClass}>
+            <NavLink to="/comingsoon" end className={linkClass}>
               <MapPin size={18} />
               Track Items
             </NavLink>
 
-            <NavLink to="/comingsoon" className={linkClass}>
+            <NavLink to="/comingsoon" end className={linkClass}>
               <FileText size={18} />
               Active Reports
             </NavLink>
 
-            <NavLink to="/comingsoon" className={linkClass}>
+            <NavLink to="/comingsoon" end className={linkClass}>
               <Package size={18} />
               Found Items
             </NavLink>
