@@ -10,6 +10,12 @@ import { securityData } from "./data/securityData";
 import { faqData } from "./data/faqData";
 import { Search, ChevronDown, Users, UserPlus, LogIn } from "lucide-react";
 import { joinFeaturesData } from "./data/joinFeaturesData";
+import Joi from "joi";
+
+// Validation Schema
+const schema = Joi.string().trim().min(2).max(100)
+  .pattern(/^[\p{L}\p{M} .&'-]+$/u)
+  .invalid('asdf', 'qwerty');
 
 // Country codes list with emoji flags
 const countryCodes = [
@@ -93,7 +99,9 @@ function Home() {
   // Form state
   const [formData, setFormData] = useState({
     itemType: "",
+    customItemType: "",
     category: "",
+    customCategory: "",
     brand: "",
     color: "",
     customColor: "",
@@ -149,6 +157,26 @@ function Home() {
 
   function handleInputChange(e) {
     const { name, value, type, checked } = e.target
+
+    // STRICT VALIDATION: Only allow letters and spaces for these fields
+    const textOnlyFields = [
+      "brand",
+      "customColor",
+      "customItemType",
+      "customCategory",
+      "whereTurned",
+      "fullName"
+    ];
+
+    if (textOnlyFields.includes(name)) {
+      // If value contains anything that is NOT allowed by the regex, ignore the input
+      // Regex matches: Unicode letters, marks, spaces, dots, ampersands, apostrophes, hyphens
+      // This matches the Joi schema pattern: /^[\p{L}\p{M} .&'-]+$/u
+      if (value && !/^[\p{L}\p{M} .&'-]*$/u.test(value)) {
+        return;
+      }
+    }
+
     if (type === "checkbox") {
       // special handling for anonymous: clear contact fields when checked
       if (name === "anonymous") {
@@ -203,7 +231,9 @@ function Home() {
         // reset
         setFormData({
           itemType: "",
+          customItemType: "",
           category: "",
+          customCategory: "",
           brand: "",
           color: "",
           dateFound: "",
@@ -231,14 +261,21 @@ function Home() {
 
   function validateStep(s) {
     if (s === 1) {
-      // Brand must be at least 2 characters, letters and spaces only (no numbers or random characters)
-      const brandText = formData.brand.trim();
-      const brandValid = brandText.length >= 2 && /^[A-Za-z\s]+$/.test(brandText);
-      // Color validation: if Other is selected, customColor must be filled
-      const colorValid = formData.color.trim() && (formData.color !== "Other" || formData.customColor.trim());
+      // Brand validation
+      const brandValid = !schema.validate(formData.brand).error;
+
+      // Item Type validation: if Other is selected, customItemType must be filled and valid
+      const itemTypeValid = formData.itemType.trim() && (formData.itemType !== "Other" || (!schema.validate(formData.customItemType).error));
+
+      // Category validation: if Others is selected, customCategory must be filled and valid
+      const categoryValid = formData.category.trim() && (formData.category !== "Others" || (!schema.validate(formData.customCategory).error));
+
+      // Color validation: if Other is selected, customColor must be valid
+      const colorValid = formData.color.trim() && (formData.color !== "Other" || (!schema.validate(formData.customColor).error));
+
       return (
-        formData.itemType.trim() &&
-        formData.category.trim() &&
+        itemTypeValid &&
+        categoryValid &&
         brandValid &&
         colorValid
       )
@@ -257,13 +294,17 @@ function Home() {
       const digits = (formData.phone || "").replace(/\D/g, "")
       const phoneOk = formData.anonymous ? true : (digits.length >= (meta.minLength || 6))
 
+      // Contact info validation
+      const fullNameValid = !schema.validate(formData.fullName).error;
+      const whereTurnedValid = !schema.validate(formData.whereTurned).error;
+
       const contactOk = formData.anonymous
         ? true
-        : (formData.fullName.trim() && formData.email.trim() && phoneOk)
+        : (fullNameValid && formData.email.trim() && phoneOk)
 
       return (
         formData.additionalInfo.trim() &&
-        formData.whereTurned.trim() &&
+        whereTurnedValid &&
         formData.imageFile &&
         contactOk
       )
@@ -302,11 +343,11 @@ function Home() {
 
         {/* Right Content (Buttons) */}
         <div className="relative z-20 flex flex-col md:flex-row gap-4 items-center">
-          <button type="button" onClick={handleHeaderReportLost} className="bg-[#E30000] text-white font-bold px-10 py-4 rounded-3xl shadow-lg border border-[#a11010] hover:bg-[#230000de] hover:shadow-2xl transition-all duration-300">
+          <button type="button" onClick={handleHeaderReportLost} className="cursor-pointer bg-[#E30000] text-white font-bold px-10 py-4 rounded-3xl shadow-lg border border-[#a11010] hover:bg-[#230000de] hover:shadow-2xl transition-all duration-300">
             Report Lost Item
           </button>
 
-          <button type="button" onClick={handleHeaderReportFound} className="bg-[#02D44F] text-white font-bold px-10 py-4 rounded-3xl shadow-lg border border-[#2eb857] hover:bg-[#0e361a] hover:shadow-2xl transition-all duration-300">
+          <button type="button" onClick={handleHeaderReportFound} className="cursor-pointer bg-[#02D44F] text-white font-bold px-10 py-4 rounded-3xl shadow-lg border border-[#2eb857] hover:bg-[#0e361a] hover:shadow-2xl transition-all duration-300">
             Report Found Item
           </button>
         </div>
@@ -405,7 +446,7 @@ function Home() {
             <button
               key={index}
               onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium ${activeCategory === cat ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-600"
+              className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-medium ${activeCategory === cat ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-600"
                 }`}
             >
               {cat}
@@ -452,7 +493,7 @@ function Home() {
                   <span>{item.date}</span>
                 </div>
 
-                <button onClick={() => setSelectedItem(item)} className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium">
+                <button onClick={() => setSelectedItem(item)} className="cursor-pointer w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium">
                   View details
                 </button>
               </div>
@@ -464,7 +505,7 @@ function Home() {
       {selectedItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-xl max-w-3xl w-full p-6 relative mx-4">
-            <button onClick={() => setSelectedItem(null)} className="absolute top-3 right-3 text-gray-600 text-2xl">×</button>
+            <button onClick={() => setSelectedItem(null)} className="cursor-pointer absolute top-3 right-3 text-gray-600 text-2xl">×</button>
 
             <div className="grid md:grid-cols-2 gap-6">
               <img src={selectedItem.image} alt={selectedItem.title} className="w-full h-64 object-cover rounded" />
@@ -480,7 +521,7 @@ function Home() {
             </div>
 
             <div className="mt-6 flex justify-end">
-              <button onClick={() => { setSelectedItem(null); navigate("/login"); }} className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded">Claim</button>
+              <button onClick={() => { setSelectedItem(null); navigate("/login"); }} className="cursor-pointer px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded">Claim</button>
             </div>
           </div>
         </div>
@@ -554,6 +595,21 @@ function Home() {
                     <option value="Calculator">Calculator</option>
                     <option value="Other">Other</option>
                   </select>
+                  {/* Custom item type input */}
+                  {formData.itemType === "Other" && (
+                    <div className="input-group mt-4">
+                      <label className="font-medium">
+                        Specify Item Type <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        name="customItemType"
+                        value={formData.customItemType}
+                        onChange={handleInputChange}
+                        placeholder="Enter item type"
+                        className={`input ${showErrorsStep === 1 && formData.itemType === "Other" && !formData.customItemType.trim() ? 'border-red-500' : ''}`}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="input-group">
@@ -569,6 +625,21 @@ function Home() {
                     <option value="Clothing">Clothing</option>
                     <option value="Others">Others</option>
                   </select>
+                  {/* Custom category input */}
+                  {formData.category === "Others" && (
+                    <div className="input-group mt-4">
+                      <label className="font-medium">
+                        Specify Category <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        name="customCategory"
+                        value={formData.customCategory}
+                        onChange={handleInputChange}
+                        placeholder="Enter category"
+                        className={`input ${showErrorsStep === 1 && formData.category === "Others" && !formData.customCategory.trim() ? 'border-red-500' : ''}`}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -746,7 +817,7 @@ function Home() {
                 <button
                   type="button"
                   onClick={prevStep}
-                  className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium"
+                  className="cursor-pointer flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium"
                 >
                   Back
                 </button>
@@ -764,7 +835,7 @@ function Home() {
                       // optional focus could be added here
                     }
                   }}
-                  className={`flex-1 py-3 rounded-lg font-medium text-white ${validateStep(step) ? 'bg-green-500' : 'bg-green-500/60 cursor-not-allowed'}`}
+                  className={`cursor-pointer flex-1 py-3 rounded-lg font-medium text-white ${validateStep(step) ? 'bg-green-500' : 'bg-green-500/60 cursor-not-allowed'}`}
                 >
                   Continue
                 </button>
@@ -773,7 +844,7 @@ function Home() {
               {step === 3 && (
                 <button
                   type="submit"
-                  className="flex-1 bg-green-500 text-white py-3 rounded-lg font-medium"
+                  className="cursor-pointer flex-1 bg-green-500 text-white py-3 rounded-lg font-medium"
                 >
                   Submit Report
                 </button>
