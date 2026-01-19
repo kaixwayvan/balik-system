@@ -8,6 +8,7 @@ import {
   User,
   CheckCircle,
 } from "lucide-react";
+import DatePicker from "react-datepicker";
 
 import iphoneImg from "../../../assets/home-assets/img-items/iphone.png";
 import bagImg from "../../../assets/home-assets/img-items/bag.png";
@@ -88,6 +89,7 @@ export default function SubmitReport() {
   const [showClaim, setShowClaim] = useState(false);
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState({});
+  const [file, setFile] = useState(null);
 
   const [form, setForm] = useState({
     fullName: "",
@@ -95,8 +97,10 @@ export default function SubmitReport() {
     email: "",
     lostLocation: "",
     lostDate: "",
-    identifiers: "",
     description: "",
+    category: "",
+    otherCategory: "",
+    identifiers: "",
 
     itemType: "",
     colorMaterial: "",
@@ -119,8 +123,14 @@ export default function SubmitReport() {
     if (!form.lostLocation) e.lostLocation = true;
     if (!form.lostDate) e.lostDate = true;
     if (!form.description) e.description = true;
+    if (!form.category) e.category = true;
+    if (!form.identifiers) e.identifiers = true;
     setErrors(e);
     return Object.keys(e).length === 0;
+  };
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
   };
 
   return (
@@ -285,7 +295,12 @@ export default function SubmitReport() {
             <div className="flex gap-3 border-t border-gray-300 px-6 py-4">
               <button
                 onClick={() => {
+                  setForm((prev) => ({
+                    ...prev,
+                    category: selectedItem.category,
+                  }));
                   setShowClaim(true);
+                  setStep(1);
                   setSelectedItem(null);
                 }}
                 className="cursor-pointer flex-1 rounded-lg bg-green-500 py-2 text-sm font-semibold text-white"
@@ -306,7 +321,7 @@ export default function SubmitReport() {
 
       {showClaim && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="relative w-full max-w-xl rounded-2xl bg-white shadow-xl">
+          <div className="relative flex max-h-[90vh] w-full max-w-xl flex-col rounded-2xl bg-white shadow-xl">
             {/* Header */}
             <div className="sticky top-0 z-10 flex items-start justify-between border-b px-6 py-4">
               <div>
@@ -326,7 +341,7 @@ export default function SubmitReport() {
             </div>
 
             {/* BODY */}
-            <div className="px-6 py-5 space-y-6 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
               {step === 1 ? (
                 <>
                   {/* PAGE 1 — Contact Information & Item Ownership Details */}
@@ -343,10 +358,15 @@ export default function SubmitReport() {
                         </label>
                         <input
                           value={form.fullName}
-                          onChange={(e) =>
-                            setForm({ ...form, fullName: e.target.value })
-                          }
-                          className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm"
+                          onChange={(e) => {
+                            setForm({ ...form, fullName: e.target.value });
+                            setErrors((prev) => ({ ...prev, fullName: false }));
+                          }}
+                          className={`w-full rounded-lg border px-4 py-2 text-sm ${
+                            errors.fullName
+                              ? "border-red-500"
+                              : "border-slate-300"
+                          }`}
                         />
                       </div>
 
@@ -356,16 +376,24 @@ export default function SubmitReport() {
                         </label>
                         <input
                           value={form.mobile}
-                          onChange={(e) =>
-                            setForm({ ...form, mobile: e.target.value })
-                          }
-                          className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm"
+                          onChange={(e) => {
+                            setForm({ ...form, mobile: e.target.value });
+                            setErrors((prev) => ({ ...prev, mobile: false }));
+                          }}
+                          className={`w-full rounded-lg border px-4 py-2 text-sm ${
+                            errors.mobile
+                              ? "border-red-500"
+                              : "border-slate-300"
+                          }`}
                         />
                       </div>
 
                       <div>
                         <label className="mb-1 block text-xs font-medium text-slate-700">
-                          Email Address
+                          Email Address{" "}
+                          <span className="pl-1 text-black/40 ">
+                            (Optional)
+                          </span>
                         </label>
                         <input
                           value={form.email}
@@ -382,10 +410,18 @@ export default function SubmitReport() {
                         </label>
                         <input
                           value={form.lostLocation}
-                          onChange={(e) =>
-                            setForm({ ...form, lostLocation: e.target.value })
-                          }
-                          className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm"
+                          onChange={(e) => {
+                            setForm({ ...form, lostLocation: e.target.value });
+                            setErrors((prev) => ({
+                              ...prev,
+                              lostLocation: false,
+                            }));
+                          }}
+                          className={`w-full rounded-lg border px-4 py-2 text-sm ${
+                            errors.lostLocation
+                              ? "border-red-500"
+                              : "border-slate-300"
+                          }`}
                         />
                       </div>
 
@@ -393,14 +429,39 @@ export default function SubmitReport() {
                         <label className="mb-1 block text-xs font-medium text-slate-700">
                           Lost Date <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          type="date"
-                          value={form.lostDate}
-                          onChange={(e) =>
-                            setForm({ ...form, lostDate: e.target.value })
-                          }
-                          className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm"
-                        />
+
+                        <div className="relative">
+                          <Calendar className="cursor-pointer pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+                          <DatePicker
+                            selected={
+                              form.lostDate ? new Date(form.lostDate) : null
+                            }
+                            onChange={(date) => {
+                              setForm({
+                                ...form,
+                                lostDate: date
+                                  ? date.toISOString().split("T")[0]
+                                  : "",
+                              });
+                              setErrors((prev) => ({
+                                ...prev,
+                                lostDate: false,
+                              }));
+                            }}
+                            maxDate={new Date()}
+                            placeholderText="Select date"
+                            dateFormat="MMMM d, yyyy"
+                            todayButton="Today"
+                            showPopperArrow={false}
+                            className={`cursor-pointer w-full rounded-lg border py-2 pl-10 pr-4 text-sm ${
+                              errors.lostDate
+                                ? "border-red-500"
+                                : "border-slate-300"
+                            }`}
+                            calendarClassName="rounded-xl shadow-lg"
+                          />
+                        </div>
                       </div>
 
                       <div className="col-span-2">
@@ -411,10 +472,18 @@ export default function SubmitReport() {
                         <textarea
                           rows={3}
                           value={form.description}
-                          onChange={(e) =>
-                            setForm({ ...form, description: e.target.value })
-                          }
-                          className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm"
+                          onChange={(e) => {
+                            setForm({ ...form, description: e.target.value });
+                            setErrors((prev) => ({
+                              ...prev,
+                              description: false,
+                            }));
+                          }}
+                          className={`w-full rounded-lg border px-4 py-2 text-sm ${
+                            errors.description
+                              ? "border-red-500"
+                              : "border-slate-300"
+                          }`}
                         />
                       </div>
                     </div>
@@ -426,14 +495,79 @@ export default function SubmitReport() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="col-span-2">
-                        <label className="mb-1 block text-xs font-medium text-slate-700 italic">
+                        <label className="mb-2 block text-xs font-medium text-slate-700 italic">
                           Item Category <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          value={selectedItem?.title || ""}
-                          readOnly
-                          className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm bg-slate-100"
-                        />
+
+                        <div className="flex flex-wrap gap-3">
+                          {categories
+                            .filter((c) => c !== "All Items")
+                            .map((cat) => (
+                              <label
+                                key={cat}
+                                className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                              >
+                                <input
+                                  type="radio"
+                                  name="category"
+                                  value={cat}
+                                  checked={form.category === cat}
+                                  onChange={(e) => {
+                                    setForm({
+                                      ...form,
+                                      category: e.target.value,
+                                    });
+                                    setErrors((prev) => ({
+                                      ...prev,
+                                      category: false,
+                                    }));
+                                  }}
+                                />
+                                {cat}
+                              </label>
+                            ))}
+
+                          {/* Others option */}
+                          <label className="flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                            <input
+                              type="radio"
+                              name="category"
+                              value="Others"
+                              checked={form.category === "Others"}
+                              onChange={() => {
+                                setForm({
+                                  ...form,
+                                  category: "Others",
+                                  otherCategory: "",
+                                });
+                                setErrors((prev) => ({
+                                  ...prev,
+                                  category: false,
+                                }));
+                              }}
+                            />
+                            Others:
+                            <input
+                              type="text"
+                              placeholder="Specify..."
+                              value={form.otherCategory || ""}
+                              disabled={form.category !== "Others"}
+                              onChange={(e) =>
+                                setForm({
+                                  ...form,
+                                  otherCategory: e.target.value,
+                                })
+                              }
+                              className="cursor-text ml-1 w-32 rounded border-b border-slate-300 px-2 py-0.5 text-xs disabled:bg-slate-100"
+                            />
+                          </label>
+                        </div>
+
+                        {errors.category && (
+                          <p className="mt-1 text-xs text-red-500">
+                            Please select a category.
+                          </p>
+                        )}
                       </div>
 
                       <div className="col-span-2">
@@ -443,22 +577,73 @@ export default function SubmitReport() {
                         <textarea
                           rows={2}
                           value={form.identifiers}
-                          onChange={(e) =>
-                            setForm({ ...form, identifiers: e.target.value })
-                          }
-                          className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm"
+                          onChange={(e) => {
+                            setForm({ ...form, identifiers: e.target.value });
+                            setErrors((prev) => ({
+                              ...prev,
+                              identifiers: false,
+                            }));
+                          }}
+                          className={`w-full rounded-lg border px-4 py-2 text-sm ${
+                            errors.identifiers
+                              ? "border-red-500"
+                              : "border-slate-300"
+                          }`}
                         />
                       </div>
 
                       <div className="col-span-2">
                         <label className="mb-1 block text-xs font-medium text-slate-700">
-                          Photo (Optional)
+                          Photo{" "}
+                          <span className="pl-1 text-black/40">(Optional)</span>
                         </label>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm"
-                        />
+
+                        <div className="flex items-center gap-3 border rounded-lg border-gray-400">
+                          {/* Hidden input */}
+                          <input
+                            id="photo-upload"
+                            type="file"
+                            accept="image/png, image/jpeg, image/gif"
+                            onChange={handleFileChange}
+                            className="hidden"
+                          />
+
+                          {/* Choose button */}
+                          <label
+                            htmlFor="photo-upload"
+                            className="cursor-pointer rounded-lg bg-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-300"
+                          >
+                            {file ? "Change File" : "Choose File"}
+                          </label>
+
+                          {/* File name */}
+                          <span className="text-sm text-slate-500">
+                            {file ? file.name : "No file chosen"}
+                          </span>
+
+                          {/* Remove button */}
+                          {file && (
+                            <button
+                              type="button"
+                              onClick={() => setFile(null)}
+                              className="rounded-lg border border-red-300 px-3 py-1 text-xs font-medium text-red-500 hover:bg-red-50"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Optional image preview */}
+                        {file && (
+                          <div className="mt-3">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt="Preview"
+                              className="h-24 rounded-lg border object-cover"
+                            />
+                          </div>
+                        )}
+
                         <p className="mt-1 text-xs text-slate-400">
                           Supported formats: JPG, PNG, GIF (Max 5MB)
                         </p>
@@ -580,7 +765,15 @@ export default function SubmitReport() {
                 Back
               </button>
               <button
-                onClick={() => (step === 1 ? setStep(2) : null)}
+                onClick={() => {
+                  if (step === 1) {
+                    if (validateStep1()) {
+                      setStep(2);
+                    }
+                  } else {
+                    console.log("Submit", form);
+                  }
+                }}
                 className="cursor-pointer flex-1 rounded-lg bg-green-500 py-2 text-sm font-medium text-white"
               >
                 {step === 1 ? "Next" : "Submit"}

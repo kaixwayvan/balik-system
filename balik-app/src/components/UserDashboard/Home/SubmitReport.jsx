@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import BALIKLogo from "../../../assets/BALIK.png";
 import DatePicker from "react-datepicker";
+import { IoNotifications } from "react-icons/io5";
 import "react-datepicker/dist/react-datepicker.css";
 
 export default function SubmitReport() {
@@ -57,7 +58,9 @@ export default function SubmitReport() {
           </Link>
         </div>
         <div className="flex items-center gap-4">
-          <button className="text-gray-500">🔔</button>
+          <button className="cursor-pointer text-gray-500">
+            <IoNotifications size={20} className="text-gray-500" />
+          </button>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-slate-300" />
             <div className="text-sm">

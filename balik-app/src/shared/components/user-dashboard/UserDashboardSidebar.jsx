@@ -42,7 +42,7 @@ export default function UserDashboardSidebar() {
               Search Items
             </NavLink>
 
-            <NavLink to="/comingsoon" end className={linkClass}>
+            <NavLink to="/dashboard/track" end className={linkClass}>
               <MapPin size={18} />
               Track Items
             </NavLink>

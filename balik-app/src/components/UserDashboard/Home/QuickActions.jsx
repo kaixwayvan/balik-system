@@ -47,7 +47,7 @@ export default function QuickActions() {
               <button
                 key={i}
                 onClick={a.onClick}
-                className={`${a.color} text-white w-full py-3 px-4 rounded-lg font-medium flex items-center gap-3 hover:opacity-80 transition`}
+                className={`${a.color} cursor-pointer text-white w-full py-3 px-4 rounded-lg font-medium flex items-center gap-3 hover:opacity-80 transition`}
               >
                 <Icon size={18} />
                 <span>{a.text}</span>
