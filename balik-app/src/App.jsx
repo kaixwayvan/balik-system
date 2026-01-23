@@ -7,6 +7,7 @@ import Signup from "./pages/auth/Signup";
 import DashboardHome from "./pages/user-dashboard/DashboardHome";
 import DashboardSearch from "./components/UserDashboard/SearchItems/SearchItems"
 import DashboardtTrack from "./components/UserDashboard/TrackItems/TrackItems"
+import DashboardReport from "./components/UserDashboard/ActiveReports/ActiveReports"
 
 import UserDashboardLayout from "./shared/components/layouts/UserDashboardLayout";
 import SubmitReport from "./components/UserDashboard/Home/SubmitReport";
@@ -31,6 +32,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardHome />} />
         <Route path="/dashboard/search" element={<DashboardSearch />} />
         <Route path="/dashboard/track" element={<DashboardtTrack />} />
+        <Route path="/dashboard/reports" element={<DashboardReport />} />
       </Route>
     </Routes>
   );

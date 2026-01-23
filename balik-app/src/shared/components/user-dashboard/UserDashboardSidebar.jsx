@@ -47,7 +47,7 @@ export default function UserDashboardSidebar() {
               Track Items
             </NavLink>
 
-            <NavLink to="/comingsoon" end className={linkClass}>
+            <NavLink to="/dashboard/reports" end className={linkClass}>
               <FileText size={18} />
               Active Reports
             </NavLink>
