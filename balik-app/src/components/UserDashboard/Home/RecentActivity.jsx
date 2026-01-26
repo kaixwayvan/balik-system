@@ -1,33 +1,51 @@
-import { Smartphone, Package, Edit3, ClipboardCheck, User } from "lucide-react";
+import {
+  Smartphone,
+  Package,
+  Edit3,
+  ClipboardCheck,
+  User,
+  SearchCheck,
+} from "lucide-react";
 
 const activities = [
   {
     text: "Lost item reported: iPhone 15 Pro",
+    history: "Yesterday, 3:45 PM",
     icon: Smartphone,
   },
   {
     text: "Reported found item",
+    history: "12 minutes ago",
     icon: Package,
   },
   {
     text: "Edited a lost report",
+    history: "1 hour ago",
     icon: Edit3,
   },
   {
     text: "Submitted a claiming request",
+    history: "Janury 22, 2026",
     icon: ClipboardCheck,
   },
   {
     text: "Updated profile",
+    history: "3 hours ago",
     icon: User,
+  },
+  {
+    text: "Item claiming request has been approved",
+    history: "7 hours ago",
+    icon: SearchCheck,
   },
 ];
 
 const colors = [
   { bubble: "bg-red-100", icon: "text-red-600" },
   { bubble: "bg-green-100", icon: "text-green-600" },
+  { bubble: "bg-orange-200", icon: "text-orange-600" },
   { bubble: "bg-blue-100", icon: "text-blue-600" },
-  { bubble: "bg-yellow-100", icon: "text-yellow-600" },
+  { bubble: "bg-yellow-100", icon: "text-yellow-500" },
   { bubble: "bg-pink-100", icon: "text-pink-600" },
   { bubble: "bg-purple-100", icon: "text-purple-600" },
   { bubble: "bg-amber-100", icon: "text-amber-600" },
@@ -61,7 +79,10 @@ export default function RecentActivity() {
               </div>
 
               {/* Text */}
-              <p className="text-sm text-gray-600 leading-snug">{a.text}</p>
+              <div className="flex-col">
+                <p className="text-sm text-gray-600 font-semibold leading-snug mb-1">{a.text}</p>
+                <p className="text-xs text-gray-400 ">{a.history}</p>
+              </div>
             </li>
           );
         })}

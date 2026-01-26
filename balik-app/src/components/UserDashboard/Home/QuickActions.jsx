@@ -13,21 +13,6 @@ export default function QuickActions() {
       onClick: () => setShowReportModal(true),
     },
     {
-      text: "Browse Found Items",
-      color: "bg-green-600",
-      icon: Search,
-    },
-    {
-      text: "Track Items",
-      color: "bg-orange-500",
-      icon: MapPin,
-    },
-    {
-      text: "View Activity History",
-      color: "bg-lime-600",
-      icon: History,
-    },
-    {
       text: "Edit Profile",
       color: "bg-red-700",
       icon: User,
@@ -39,7 +24,7 @@ export default function QuickActions() {
       <div className="bg-white rounded-xl p-6 shadow">
         <h2 className="font-semibold mb-4">Quick Actions</h2>
 
-        <div className="space-y-3">
+        <div className="flex flex-col items-center justify-center space-y-3">
           {actions.map((a, i) => {
             const Icon = a.icon;
 
@@ -47,7 +32,7 @@ export default function QuickActions() {
               <button
                 key={i}
                 onClick={a.onClick}
-                className={`${a.color} cursor-pointer text-white w-full py-3 px-4 rounded-lg font-medium flex items-center gap-3 hover:opacity-80 transition`}
+                className={`${a.color} cursor-pointer text-white w-full py-3 px-4 rounded-lg font-medium flex items-left justify-center gap-3 hover:opacity-80 transition`}
               >
                 <Icon size={18} />
                 <span>{a.text}</span>

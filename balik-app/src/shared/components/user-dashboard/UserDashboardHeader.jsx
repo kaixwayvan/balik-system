@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { IoNotifications } from "react-icons/io5";
 import {
   ChevronDown,
@@ -12,9 +13,9 @@ import {
 
 export default function UserDashboardHeader() {
   const [isOpen, setIsOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Close when clicking outside
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -48,9 +49,7 @@ export default function UserDashboardHeader() {
             </div>
             <ChevronDown
               size={16}
-              className={`transition-transform ${
-                isOpen ? "rotate-180" : ""
-              }`}
+              className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
             />
           </button>
 
@@ -68,7 +67,11 @@ export default function UserDashboardHeader() {
 
               {/* Menu */}
               <div className="p-2">
-                <MenuItem icon={User} label="View Profile" className="cursor-pointer" />
+                <MenuItem
+                  icon={User}
+                  label="View Profile"
+                  className="cursor-pointer"
+                />
                 <MenuItem icon={Bell} label="Notification" />
                 <MenuItem icon={HelpCircle} label="Help Center" />
                 <MenuItem icon={Settings} label="Settings" />
@@ -82,18 +85,29 @@ export default function UserDashboardHeader() {
                   <Moon size={18} />
                   <span className="text-sm font-medium">Dark Mode</span>
                 </div>
-                <div className="w-11 h-6 bg-gray-300 rounded-full relative cursor-pointer">
-                  <div className="w-5 h-5 bg-white rounded-full absolute left-1 top-0.5" />
+                <div
+                  onClick={() => setDarkMode(!darkMode)}
+                  className={`w-11 h-6 rounded-full relative cursor-pointer transition-colors ${
+                    darkMode ? "bg-gray-700" : "bg-gray-300"
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${
+                      darkMode ? "translate-x-5" : "translate-x-1"
+                    }`}
+                  />
                 </div>
               </div>
 
               <div className="border-t border-gray-300" />
 
               {/* Logout */}
-              <button className="cursor-pointer w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50">
-                <LogOut size={18} />
-                Log Out
-              </button>
+              <Link to="/login">
+                <button className="cursor-pointer w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50">
+                  <LogOut size={18} />
+                  Log Out
+                </button>
+              </Link>
             </div>
           )}
         </div>
