@@ -71,11 +71,11 @@ function Home() {
 
         {/* Right Content (Buttons) */}
         <div className="relative z-20 flex flex-col md:flex-row gap-4 items-center">
-          <button className="bg-[#E30000] text-white font-bold px-10 py-4 rounded-3xl shadow-lg border border-[#a11010] hover:bg-[#230000de] hover:shadow-2xl transition-all duration-300">
+          <button className="-translate-y-8 translate-x-5 mb-5 bg-[#E30000] text-white font-bold px-10 py-4 rounded-3xl shadow-lg border border-[#a11010] hover:bg-[#230000de] hover:shadow-2xl transition-all duration-300">
             Report Lost Item
           </button>
 
-          <button className="bg-[#02D44F] text-white font-bold px-10 py-4 rounded-3xl shadow-lg border border-[#2eb857] hover:bg-[#0e361a] hover:shadow-2xl transition-all duration-300">
+          <button className="translate-y-8 -translate-x-10 bg-[#02D44F] text-white font-bold px-10 py-4 rounded-3xl shadow-lg border border-[#2eb857] hover:bg-[#0e361a] hover:shadow-2xl transition-all duration-300">
             Report Found Item
           </button>
         </div>
@@ -173,7 +173,7 @@ function Home() {
         {categories.map((cat, index) => (
           <button
             key={index}
-            className={`px-4 py-2 rounded-lg text-sm font-medium
+            className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-medium
               ${
                 cat === "All Items"
                   ? "bg-blue-600 text-white"

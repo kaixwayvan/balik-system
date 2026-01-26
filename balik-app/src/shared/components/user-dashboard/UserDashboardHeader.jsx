@@ -27,7 +27,7 @@ export default function UserDashboardHeader() {
   }, []);
 
   return (
-    <header className="h-16 bg-white border-b flex items-center justify-between px-6 relative">
+    <header className="h-20 bg-white border-b border-gray-300 shadow-md flex items-center justify-between px-6 relative">
       <div className="font-semibold text-gray-700">BALIK Dashboard</div>
 
       <div className="flex items-center gap-4">
