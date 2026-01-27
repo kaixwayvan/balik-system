@@ -52,7 +52,7 @@ export default function UserDashboardSidebar() {
               Active Reports
             </NavLink>
 
-            <NavLink to="/comingsoon" end className={linkClass}>
+            <NavLink to="/dashboard/found" end className={linkClass}>
               <Package size={18} />
               Found Items
             </NavLink>
