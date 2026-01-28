@@ -13,18 +13,21 @@ const achievements = [
     title: "First Finder",
     description: "Report your first found item",
     icon: Search,
+    iconColor: "text-blue-600",
     unlocked: true,
   },
   {
     title: "Good Samaritan",
     description: "Help return 5 items",
     icon: Heart,
+    iconColor: "text-pink-600",
     unlocked: true,
   },
   {
     title: "Community Hero",
     description: "Help return 20 items",
     icon: Trophy,
+    iconColor: "text-gray-500",
     progress: 12,
     total: 20,
   },
@@ -32,12 +35,14 @@ const achievements = [
     title: "Detail Master",
     description: "Provide detailed descriptions for 10 items",
     icon: PenTool,
+    iconColor: "text-purple-600",
     unlocked: true,
   },
   {
     title: "Loyal BALIK User",
     description: "Active user for 3 consecutive months",
     icon: Shield,
+    iconColor: "text-gray-500",
     progress: 1,
     total: 3,
   },
@@ -45,6 +50,7 @@ const achievements = [
     title: "Persistent Seeker",
     description: "Log in and check item updates 5 times",
     icon: Repeat,
+    iconColor: "text-gray-500",
     progress: 2,
     total: 5,
   },
@@ -52,6 +58,7 @@ const achievements = [
     title: "Eco Warrior",
     description: "Choose digital reporting instead of printing posters",
     icon: Leaf,
+    iconColor: "text-gray-500",
     progress: 1,
     total: 3,
   },
@@ -71,24 +78,13 @@ export default function AchievementsPanel() {
             <div
               key={i}
               className={`border rounded-lg p-3 ${
-                isUnlocked
-                  ? "border-green-400 bg-green-50"
-                  : "border-gray-200"
+                isUnlocked ? "border-green-400" : "border-gray-200"
               }`}
             >
               <div className="flex gap-3 items-start">
                 {/* Icon */}
-                <div
-                  className={`p-2 rounded-full ${
-                    isUnlocked ? "bg-green-100" : "bg-gray-100"
-                  }`}
-                >
-                  <Icon
-                    size={16}
-                    className={
-                      isUnlocked ? "text-green-600" : "text-gray-500"
-                    }
-                  />
+                <div className="p-2 rounded-full bg-gray-100">
+                  <Icon size={16} className={a.iconColor} />
                 </div>
 
                 {/* Content */}
@@ -98,7 +94,6 @@ export default function AchievementsPanel() {
                     {a.description}
                   </p>
 
-                  {/* Status */}
                   {isUnlocked ? (
                     <p className="text-xs text-green-600 font-medium">
                       ✓ Unlocked

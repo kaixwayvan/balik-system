@@ -5,8 +5,13 @@ import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 
 import DashboardHome from "./pages/user-dashboard/DashboardHome";
-import UserDashboardLayout from "./shared/components/layouts/UserDashboardLayout";
+import DashboardSearch from "./components/UserDashboard/SearchItems/SearchItems"
+import DashboardtTrack from "./components/UserDashboard/TrackItems/TrackItems"
+import DashboardReport from "./components/UserDashboard/ActiveReports/ActiveReports"
+import DashboardFound from "./components/UserDashboard/FoundItems/FoundItems"
 
+import UserDashboardLayout from "./shared/components/layouts/UserDashboardLayout";
+import SubmitReport from "./components/UserDashboard/Home/SubmitReport";
 import ComingSoonPage from "./pages/ComingSoonPage";
 
 function App() {
@@ -21,16 +26,16 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/comingsoon" element={<ComingSoonPage />} />
+      <Route path="/submitreport" element={<SubmitReport />} />
 
       {/* Dashboard with its own layout */}
-      <Route
-        path="/dashboard"
-        element={
-          <UserDashboardLayout>
-            <DashboardHome />
-          </UserDashboardLayout>
-        }
-      />
+      <Route element={<UserDashboardLayout />}>
+        <Route path="/dashboard" element={<DashboardHome />} />
+        <Route path="/dashboard/search" element={<DashboardSearch />} />
+        <Route path="/dashboard/track" element={<DashboardtTrack />} />
+        <Route path="/dashboard/reports" element={<DashboardReport />} />
+        <Route path="/dashboard/found" element={<DashboardFound />} />
+      </Route>
     </Routes>
   );
 }

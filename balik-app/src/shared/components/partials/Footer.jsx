@@ -1,24 +1,18 @@
-import {
-  Share2,
-  MessageSquare,
-  Camera,
-  Printer
-} from "lucide-react";
 import BALIKLogo from "../../../assets/BALIK.png";
 
 function Footer() {
   const footerSections = [
     {
       title: "Product",
-      links: ["How It Works", "Success Stories", "FAQs"]
+      links: ["How It Works", "Success Stories", "FAQs"],
     },
     {
       title: "Company",
-      links: ["About Us", "Careers", "Contact"]
+      links: ["About Us", "Contact"],
     },
     {
       title: "Legal",
-      links: ["Privacy Policy", "Terms of Service", "Cookie Policy"]
+      links: ["Privacy Policy", "Terms of Service", "Cookie Policy"],
     },
     {
       title: "Support",
@@ -26,44 +20,24 @@ function Footer() {
         "Help Center",
         "Safety Tips",
         "Community Guidelines",
-        "Report Abuse"
-      ]
-    }
-  ]
+        "Report Abuse",
+      ],
+    },
+  ];
 
   return (
     <footer className="bg-white">
       <div className="max-w-8xl mx-auto py-16 px-10">
-        
         {/* Top Section */}
-        <div className="grid grid-cols-1 md:grid-cols-6">
-          
+        <div className="grid grid-cols-1 md:grid-cols-6 h-full">
           {/* Brand */}
-          <div className="md:col-span-2 w-80">
-            <img
-              src={BALIKLogo}
-              alt="BALIK Logo"
-              className="h-30 mb-0"
-            />
+          <div className="md:col-span-2 w-80 overflow-hidden relative">
+            <img src={BALIKLogo} alt="BALIK Logo" className="h-30 object-cover -translate-y-7" />
 
-            <p className="text-md text-gray-600 max-w-md">
-              Reuniting people with their belongings through AI-powered
-              smart matching and verified community reporting.
+            <p className="text-md text-gray-600 max-w-md -translate-y-9 relative">
+              Reuniting people with their belongings through AI-powered smart
+              matching and verified community reporting.
             </p>
-
-            {/* Social Icons */}
-            <div className="flex gap-4 mt-6">
-              {[Share2, MessageSquare, Camera, Printer].map(
-                (Icon, index) => (
-                  <button
-                    key={index}
-                    className="p-3 transition"
-                  >
-                    <Icon className="w-5 h-5 text-[#ba0802] hover:text-orange-700" />
-                  </button>
-                )
-              )}
-            </div>
           </div>
 
           {/* Footer Links */}
@@ -75,10 +49,7 @@ function Footer() {
               <ul className="space-y-3 text-gray-600">
                 {section.links.map((link, i) => (
                   <li key={i}>
-                    <a
-                      href="#"
-                      className="hover:text-black transition"
-                    >
+                    <a href="#" className="hover:text-black transition">
                       {link}
                     </a>
                   </li>
@@ -96,7 +67,7 @@ function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }
 
-export default Footer
+export default Footer;

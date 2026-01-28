@@ -343,11 +343,19 @@ function Home() {
 
         {/* Right Content (Buttons) */}
         <div className="relative z-20 flex flex-col md:flex-row gap-4 items-center">
+<<<<<<< HEAD
           <button type="button" onClick={handleHeaderReportLost} className="cursor-pointer bg-[#E30000] text-white font-bold px-10 py-4 rounded-3xl shadow-lg border border-[#a11010] hover:bg-[#230000de] hover:shadow-2xl transition-all duration-300">
             Report Lost Item
           </button>
 
           <button type="button" onClick={handleHeaderReportFound} className="cursor-pointer bg-[#02D44F] text-white font-bold px-10 py-4 rounded-3xl shadow-lg border border-[#2eb857] hover:bg-[#0e361a] hover:shadow-2xl transition-all duration-300">
+=======
+          <button className="-translate-y-8 translate-x-5 mb-5 bg-[#E30000] text-white font-bold px-10 py-4 rounded-3xl shadow-lg border border-[#a11010] hover:bg-[#230000de] hover:shadow-2xl transition-all duration-300">
+            Report Lost Item
+          </button>
+
+          <button className="translate-y-8 -translate-x-10 bg-[#02D44F] text-white font-bold px-10 py-4 rounded-3xl shadow-lg border border-[#2eb857] hover:bg-[#0e361a] hover:shadow-2xl transition-all duration-300">
+>>>>>>> origin/user-dashboard
             Report Found Item
           </button>
         </div>
@@ -430,6 +438,88 @@ function Home() {
 
       {/* SECTION 3*/}
       <section className="max-w-7xl mx-auto px-6 py-16">
+<<<<<<< HEAD
+=======
+      {/* Header */}
+      <div className="text-center mb-10">
+        <h2 className="text-[2.8rem] text-black font-extrabold mb-2">
+          Recently Found Items
+        </h2>
+        <p className="text-gray-500 text-lg">
+          Admin-verified items waiting to be reunited with their owners
+        </p>
+      </div>
+
+      {/* Filters */}
+      <div className="flex justify-center gap-3 mb-12">
+        {categories.map((cat, index) => (
+          <button
+            key={index}
+            className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-medium
+              ${
+                cat === "All Items"
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-gray-600"
+              }`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      {/* Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {foundItems.map((item) => (
+          <div
+            key={item.id}
+            className="bg-white rounded-xl shadow-sm overflow-hidden"
+          >
+            {/* Image */}
+            <div className="relative">
+              <img
+                src={item.image}
+                alt={item.title}
+                className="w-full h-56 object-cover"
+              />
+
+              <span className="absolute top-3 right-3 bg-green-500 text-white text-xs px-3 py-1 rounded-full">
+                ✓ Verified
+              </span>
+            </div>
+
+            {/* Content */}
+            <div className="p-5">
+              <h3 className="font-semibold text-lg mb-1">
+                {item.title}
+              </h3>
+
+              <span className="inline-block bg-gray-100 text-xs px-2 py-1 rounded mb-2">
+                {item.tag}
+              </span>
+
+              <p className="text-sm text-gray-600 mb-4">
+                {item.description}
+              </p>
+
+              <div className="flex justify-between text-xs text-gray-500 mb-4">
+                <span>{item.location}</span>
+                <span>{item.date}</span>
+              </div>
+
+              <button className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium">
+                View details
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    {/* Forms (Report) Section 4 */}
+    <div className="min-h-screen flex justify-center px-4 py-16 bg-gray-50">
+      <div className="w-full max-w-2xl bg-transparent">
+
+>>>>>>> origin/user-dashboard
         {/* Header */}
         <div className="text-center mb-10">
           <h2 className="text-[2.8rem] text-black font-extrabold mb-2">
