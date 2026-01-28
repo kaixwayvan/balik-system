@@ -31,8 +31,14 @@ const statusStyles = {
 
 export default function TrackItems() {
   const [filter, setFilter] = useState("All");
+  const [editingId, setEditingId] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    category: "",
+    location: "",
+    date: "",
+  });
 
-  const items = [
+  const [items, setItems] = useState([
     {
       id: "ITEM - 10137",
       category: "Electronics - Camera",
@@ -78,12 +84,47 @@ export default function TrackItems() {
       type: "Found",
       status: "Report Submission Approved",
     },
-  ];
+  ]);
 
   const filteredItems = items.filter((item) => {
     if (filter === "All") return true;
     return item.type === filter;
   });
+
+  const handleEditClick = (item) => {
+    setEditingId(item.id);
+    setEditFormData({
+      category: item.category,
+      location: item.location,
+      date: item.date,
+    });
+  };
+
+  const handleSaveEdit = () => {
+    // Update the item in the items array
+    setItems(
+      items.map((item) =>
+        item.id === editingId
+          ? {
+              ...item,
+              category: editFormData.category,
+              location: editFormData.location,
+              date: editFormData.date,
+            }
+          : item
+      )
+    );
+    setEditingId(null);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditFormData({
+      category: "",
+      location: "",
+      date: "",
+    });
+  };
 
   return (
     <div className="flex min-h-screen bg-[#EEF1F8]">
@@ -163,11 +204,99 @@ export default function TrackItems() {
 
             <div className="space-y-5">
               {filteredItems.map((item) => (
-                <TimelineItem key={item.id} {...item} />
+                <TimelineItem key={item.id} {...item} onEditClick={handleEditClick} />
               ))}
             </div>
           </div>
         </section>
+
+        {/* EDIT MODAL */}
+        {editingId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-white rounded-xl max-w-md w-full p-6 relative mx-4 shadow-xl">
+              <button
+                onClick={handleCancelEdit}
+                className="cursor-pointer absolute top-3 right-3 text-gray-600 text-2xl hover:text-gray-800"
+              >
+                ×
+              </button>
+
+              <h3 className="text-2xl font-bold mb-4">Edit Item Details</h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Category
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.category}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        category: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Location
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.location}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        location: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    value={editFormData.date}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        date: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                    style={{
+                      colorScheme: "light",
+                      fontSize: "16px",
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={handleCancelEdit}
+                  className="cursor-pointer flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  className="cursor-pointer flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
@@ -191,7 +320,7 @@ function StatCard({ color, title, subtitle, value, icon: Icon }) {
   );
 }
 
-function TimelineItem({ id, category, location, date, time, type, status }) {
+function TimelineItem({ id, category, location, date, time, type, status, onEditClick }) {
   const typeClass = typeStyles[type] || "bg-gray-200 text-gray-700";
   const statusClass = statusStyles[status] || "bg-gray-200 text-gray-700";
 
@@ -230,10 +359,10 @@ function TimelineItem({ id, category, location, date, time, type, status }) {
       </span>
 
       <div className="flex gap-2">
-        <button className="cursor-pointer bg-blue-600 text-white p-2 rounded-lg">
+        <button onClick={() => onEditClick({ id, category, location, date, time, type, status })} className="cursor-pointer bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition">
           <Edit size={16} />
         </button>
-        <button className="cursor-pointer bg-red-600 text-white p-2 rounded-lg">
+        <button className="cursor-pointer bg-red-600 text-white p-2 rounded-lg hover:bg-red-700 transition">
           <Trash2 size={16} />
         </button>
       </div>

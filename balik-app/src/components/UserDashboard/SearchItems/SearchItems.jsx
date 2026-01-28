@@ -232,67 +232,75 @@ export default function SubmitReport() {
       {/* MODAL */}
       {selectedItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="relative w-full max-w-lg rounded-2xl bg-white shadow-xl">
+          <div className="relative w-full max-w-lg rounded-2xl bg-white shadow-xl flex flex-col max-h-[90vh]">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-gray-300 px-6 py-4">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-300 px-6 py-4 bg-white">
               <h2 className="text-lg font-semibold">Item Details</h2>
               <button onClick={() => setSelectedItem(null)}>
                 <X className="cursor-pointer h-5 w-5 text-slate-500" />
               </button>
             </div>
 
-            {/* Image */}
-            <div className="relative p-6 pb-0">
-              <img
-                src={selectedItem.image}
-                alt={selectedItem.title}
-                className="h-56 w-full rounded-xl object-cover"
-              />
-              <span className="absolute left-8 top-8 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                Found Item
-              </span>
-            </div>
-
-            {/* Content */}
-            <div className="px-6 py-4">
-              <div className="flex justify-between">
-                <h3 className="text-lg font-bold">{selectedItem.title}</h3>
-                <span className="text-xs text-slate-400">ITEM ID: 40257</span>
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto modal-scroll" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              <style>{`
+                .modal-scroll::-webkit-scrollbar {
+                  display: none;
+                }
+              `}</style>
+              {/* Image */}
+              <div className="relative p-6 pb-0">
+                <img
+                  src={selectedItem.image}
+                  alt={selectedItem.title}
+                  className="h-56 w-full rounded-xl object-cover"
+                />
+                <span className="absolute left-8 top-8 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                  Found Item
+                </span>
               </div>
 
-              <p className="mt-1 text-sm text-slate-600">
-                {selectedItem.description}
-              </p>
-
-              <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-                <Info
-                  icon={CheckCircle}
-                  label="Category"
-                  value={selectedItem.category}
-                />
-                <Info
-                  icon={MapPin}
-                  label="Location"
-                  value={selectedItem.location}
-                />
-                <Info icon={Calendar} label="Date" value={selectedItem.date} />
-                <Info icon={User} label="Reported By" value="Dj Mod Kalkal" />
-              </div>
-
-              <div className="mt-5 rounded-xl border border-blue-500 bg-blue-50 p-4 text-sm">
-                <div className="flex items-center gap-2 font-semibold text-blue-600">
-                  <CheckCircle className="h-4 w-4" />
-                  95% Match with your search
+              {/* Content */}
+              <div className="px-6 py-4">
+                <div className="flex justify-between">
+                  <h3 className="text-lg font-bold">{selectedItem.title}</h3>
+                  <span className="text-xs text-slate-400">ITEM ID: 40257</span>
                 </div>
-                <p className="mt-1 text-xs text-blue-600">
-                  This item closely matches your search criteria based on
-                  category, location, and description.
+
+                <p className="mt-1 text-sm text-slate-600">
+                  {selectedItem.description}
                 </p>
+
+                <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+                  <Info
+                    icon={CheckCircle}
+                    label="Category"
+                    value={selectedItem.category}
+                  />
+                  <Info
+                    icon={MapPin}
+                    label="Location"
+                    value={selectedItem.location}
+                  />
+                  <Info icon={Calendar} label="Date" value={selectedItem.date} />
+                  <Info icon={User} label="Reported By" value="Dj Mod Kalkal" />
+                </div>
+
+                <div className="mt-5 rounded-xl border border-blue-500 bg-blue-50 p-4 text-sm">
+                  <div className="flex items-center gap-2 font-semibold text-blue-600">
+                    <CheckCircle className="h-4 w-4" />
+                    95% Match with your search
+                  </div>
+                  <p className="mt-1 text-xs text-blue-600">
+                    This item closely matches your search criteria based on
+                    category, location, and description.
+                  </p>
+                </div>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="flex gap-3 border-t border-gray-300 px-6 py-4">
+            <div className="sticky bottom-0 z-10 border-t border-gray-300 px-6 py-4 bg-white">
               <button
                 onClick={() => {
                   setForm((prev) => ({
@@ -301,18 +309,10 @@ export default function SubmitReport() {
                   }));
                   setShowClaim(true);
                   setStep(1);
-                  setSelectedItem(null);
                 }}
-                className="cursor-pointer flex-1 rounded-lg bg-green-500 py-2 text-sm font-semibold text-white"
+                className="cursor-pointer w-full rounded-lg bg-green-500 py-2 text-sm font-semibold text-white hover:bg-green-600 transition"
               >
                 Claim this Item
-              </button>
-
-              <button
-                onClick={() => setSelectedItem(null)}
-                className="cursor-pointer flex-1 rounded-lg border border-slate-300 py-2 text-sm"
-              >
-                Close
               </button>
             </div>
           </div>
@@ -323,7 +323,7 @@ export default function SubmitReport() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="relative flex max-h-[90vh] w-full max-w-xl flex-col rounded-2xl bg-white shadow-xl">
             {/* Header */}
-            <div className="sticky top-0 z-10 flex items-start justify-between border-b px-6 py-4">
+            <div className="sticky top-0 z-10 flex items-start justify-between border-b px-6 py-4 bg-white">
               <div>
                 <h2 className="text-lg font-semibold text-slate-900">
                   {step === 1 ? "Claiming Request Form" : "Security Questions"}
@@ -341,7 +341,12 @@ export default function SubmitReport() {
             </div>
 
             {/* BODY */}
-            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6 modal-scroll" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              <style>{`
+                .modal-scroll::-webkit-scrollbar {
+                  display: none;
+                }
+              `}</style>
               {step === 1 ? (
                 <>
                   {/* PAGE 1 — Contact Information & Item Ownership Details */}
@@ -757,10 +762,16 @@ export default function SubmitReport() {
             </div>
 
             {/* FOOTER */}
-            <div className="sticky bottom-0 z-10 flex gap-4 border-t px-6 py-4">
+            <div className="sticky bottom-0 z-10 flex gap-4 border-t px-6 py-4 bg-white">
               <button
-                onClick={() => (step === 1 ? setShowClaim(false) : setStep(1))}
-                className="cursor-pointer flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white"
+                onClick={() => {
+                  if (step === 1) {
+                    setShowClaim(false);
+                  } else {
+                    setStep(1);
+                  }
+                }}
+                className="cursor-pointer flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
               >
                 Back
               </button>
@@ -774,7 +785,7 @@ export default function SubmitReport() {
                     console.log("Submit", form);
                   }
                 }}
-                className="cursor-pointer flex-1 rounded-lg bg-green-500 py-2 text-sm font-medium text-white"
+                className="cursor-pointer flex-1 rounded-lg bg-green-500 py-2 text-sm font-medium text-white hover:bg-green-600 transition"
               >
                 {step === 1 ? "Next" : "Submit"}
               </button>
