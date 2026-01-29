@@ -91,7 +91,7 @@ export default function TrackItems() {
       <main className="flex-1">
         {/* CONTENT */}
         <section className="p-8">
-          <h2 className="text-2xl font-bold text-gray-800">
+          <h2 className="text-2xl font-bold text-gray-800 mb-1">
             Item Tracking Overview
           </h2>
           <p className="text-gray-500 text-sm mb-6">

@@ -106,7 +106,7 @@ export default function ActiveReports() {
       {/* HEADER */}
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Active Reports</h1>
+          <h1 className="text-2xl font-bold mb-1">Active Reports</h1>
           <p className="text-sm text-gray-600">
             Track your reported lost items
           </p>

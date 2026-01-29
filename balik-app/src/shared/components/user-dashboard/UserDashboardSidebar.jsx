@@ -22,7 +22,7 @@ export default function UserDashboardSidebar() {
     <aside className="w-72 bg-white border-r border-gray-200 p-4">
       {/* Logo */}
       <NavLink to="/" end>
-        <img src={BALIKLogo} className="h-30 mb-6 mx-auto -translate-y-3 translate-y-3" alt="BALIK Logo" />
+        <img src={BALIKLogo} className="cursor-alias h-30 mb-6 mx-auto -translate-y-3 translate-y-3" alt="BALIK Logo" />
       </NavLink>
 
       <nav className="space-y-6">
@@ -65,7 +65,7 @@ export default function UserDashboardSidebar() {
             My Activity
           </p>
           <div className="space-y-1">
-            <NavLink to="/comingsoon" className={linkClass}>
+            <NavLink to="/dashboard/myclaims" className={linkClass}>
               <ClipboardCheck size={18} />
               My Claims
             </NavLink>
