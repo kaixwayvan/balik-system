@@ -70,7 +70,7 @@ export default function UserDashboardSidebar() {
               My Claims
             </NavLink>
 
-            <NavLink to="/comingsoon" className={linkClass}>
+            <NavLink to="/dashboard/history" className={linkClass}>
               <History size={18} />
               Activity History
             </NavLink>
