@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
-import {
-  loginWithGoogle,
-  loginWithPassword,
-} from "../auth/services/authService";
+import { loginWithPasswordSupabase, loginWithGoogleSupabase } from "./services/supabaseAuthService";
 import BALIKLogo from "../../assets/BALIK.png";
 import StudentSupportImg from "../../assets/auth-assets/studentsupport.png";
 
@@ -18,6 +15,7 @@ export default function Login() {
 
   // VALIDATION FUNCTIONS
   const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  const isPUPEmail = (value) => /^[^\s@]+@iskolarngbayan\.pup\.edu\.ph$/.test(value);
   const isMobile = (value) => /^(09|\+639)\d{9}$/.test(value);
 
   const validateForm = () => {
@@ -25,8 +23,10 @@ export default function Login() {
 
     if (!form.identifier) {
       newErrors.identifier = "Email or mobile number is required.";
+    } else if (isEmail(form.identifier) && !isPUPEmail(form.identifier)) {
+      newErrors.identifier = "Please use your PUP email (@iskolarngbayan.pup.edu.ph).";
     } else if (!isEmail(form.identifier) && !isMobile(form.identifier)) {
-      newErrors.identifier = "Enter a valid email or PH mobile number.";
+      newErrors.identifier = "Enter a valid PUP email or PH mobile number.";
     }
 
     if (!form.password) {
@@ -45,9 +45,12 @@ export default function Login() {
       try {
         setLoading(true);
         setError("");
-        await loginWithGoogle(tokenResponse.access_token);
-        // on success navigate to dashboard
-        navigate('/dashboard', { replace: true })
+        const result = await loginWithGoogleSupabase();
+        if (result.success) {
+          navigate('/dashboard', { replace: true })
+        } else {
+          setError(result.error || "Google login failed. Please try again.");
+        }
       } catch {
         setError("Google login failed. Please try again.");
       } finally {
@@ -63,16 +66,26 @@ export default function Login() {
 
     if (!validateForm()) return;
 
+    // Additional check: if identifier is an email, verify it has correct PUP domain
+    if (isEmail(form.identifier) && !isPUPEmail(form.identifier)) {
+      setError("You must use your PUP email (@iskolarngbayan.pup.edu.ph) to log in.");
+      return;
+    }
+
     try {
       setLoading(true);
       setError("");
-      const res = await loginWithPassword(form);
-      if (res?.data?.success) {
+      
+      const result = await loginWithPasswordSupabase(form.identifier, form.password);
+      
+      if (result.success) {
+        // Store session if needed
+        localStorage.setItem("session", JSON.stringify(result.session));
         navigate('/dashboard', { replace: true })
       } else {
-        setError(res?.data?.message || 'Invalid credentials. Please try again.')
+        setError(result.error || 'Invalid credentials. Please try again.')
       }
-    } catch {
+    } catch (error) {
       setError("Invalid credentials. Please try again.");
     } finally {
       setLoading(false);
@@ -159,8 +172,10 @@ export default function Login() {
                     ...prev,
                     identifier: !e.target.value
                       ? "Email or mobile number is required."
+                      : isEmail(e.target.value) && !isPUPEmail(e.target.value)
+                      ? "Please use your PUP email (@iskolarngbayan.pup.edu.ph)."
                       : !isEmail(e.target.value) && !isMobile(e.target.value)
-                      ? "Enter a valid email or PH mobile number."
+                      ? "Enter a valid PUP email or PH mobile number."
                       : "",
                   }));
                 }}
@@ -251,8 +266,8 @@ export default function Login() {
             <Link to="/dashboard">
               <button
                 type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 text-white py-2.5 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+                disabled={loading || Object.keys(errors).length > 0}
+                className="w-full bg-blue-600 text-white py-2.5 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Logging in..." : "Login"}
               </button>

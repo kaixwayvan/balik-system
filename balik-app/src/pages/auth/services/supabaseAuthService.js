@@ -1,0 +1,106 @@
+import { supabase } from "../../../utils/supabaseClient";
+
+export const signupWithEmail = async (email, password, fullName) => {
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    
+    if (error) throw error;
+    
+    return {
+      success: true,
+      message: "Check your email for confirmation link",
+      user: data.user,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
+
+export const loginWithPasswordSupabase = async (identifier, password) => {
+  try {
+    // Check if identifier is email or mobile
+    let email = identifier;
+    
+    if (identifier.startsWith("09") || identifier.startsWith("+63")) {
+      // If mobile, fetch user by phone from database first
+      const { data, error } = await supabase
+        .from("users")
+        .select("email")
+        .eq("phone", identifier)
+        .single();
+      
+      if (error || !data) {
+        throw new Error("User not found");
+      }
+      email = data.email;
+    }
+    
+    // Login with email and password
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
+    });
+    
+    if (error) throw error;
+    
+    return {
+      success: true,
+      user: data.user,
+      session: data.session,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
+
+export const loginWithGoogleSupabase = async () => {
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`,
+      },
+    });
+    
+    if (error) throw error;
+    
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
+export const logoutSupabase = async () => {
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
+export const getCurrentUser = async () => {
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) throw error;
+    return user;
+  } catch (error) {
+    return null;
+  }
+};

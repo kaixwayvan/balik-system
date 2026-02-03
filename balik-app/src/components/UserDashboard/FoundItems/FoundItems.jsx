@@ -78,6 +78,41 @@ const reports = [
 export default function FoundItems() {
   const [openModal, setOpenModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [openPhotoModal, setOpenPhotoModal] = useState(false);
+  const [selectedItemForPhoto, setSelectedItemForPhoto] = useState(null);
+  const [photoFiles, setPhotoFiles] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
+
+  const handlePhotoSelect = (e) => {
+    const files = Array.from(e.target.files);
+    setPhotoFiles((prev) => [...prev, ...files]);
+    
+    const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
+    setPreviewUrls((prev) => [...prev, ...newPreviewUrls]);
+    
+    // Reset input so user can upload same file again if needed
+    e.target.value = "";
+  };
+
+  const removePhoto = (index) => {
+    setPhotoFiles((prev) => prev.filter((_, i) => i !== index));
+    setPreviewUrls((prev) => {
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const handleSavePhotos = () => {
+    if (photoFiles.length === 0) {
+      alert("Please select at least one photo to upload.");
+      return;
+    }
+    console.log("Saving photos for item:", selectedItemForPhoto, photoFiles);
+    alert("Photos uploaded successfully!");
+    setPhotoFiles([]);
+    setPreviewUrls([]);
+    setOpenPhotoModal(false);
+  };
 
   return (
     <div className="p-8 space-y-6">
@@ -194,7 +229,15 @@ export default function FoundItems() {
                     <Users size={14} /> View claimers ({item.requests})
                   </button>
 
-                  <button className="flex-1 flex items-center justify-center cursor-pointer flex items-center gap-2 border py-2 rounded-lg text-sm hover:bg-gray-50">
+                  <button
+                    onClick={() => {
+                      setSelectedItemForPhoto(item);
+                      setPhotoFiles([]);
+                      setPreviewUrls([]);
+                      setOpenPhotoModal(true);
+                    }}
+                    className="flex-1 flex items-center justify-center cursor-pointer gap-2 border py-2 rounded-lg text-sm hover:bg-gray-50"
+                  >
                     <Image size={14} /> Edit Photos
                   </button>
                 </div>
@@ -248,6 +291,114 @@ export default function FoundItems() {
                 className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-10 py-2 rounded-lg text-sm font-medium"
               >
                 OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {openPhotoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white w-full max-w-xl rounded-xl shadow-lg py-6 px-10 relative animate-fadeIn max-h-[90vh] overflow-y-auto">
+            {/* Close */}
+            <button
+              onClick={() => {
+                setOpenPhotoModal(false);
+                setPhotoFiles([]);
+                setPreviewUrls([]);
+              }}
+              className="cursor-pointer absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+
+            {/* Content */}
+            <h2 className="text-lg font-bold mb-2">
+              Edit Photos - {selectedItemForPhoto?.title}
+            </h2>
+            <p className="text-sm text-gray-500 mb-6">
+              Upload new photos to help with item verification and claims.
+            </p>
+
+            {/* Upload Area */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Select Photos
+              </label>
+              <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 hover:bg-blue-50 transition">
+                <input
+                  id="photo-input"
+                  type="file"
+                  multiple
+                  accept="image/png, image/jpeg, image/gif, image/webp"
+                  onChange={handlePhotoSelect}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="photo-input"
+                  className="cursor-pointer flex flex-col items-center gap-2"
+                >
+                  <Image size={32} className="text-gray-400" />
+                  <span className="text-sm font-medium text-gray-700">
+                    Click to upload photos
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    or drag and drop
+                  </span>
+                  <span className="text-xs text-gray-400 mt-1">
+                    PNG, JPG, GIF, WebP up to 5MB each
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            {/* Photo Preview */}
+            {previewUrls.length > 0 && (
+              <div className="mb-6">
+                <p className="text-sm font-semibold text-gray-700 mb-3">
+                  Selected Photos ({photoFiles.length})
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  {previewUrls.map((url, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={url}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                      />
+                      <button
+                        onClick={() => removePhoto(index)}
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
+                      >
+                        ✕
+                      </button>
+                      <p className="text-xs text-gray-500 mt-1 truncate">
+                        {photoFiles[index].name}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setOpenPhotoModal(false);
+                  setPhotoFiles([]);
+                  setPreviewUrls([]);
+                }}
+                className="cursor-pointer px-6 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSavePhotos}
+                disabled={photoFiles.length === 0}
+                className="cursor-pointer px-6 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition"
+              >
+                Save Photos
               </button>
             </div>
           </div>

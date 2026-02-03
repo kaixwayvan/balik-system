@@ -90,6 +90,7 @@ export default function SubmitReport() {
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState({});
   const [file, setFile] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [form, setForm] = useState({
     fullName: "",
@@ -113,8 +114,25 @@ export default function SubmitReport() {
 
   const filteredItems =
     activeCategory === "All Items"
-      ? items
-      : items.filter((item) => item.category === activeCategory);
+      ? items.filter((item) =>
+          searchQuery === ""
+            ? true
+            : item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              item.category.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : items.filter((item) => {
+          const matchesCategory = item.category === activeCategory;
+          const matchesSearch =
+            searchQuery === ""
+              ? true
+              : item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                item.category.toLowerCase().includes(searchQuery.toLowerCase());
+          return matchesCategory && matchesSearch;
+        });
 
   const validateStep1 = () => {
     const e = {};
@@ -165,6 +183,8 @@ export default function SubmitReport() {
         <input
           type="text"
           placeholder="Search items..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full border-none bg-transparent text-sm outline-none"
         />
       </div>

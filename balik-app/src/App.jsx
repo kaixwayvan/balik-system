@@ -1,8 +1,10 @@
 import { Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./shared/context/AuthContext";
 import RootLayout from "./shared/components/layouts/RootLayout";
 import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
+import AuthCallback from "./pages/auth/AuthCallback";
 
 import DashboardHome from "./pages/user-dashboard/DashboardHome";
 import DashboardSearch from "./components/UserDashboard/SearchItems/SearchItems"
@@ -16,27 +18,30 @@ import ComingSoonPage from "./pages/ComingSoonPage";
 
 function App() {
   return (
-    <Routes>
-      {/* Pages with layout */}
-      <Route element={<RootLayout />}>
-        <Route path="/" element={<Home />} />
-      </Route>
+    <AuthProvider>
+      <Routes>
+        {/* Pages with layout */}
+        <Route element={<RootLayout />}>
+          <Route path="/" element={<Home />} />
+        </Route>
 
-      {/* Pages without layout */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/comingsoon" element={<ComingSoonPage />} />
-      <Route path="/submitreport" element={<SubmitReport />} />
+        {/* Pages without layout */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/comingsoon" element={<ComingSoonPage />} />
+        <Route path="/submitreport" element={<SubmitReport />} />
 
-      {/* Dashboard with its own layout */}
-      <Route element={<UserDashboardLayout />}>
-        <Route path="/dashboard" element={<DashboardHome />} />
-        <Route path="/dashboard/search" element={<DashboardSearch />} />
-        <Route path="/dashboard/track" element={<DashboardtTrack />} />
-        <Route path="/dashboard/reports" element={<DashboardReport />} />
-        <Route path="/dashboard/found" element={<DashboardFound />} />
-      </Route>
-    </Routes>
+        {/* Dashboard with its own layout */}
+        <Route element={<UserDashboardLayout />}>
+          <Route path="/dashboard" element={<DashboardHome />} />
+          <Route path="/dashboard/search" element={<DashboardSearch />} />
+          <Route path="/dashboard/track" element={<DashboardtTrack />} />
+          <Route path="/dashboard/reports" element={<DashboardReport />} />
+          <Route path="/dashboard/found" element={<DashboardFound />} />
+        </Route>
+      </Routes>
+    </AuthProvider>
   );
 }
 
