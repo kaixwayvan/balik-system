@@ -22,8 +22,7 @@ export default function AuthCallback() {
 
         if (data?.session) {
           console.log("✅ Email confirmed! Session created.");
-          localStorage.setItem("session", JSON.stringify(data.session));
-          
+
           // Redirect to dashboard
           setTimeout(() => navigate("/dashboard", { replace: true }), 2000);
         } else {

@@ -10,7 +10,7 @@ export const signupWithEmail = async (email, password, fullName, contact) => {
           full_name: fullName,
           mobile_number: contact,
         },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${import.meta.env.VITE_APP_URL || window.location.origin}/auth/callback`,
       },
     });
 
@@ -78,7 +78,7 @@ export const loginWithGoogleSupabase = async () => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: `${import.meta.env.VITE_APP_URL || window.location.origin}/dashboard`,
       },
     });
 

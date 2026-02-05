@@ -79,9 +79,6 @@ export default function Login() {
       const result = await loginWithPasswordSupabase(form.identifier, form.password);
 
       if (result.success) {
-        // Remove manual session management to let Supabase handle it
-        localStorage.removeItem("session");
-
         // Small delay to ensure Supabase internal state is updated before navigation
         setTimeout(() => {
           navigate('/dashboard', { replace: true });

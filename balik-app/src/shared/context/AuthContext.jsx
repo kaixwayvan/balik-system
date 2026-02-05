@@ -60,37 +60,10 @@ export const AuthProvider = ({ children }) => {
       }
     );
 
-    // 3. Re-check session on window focus (Fixes "tab sleep" issues)
-    const handleFocus = async () => {
-      console.log("Window focused, checking session...");
-
-      // Just check if we can get a session. If strictly null, do nothing and let onAuthStateChange handle it.
-      // We only manually update if we find a Valid session that we didn't know about.
-      const { data: { session }, error } = await supabase.auth.getSession();
-
-      if (error) {
-        console.warn("Error checking session on focus:", error);
-        return;
-      }
-
-      if (session?.user) {
-        if (!user) {
-          console.log("Recovered session on focus");
-          await fetchProfile(session.user);
-        }
-      }
-      // Removed the 'else { setUser(null) }' block. 
-      // If session is missing here (e.g. strict refresh fail), Supabase will emit SIGNED_OUT event shortly.
-      // Forcing it here causes race conditions where the token is just refreshing.
-    };
-
-    window.addEventListener('focus', handleFocus);
-
     return () => {
       subscription?.unsubscribe();
-      window.removeEventListener('focus', handleFocus);
     };
-  }, [user]); // Add user to dependency array so handleFocus sees current user state
+  }, []); // Run only once on mount
 
   return (
     <AuthContext.Provider value={{ user, loading }}>

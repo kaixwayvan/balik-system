@@ -43,8 +43,34 @@ const initialFoundFormData = {
 };
 
 export default function DashboardHome() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect to login if not authenticated (after loading completes)
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/login', { replace: true });
+    }
+  }, [loading, user, navigate]);
+
+  // Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render dashboard if no user (will redirect)
+  if (!user) {
+    return null;
+  }
+
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stats, setStats] = useState({ total: 0, lost: 0, found: 0, resolved: 0 });
   const [showReportModal, setShowReportModal] = useState(false);
@@ -195,16 +221,25 @@ export default function DashboardHome() {
         }
       };
 
-      // Generate embedding for smart matching (Non-blocking)
+      // Generate embedding for smart matching (Non-blocking with timeout)
       let embedding = null;
       try {
         const searchText = `${lostFormData.itemCategory} ${lostFormData.whatWasLost} ${lostFormData.brand} ${lostFormData.color} ${lostFormData.location} ${lostFormData.additionalInfo}`;
-        embedding = await nlpService.generateEmbedding(searchText);
+
+        // Add 5-second timeout to prevent blocking submission
+        const embeddingPromise = nlpService.generateEmbedding(searchText);
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('NLP timeout')), 5000)
+        );
+
+        embedding = await Promise.race([embeddingPromise, timeoutPromise]);
+
         if (embedding) {
           mappedData.description_embedding = embedding;
         }
       } catch (nlpError) {
-        console.warn("NLP Embedding generation failed (continuing without smart match):", nlpError);
+        console.warn("NLP Embedding generation failed or timed out (continuing without smart match):", nlpError.message);
+        // Continue without embedding - submission should not fail
       }
 
       const newItem = await itemService.reportItem(mappedData);
@@ -292,16 +327,25 @@ export default function DashboardHome() {
         }
       };
 
-      // Generate embedding for smart matching (Non-blocking)
+      // Generate embedding for smart matching (Non-blocking with timeout)
       let embedding = null;
       try {
         const searchText = `${foundFormData.itemCategory} ${foundFormData.whatWasFound} ${foundFormData.brand} ${foundFormData.color} ${foundFormData.location} ${foundFormData.additionalInfo}`;
-        embedding = await nlpService.generateEmbedding(searchText);
+
+        // Add 5-second timeout to prevent blocking submission
+        const embeddingPromise = nlpService.generateEmbedding(searchText);
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('NLP timeout')), 5000)
+        );
+
+        embedding = await Promise.race([embeddingPromise, timeoutPromise]);
+
         if (embedding) {
           mappedData.description_embedding = embedding;
         }
       } catch (nlpError) {
-        console.warn("NLP Embedding generation failed (continuing without smart match):", nlpError);
+        console.warn("NLP Embedding generation failed or timed out (continuing without smart match):", nlpError.message);
+        // Continue without embedding - submission should not fail
       }
 
       const newItem = await itemService.reportItem(mappedData);

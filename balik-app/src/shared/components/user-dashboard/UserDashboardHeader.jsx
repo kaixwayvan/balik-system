@@ -119,7 +119,6 @@ export default function UserDashboardHeader() {
                   try {
                     const { logoutSupabase } = await import("../../../pages/auth/services/supabaseAuthService");
                     await logoutSupabase();
-                    localStorage.removeItem("session");
                     window.location.href = "/login";
                   } catch (err) {
                     console.error("Logout error:", err);

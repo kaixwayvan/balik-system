@@ -9,6 +9,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         autoRefreshToken: true,
         detectSessionInUrl: true,
         storage: window.localStorage,
+        storageKey: 'balik-auth-token',
         flowType: 'pkce'
     }
 });

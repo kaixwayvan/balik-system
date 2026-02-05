@@ -69,7 +69,8 @@ export default function TrackItems() {
 
   useEffect(() => {
     fetchItems();
-  }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const stats = {
     total: items.length,

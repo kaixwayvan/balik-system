@@ -160,7 +160,8 @@ export default function ActiveReports() {
 
   useEffect(() => {
     fetchReports();
-  }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   useEffect(() => {
     document.body.style.overflow =
