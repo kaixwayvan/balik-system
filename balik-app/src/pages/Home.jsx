@@ -76,7 +76,7 @@ function Home() {
   const prevStep = () => setStep((s) => Math.max(s - 1, 1))
 
   const [index, setIndex] = useState(0);
-  const story = successStories[index];
+  const story = successStories.length > 0 ? successStories[index] : null;
 
   const prevStory = () => {
     setIndex((prev) =>
@@ -372,26 +372,28 @@ function Home() {
 
         {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mb-6">
-          {valuableItemsCards.map((card) => (
-            <div
-              key={card.id}
-              className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-gray-100 mb-4">
-                <img
-                  src={card.icon}
-                  alt={`${card.title} icon`}
-                  className="w-6 h-6 object-contain"
-                />
+          {valuableItemsCards.length > 0 ? (
+            valuableItemsCards.map((card) => (
+              <div
+                key={card.id}
+                className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-gray-100 mb-4">
+                  <img
+                    src={card.icon}
+                    alt={`${card.title} icon`}
+                    className="w-6 h-6 object-contain"
+                  />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">{card.title}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {card.description}
+                </p>
               </div>
-
-              <h3 className="text-lg font-semibold mb-2">{card.title}</h3>
-
-              <p className="text-gray-600 text-sm leading-relaxed">
-                {card.description}
-              </p>
-            </div>
-          ))}
+            ))
+          ) : (
+            <div className="col-span-3 text-center py-10 text-gray-500">No items found.</div>
+          )}
         </div>
       </section>
 
@@ -403,26 +405,28 @@ function Home() {
 
         {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl px-5 mx-auto">
-          {systemCards.map((card) => (
-            <div
-              key={card.id}
-              className="bg-white rounded-xl p-6 flex flex-col items-center text-center"
-            >
-              <div className="w-12 h-12 flex items-center justify-center rounded-lg mb-4">
-                <img
-                  src={card.icon}
-                  alt={`${card.title} icon`}
-                  className="w-10 h-10 object-contain"
-                />
+          {systemCards.length > 0 ? (
+            systemCards.map((card) => (
+              <div
+                key={card.id}
+                className="bg-white rounded-xl p-6 flex flex-col items-center text-center"
+              >
+                <div className="w-12 h-12 flex items-center justify-center rounded-lg mb-4">
+                  <img
+                    src={card.icon}
+                    alt={`${card.title} icon`}
+                    className="w-10 h-10 object-contain"
+                  />
+                </div>
+                <h3 className="text-lg font-semibold mb-4">{card.title}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {card.description}
+                </p>
               </div>
-
-              <h3 className="text-lg font-semibold mb-4">{card.title}</h3>
-
-              <p className="text-gray-600 text-sm leading-relaxed">
-                {card.description}
-              </p>
-            </div>
-          ))}
+            ))
+          ) : (
+            <div className="col-span-3 text-center py-10 text-gray-500">System information coming soon.</div>
+          )}
         </div>
       </section>
 
@@ -430,83 +434,78 @@ function Home() {
 
       {/* SECTION 3*/}
       <section className="max-w-7xl mx-auto px-6 py-16">
-      {/* Header */}
-      <div className="text-center mb-10">
-        <h2 className="text-[2.8rem] text-black font-extrabold mb-2">
-          Recently Found Items
-        </h2>
-        <p className="text-gray-500 text-lg">
-          Admin-verified items waiting to be reunited with their owners
-        </p>
-      </div>
+        {/* Header */}
+        <div className="text-center mb-10">
+          <h2 className="text-[2.8rem] text-black font-extrabold mb-2">
+            Recently Found Items
+          </h2>
+          <p className="text-gray-500 text-lg">
+            Admin-verified items waiting to be reunited with their owners
+          </p>
+        </div>
 
-      {/* Filters */}
-      <div className="flex justify-center gap-3 mb-12">
-        {categories.map((cat, index) => (
-          <button
-            key={index}
-            onClick={() => setActiveCategory(cat)}
-            className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-medium transition-all
-              ${
-                cat === activeCategory
+        {/* Filters */}
+        <div className="flex justify-center gap-3 mb-12">
+          {categories.map((cat, index) => (
+            <button
+              key={index}
+              onClick={() => setActiveCategory(cat)}
+              className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-medium transition-all
+              ${cat === activeCategory
                   ? "bg-blue-600 text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
+                }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
 
-      {/* Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {foundItems.map((item) => (
-          <div
-            key={item.id}
-            className="bg-white rounded-xl shadow-sm overflow-hidden"
-          >
-            {/* Image */}
-            <div className="relative">
-              <img
-                src={item.image}
-                alt={item.title}
-                className="w-full h-56 object-cover"
-              />
-
-              <span className="absolute top-3 right-3 bg-green-500 text-white text-xs px-3 py-1 rounded-full">
-                ✓ Verified
-              </span>
-            </div>
-
-            {/* Content */}
-            <div className="p-5">
-              <h3 className="font-semibold text-lg mb-1">
-                {item.title}
-              </h3>
-
-              <span className="inline-block bg-gray-100 text-xs px-2 py-1 rounded mb-2">
-                {item.tag}
-              </span>
-
-              <p className="text-sm text-gray-600 mb-4">
-                {item.description}
-              </p>
-
-              <div className="flex justify-between text-xs text-gray-500 mb-4">
-                <span>{item.location}</span>
-                <span>{item.date}</span>
+        {/* Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {displayedFoundItems.length > 0 ? (
+            displayedFoundItems.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white rounded-xl shadow-sm overflow-hidden"
+              >
+                {/* Image */}
+                <div className="relative">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-56 object-cover"
+                  />
+                  <span className="absolute top-3 right-3 bg-green-500 text-white text-xs px-3 py-1 rounded-full">
+                    ✓ Verified
+                  </span>
+                </div>
+                <div className="p-5">
+                  <h3 className="font-semibold text-lg mb-1">{item.title}</h3>
+                  <span className="inline-block bg-gray-100 text-xs px-2 py-1 rounded mb-2">
+                    {item.tag}
+                  </span>
+                  <p className="text-sm text-gray-600 mb-4">{item.description}</p>
+                  <div className="flex justify-between text-xs text-gray-500 mb-4">
+                    <span>{item.location}</span>
+                    <span>{item.date}</span>
+                  </div>
+                  <button onClick={() => setSelectedItem(item)} className="cursor-pointer w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                    View details
+                  </button>
+                </div>
               </div>
-
-              <button onClick={() => setSelectedItem(item)} className="cursor-pointer w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
-                View details
-              </button>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-20 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+              <p className="text-gray-500 text-lg font-medium mb-2">No recently found items</p>
+              <p className="text-gray-400 text-sm">Be the first to report a found item!</p>
             </div>
-          </div>
-        ))}
-      </div>
-    </section>
+          )}
+        </div>
+      </section>
 
-    {/* Forms (Report) Section 4 */}
+      {/* Forms (Report) Section 4 */}
 
       {selectedItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -933,26 +932,25 @@ function Home() {
 
           {/* Grid inner section */}
           <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-3">
-            {whyBalikData.map((item, index) => {
-              const Icon = item.icon;
-
-              return (
-                <div
-                  key={index}
-                  className="flex flex-col items-center text-center gap-4"
-                >
-                  <Icon className="w-10 h-10 text-blue-600" />
-
-                  <h3 className="text-lg font-semibold">
-                    {item.title}
-                  </h3>
-
-                  <p className="text-gray-500 text-sm leading-relaxed">
-                    {item.description}
-                  </p>
-                </div>
-              );
-            })}
+            {whyBalikData.length > 0 ? (
+              whyBalikData.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={index}
+                    className="flex flex-col items-center text-center gap-4"
+                  >
+                    <Icon className="w-10 h-10 text-blue-600" />
+                    <h3 className="text-lg font-semibold">{item.title}</h3>
+                    <p className="text-gray-500 text-sm leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="col-span-full text-center py-10 text-gray-500 italic">Information about BALIK features will be available soon.</div>
+            )}
           </div>
         </div>
       </section>
@@ -975,50 +973,38 @@ function Home() {
             </h3>
 
             <div className="flex flex-col gap-4">
-              {topContributors.map((user) => (
-                <div
-                  key={user.rank}
-                  className="
-                  flex items-center justify-between
-                  p-4 rounded-xl border border-gray-200
-                  transition-all duration-300 ease-out
-                  hover:-translate-y-2 hover:shadow-lg
-                "
-                >
-                  {/* Left */}
-                  <div className="flex items-center gap-4">
-                    {/* Rank */}
-                    <div className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-600 text-white font-semibold">
-                      {user.rank}
+              {topContributors.length > 0 ? (
+                topContributors.map((user) => (
+                  <div
+                    key={user.rank}
+                    className="
+                    flex items-center justify-between
+                    p-4 rounded-xl border border-gray-200
+                    transition-all duration-300 ease-out
+                    hover:-translate-y-2 hover:shadow-lg
+                  "
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-600 text-white font-semibold">
+                        {user.rank}
+                      </div>
+                      <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-semibold">
+                        {user.initials}
+                      </div>
+                      <div className="text-left">
+                        <p className="font-medium leading-tight">{user.name}</p>
+                        <p className="text-sm text-gray-500">{user.items} items reunited</p>
+                      </div>
                     </div>
-
-                    {/* Avatar */}
-                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-semibold">
-                      {user.initials}
-                    </div>
-
-                    {/* Info */}
-                    <div className="text-left">
-                      <p className="font-medium leading-tight">
-                        {user.name}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {user.items} items reunited
-                      </p>
+                    <div className="text-right">
+                      <p className="text-blue-600 font-semibold">{user.points.toLocaleString()}</p>
+                      <p className="text-sm text-gray-500">points</p>
                     </div>
                   </div>
-
-                  {/* Points */}
-                  <div className="text-right">
-                    <p className="text-blue-600 font-semibold">
-                      {user.points.toLocaleString()}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      points
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-gray-500 py-4 italic">Community contributors will be listed here soon.</p>
+              )}
             </div>
           </div>
         </div>
@@ -1036,76 +1022,64 @@ function Home() {
           </p>
 
           {/* Story */}
-          <div className="relative">
-            {/* Avatar placeholder */}
-            <div className="w-24 h-24 mx-auto rounded-full bg-gray-200 mb-6" />
-
-            {/* Name */}
-            <h3 className="text-xl font-semibold">
-              {story.name}
-            </h3>
-            <p className="text-gray-500 mb-2">
-              {story.role}
-            </p>
-
-            {/* Stars */}
-            <div className="flex justify-center gap-1 mb-8">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <span
-                  key={i}
-                  className={
-                    i < story.rating
-                      ? "text-yellow-400 text-lg"
-                      : "text-gray-300 text-lg"
-                  }
-                >
-                  ★
-                </span>
-              ))}
-            </div>
-
-            {/* Quote */}
-            <p className="italic text-lg text-gray-800 max-w-3xl mx-auto mb-10 leading-relaxed">
-              “{story.quote}”
-            </p>
-
-            {/* Reunited item */}
-            <div className="flex justify-center items-center gap-2 text-blue-600 font-medium mb-14">
-              <span className="w-5 h-5 rounded-full border-2 border-blue-600 flex items-center justify-center text-xs">
-                ✓
-              </span>
-              Reunited: {story.reunitedItem}
-            </div>
-
-            {/* Controls */}
-            <div className="flex justify-between items-center max-w-3xl mx-auto">
-              <button
-                onClick={prevStory}
-                className="cursor-pointer w-20 h-20 flex items-center justify-center rounded-full text-3xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition"
-              > ‹
-              </button>
-
-              {/* Dots */}
-              <div className="flex gap-2">
-                {successStories.map((_, i) => (
-                  <div
+          {story ? (
+            <div className="relative">
+              <div className="w-24 h-24 mx-auto rounded-full bg-gray-200 mb-6" />
+              <h3 className="text-xl font-semibold">{story.name}</h3>
+              <p className="text-gray-500 mb-2">{story.role}</p>
+              <div className="flex justify-center gap-1 mb-8">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span
                     key={i}
-                    className={`h-2 rounded-full transition-all cursor-pointer ${i === index
-                      ? "w-8 bg-blue-600"
-                      : "w-2 bg-gray-300 hover:bg-gray-400"
-                      }`}
-                    onClick={() => setIndex(i)}
-                  />
+                    className={
+                      i < story.rating
+                        ? "text-yellow-400 text-lg"
+                        : "text-gray-300 text-lg"
+                    }
+                  >
+                    ★
+                  </span>
                 ))}
               </div>
-
-              <button
-                onClick={nextStory}
-                className="cursor-pointer w-20 h-20 flex items-center justify-center rounded-full text-3xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition"
-              > ›
-              </button>
+              <p className="italic text-lg text-gray-800 max-w-3xl mx-auto mb-10 leading-relaxed">
+                “{story.quote}”
+              </p>
+              <div className="flex justify-center items-center gap-2 text-blue-600 font-medium mb-14">
+                <span className="w-5 h-5 rounded-full border-2 border-blue-600 flex items-center justify-center text-xs">
+                  ✓
+                </span>
+                Reunited: {story.reunitedItem}
+              </div>
+              <div className="flex justify-between items-center max-w-3xl mx-auto">
+                <button
+                  onClick={prevStory}
+                  className="cursor-pointer w-20 h-20 flex items-center justify-center rounded-full text-3xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition"
+                > ‹
+                </button>
+                <div className="flex gap-2">
+                  {successStories.map((_, i) => (
+                    <div
+                      key={i}
+                      className={`h-2 rounded-full transition-all cursor-pointer ${i === index
+                        ? "w-8 bg-blue-600"
+                        : "w-2 bg-gray-300 hover:bg-gray-400"
+                        }`}
+                      onClick={() => setIndex(i)}
+                    />
+                  ))}
+                </div>
+                <button
+                  onClick={nextStory}
+                  className="cursor-pointer w-20 h-20 flex items-center justify-center rounded-full text-3xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition"
+                > ›
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+              <p className="text-gray-500 italic">Success stories will be shared by our community members soon.</p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -1120,26 +1094,27 @@ function Home() {
           </p>
 
           <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {securityData.map((item, index) => {
-              const Icon = item.icon;
-
-              return (
-                <div
-                  key={index}
-                  className="bg-white border border-gray-200 rounded-xl p-8 text-left shadow-sm hover:shadow-lg transition"
-                >
-                  <Icon className="w-10 h-10 text-green-500 mb-6" />
-
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    {item.title}
-                  </h3>
-
-                  <p className="text-gray-600 leading-relaxed">
-                    {item.description}
-                  </p>
-                </div>
-              );
-            })}
+            {securityData.length > 0 ? (
+              securityData.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={index}
+                    className="bg-white border border-gray-200 rounded-xl p-8 text-left shadow-sm hover:shadow-lg transition"
+                  >
+                    <Icon className="w-10 h-10 text-green-500 mb-6" />
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                      {item.title}
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="col-span-full py-10 text-gray-500 italic">Security features overview coming soon.</div>
+            )}
           </div>
         </div>
       </section>
@@ -1245,20 +1220,24 @@ function Home() {
 
           {/* Features */}
           <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-12">
-            {joinFeaturesData.map((item, index) => {
-              const Icon = item.icon;
-              return (
-                <div key={index}>
-                  <Icon className="w-7 h-7 mx-auto text-blue-600 mb-8" />
-                  <h3 className="text-xl font-semibold text-gray-900">
-                    {item.title}
-                  </h3>
-                  <p className="mt-2 text-gray-500">
-                    {item.description}
-                  </p>
-                </div>
-              );
-            })}
+            {joinFeaturesData.length > 0 ? (
+              joinFeaturesData.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <div key={index}>
+                    <Icon className="w-7 h-7 mx-auto text-blue-600 mb-8" />
+                    <h3 className="text-xl font-semibold text-gray-900">
+                      {item.title}
+                    </h3>
+                    <p className="mt-2 text-gray-500">
+                      {item.description}
+                    </p>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="col-span-full py-10 text-gray-500 italic">Community features available soon.</div>
+            )}
           </div>
         </div>
       </section>

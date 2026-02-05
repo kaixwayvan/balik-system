@@ -1,47 +1,34 @@
-import {
-  ShieldCheck,
-  QrCode,
-  Lock,
-  IdCard,
-  Clock,
-  Users
-} from "lucide-react"
+import { Shield, Lock, UserCheck, EyeOff, FileText, CheckCircle } from "lucide-react";
 
 export const securityData = [
-  {
-    title: "Admin Verification",
-    description:
-      "Every found item listing is manually reviewed and verified by our trained admin team before going live, ensuring authenticity and preventing fraud.",
-    icon: ShieldCheck
-  },
-  {
-    title: "QR Code Authentication",
-    description:
-      "Unique QR codes are generated for each item, allowing secure verification during handoff without sharing personal contact information prematurely.",
-    icon: QrCode
-  },
-  {
-    title: "Privacy Protection",
-    description:
-      "Your personal details remain private until you choose to connect. We use end-to-end encryption for all communications between finders and owners.",
-    icon: Lock
-  },
-  {
-    title: "Identity Verification",
-    description:
-      "Optional identity verification for high-value items adds an extra layer of security, with government ID checks and photo verification.",
-    icon: IdCard
-  },
-  {
-    title: "24/7 Monitoring",
-    description:
-      "Our AI-powered fraud detection system monitors all activities in real-time, flagging suspicious behavior and protecting community members.",
-    icon: Clock
-  },
-  {
-    title: "Community Trust Score",
-    description:
-      "Members earn trust scores based on successful reunions, verified identity, and community feedback, helping you identify reliable helpers.",
-    icon: Users
-  }
-]
+    {
+        title: "Data Privacy",
+        description: "Your personal information is encrypted and only shared with the other party once a match is confirmed and verified.",
+        icon: Lock,
+    },
+    {
+        title: "Verified Community",
+        description: "All users must be verified members of the institution, ensuring a trustworthy environment for everyone.",
+        icon: UserCheck,
+    },
+    {
+        title: "Safe Handovers",
+        description: "Our QR-based handover system logs every transaction, making the recovery process transparent and secure.",
+        icon: Shield,
+    },
+    {
+        title: "Identity Protection",
+        description: "Keep your identity private. Only share contact details when you feel comfortable and a match is highly probable.",
+        icon: EyeOff,
+    },
+    {
+        title: "Admin Verification",
+        description: "High-value items go through an extra layer of admin verification to prevent fraudulent claims.",
+        icon: FileText,
+    },
+    {
+        title: "Trust System",
+        description: "Our reputation system tracks successful returns, building a community of trusted finders and owners.",
+        icon: CheckCircle,
+    },
+];

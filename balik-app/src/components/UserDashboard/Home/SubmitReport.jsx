@@ -1,9 +1,11 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import BALIKLogo from "../../../assets/BALIK.png";
 import DatePicker from "react-datepicker";
 import { IoNotifications } from "react-icons/io5";
 import "react-datepicker/dist/react-datepicker.css";
+import { useAuth } from "../../../shared/context/AuthContext";
+import { itemService } from "../../../services/itemService";
 
 export default function SubmitReport() {
   const [reportType, setReportType] = useState("");
@@ -19,30 +21,103 @@ export default function SubmitReport() {
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
 
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Auto-fill reporter info
+  useEffect(() => {
+    if (user) {
+      setReporterName(user.user_metadata?.full_name || "");
+      setEmail(user.email || "");
+    }
+  }, [user]);
+
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const formData = {
-      reportType,
-      category,
-      brand,
-      color,
-      location,
-      additionalInfo,
-      itemLost,
-      dateLost,
-      file,
-      reporterName,
-      mobile,
-      email,
-    };
+    if (!user) {
+      alert("You must be logged in to submit a report.");
+      return;
+    }
 
-    // for backend stuff
-    console.log("Form Submitted:", formData);
+    // Comprehensive validation
+    if (!reportType) return alert("Please select a report type.");
+    if (!category) return alert("Please select a category.");
+    if (reportType === "Missing Item" && !itemLost) return alert("Please specify what was lost.");
+    if (!location) return alert("Please enter the location.");
+    if (!dateLost) return alert("Please select the date.");
+    if (!reporterName) return alert("Reporter name is required.");
+    if (!mobile) return alert("Mobile number is required.");
+    if (!email) return alert("Email is required.");
+
+    setIsSubmitting(true);
+    try {
+      // 1. Upload image if exists
+      let imageUrl = null;
+      if (file) {
+        imageUrl = await itemService.uploadItemImage(file);
+      }
+
+      // 2. Format date for Supabase (YYYY-MM-DD)
+      const formattedDate = dateLost instanceof Date
+        ? dateLost.toISOString().split('T')[0]
+        : dateLost;
+
+      const mappedData = {
+        user_id: user.id,
+        type: reportType === "Missing Item" ? "lost" : "found",
+        category,
+        title: itemLost || (reportType === "Found Item" ? `Found ${category}` : "Untitled Item"),
+        description: `Brand: ${brand}\nColor: ${color}\n\n${additionalInfo}`,
+        location,
+        date_reported: formattedDate,
+        status: 'pending',
+        image_url: imageUrl,
+        metadata: {
+          brand,
+          color,
+          reporter: {
+            name: reporterName,
+            mobile,
+            email
+          }
+        }
+      };
+
+      await itemService.reportItem(mappedData);
+
+      alert(`${reportType} submitted successfully!`);
+
+      // Navigate to see the new report
+      if (reportType === "Missing Item") {
+        navigate('/dashboard/reports');
+      } else {
+        navigate('/dashboard/track');
+      }
+      // Reset form
+      setReportType("");
+      setCategory("");
+      setBrand("");
+      setColor("");
+      setLocation("");
+      setAdditionalInfo("");
+      setItemLost("");
+      setDateLost(null);
+      setFile(null);
+      setReporterName("");
+      setMobile("");
+      setEmail("");
+    } catch (error) {
+      console.error("Submission Error:", error);
+      alert("Failed to submit report: " + error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -61,30 +136,33 @@ export default function SubmitReport() {
           <button className="cursor-pointer text-gray-500">
             <IoNotifications size={20} className="text-gray-500" />
           </button>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-slate-300" />
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center overflow-hidden text-white">
+              {user?.user_metadata?.avatar_url ? (
+                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-xs font-bold">{user?.user_metadata?.full_name?.charAt(0) || "U"}</span>
+              )}
+            </div>
             <div className="text-sm">
-              <p className="font-medium">Mike Wazowski</p>
-              <p className="text-xs text-gray-500">Registered User</p>
+              <p className="font-medium">{user?.user_metadata?.full_name || "Guest User"}</p>
+              <p className="text-[10px] text-gray-500 font-semibold uppercase">ISKOLAR NG BAYAN</p>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="min-h-screen bg-gray-50 py-10 px-4 text-gray-800">
-        <div className="max-w-6xl mx-auto bg-white rounded-2xl border border-gray-300 p-10">
-          <h1 className="text-5xl font-extrabold font-[Cormorant] text-red-800 mb-1">
-            Submit a Report
-          </h1>
-          <p className="text-lg text-gray-600 mb-8">
-            Our Online Lost &amp; Found can help you find what you are looking
-            for.
+      <div className="min-h-[calc(100vh-80px)] bg-gray-50 p-6 md:p-10">
+        <div className="max-w-5xl mx-auto bg-white rounded-xl border p-8 shadow-sm">
+          <h1 className="text-2xl font-bold text-[#7B1C1C]">Submit a Report</h1>
+          <p className="text-gray-500 mb-8">
+            Our Online Lost & Found can Help you Find what you are Looking For!
           </p>
 
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               {/* Left Column */}
-              <div className="space-y-5">
+              <div className="space-y-6">
                 <div>
                   <label
                     htmlFor="reportType"
@@ -187,12 +265,11 @@ export default function SubmitReport() {
                     item.
                   </p>
                   <textarea
-                    rows="3"
-                    placeholder="Please provide additional details or description."
+                    rows={4}
                     value={additionalInfo}
                     onChange={(e) => setAdditionalInfo(e.target.value)}
                     className="w-full border rounded-md px-3 py-2 resize-none"
-                  />
+                  ></textarea>
                 </div>
               </div>
 
@@ -331,9 +408,10 @@ export default function SubmitReport() {
               </Link>
               <button
                 type="submit"
-                className="cursor-pointer px-10 py-2 rounded-md bg-green-600 text-white hover:bg-green-700"
+                disabled={isSubmitting}
+                className={`cursor-pointer px-10 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                Submit
+                {isSubmitting ? "Submitting..." : "Submit"}
               </button>
             </div>
           </form>

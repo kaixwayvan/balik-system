@@ -11,6 +11,7 @@ import DashboardSearch from "./components/UserDashboard/SearchItems/SearchItems"
 import DashboardtTrack from "./components/UserDashboard/TrackItems/TrackItems"
 import DashboardReport from "./components/UserDashboard/ActiveReports/ActiveReports"
 import DashboardFound from "./components/UserDashboard/FoundItems/FoundItems"
+import DashboardClaims from "./components/UserDashboard/MyClaims/MyClaims"
 
 import UserDashboardLayout from "./shared/components/layouts/UserDashboardLayout";
 import SubmitReport from "./components/UserDashboard/Home/SubmitReport";
@@ -39,6 +40,7 @@ function App() {
           <Route path="/dashboard/track" element={<DashboardtTrack />} />
           <Route path="/dashboard/reports" element={<DashboardReport />} />
           <Route path="/dashboard/found" element={<DashboardFound />} />
+          <Route path="/dashboard/claims" element={<DashboardClaims />} />
         </Route>
       </Routes>
     </AuthProvider>

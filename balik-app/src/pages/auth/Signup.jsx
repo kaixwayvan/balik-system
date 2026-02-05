@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useGoogleLogin } from "@react-oauth/google";
-import { loginWithGoogle } from "../auth/services/authService";
+import { signupWithEmail, loginWithGoogleSupabase } from "../auth/services/supabaseAuthService";
 import BALIKLogo from "../../assets/BALIK.png";
 import StudentSupportImg from "../../assets/auth-assets/studentsupport.png";
 
@@ -26,6 +26,7 @@ export default function Signup() {
 
   // VALIDATION FUNCTIONS
   const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  const isPUPEmail = (value) => /^[^\s@]+@iskolarngbayan\.pup\.edu\.ph$/i.test(value);
   const isMobile = (value) => /^(09|\+639)\d{9}$/.test(value);
 
   const validateField = (name, value) => {
@@ -35,6 +36,7 @@ export default function Signup() {
       case "email":
         if (!value) return "Email is required.";
         if (!isEmail(value)) return "Enter a valid email.";
+        if (!isPUPEmail(value)) return "Please use your PUP email (@iskolarngbayan.pup.edu.ph).";
         return "";
       case "contact":
         if (!value) return "Contact number is required.";
@@ -66,13 +68,14 @@ export default function Signup() {
 
   // GOOGLE LOGIN
   const googleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
+    onSuccess: async () => {
       try {
         setLoading(true);
         setError("");
-        await loginWithGoogle(tokenResponse.access_token);
-      } catch {
-        setError("Google signup failed. Please try again.");
+        const result = await loginWithGoogleSupabase();
+        if (!result.success) throw new Error(result.error);
+      } catch (err) {
+        setError(err.message || "Google signup failed. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -88,11 +91,15 @@ export default function Signup() {
     try {
       setLoading(true);
       setError("");
-      // BACKEND: Replace with actual signup function
-      console.log("Signup data:", form, "Captcha:", captchaValue);
-      // Simulate successful signup: show success modal
-      setShowSuccess(true);
-    } catch {
+
+      const result = await signupWithEmail(form.email, form.password, form.fullName, form.contact);
+
+      if (result.success) {
+        setShowSuccess(true);
+      } else {
+        setError(result.error || "Signup failed. Please try again.");
+      }
+    } catch (err) {
       setError("Signup failed. Please try again.");
     } finally {
       setLoading(false);
@@ -176,9 +183,8 @@ export default function Signup() {
                 type="text"
                 value={form.fullName}
                 onChange={handleChange}
-                className={`w-full border rounded-md px-3 py-2 focus:ring-2 focus:outline-none ${
-                  errors.fullName ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-600"
-                }`}
+                className={`w-full border rounded-md px-3 py-2 focus:ring-2 focus:outline-none ${errors.fullName ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-600"
+                  }`}
               />
               {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
             </div>
@@ -193,9 +199,8 @@ export default function Signup() {
                 type="email"
                 value={form.email}
                 onChange={handleChange}
-                className={`w-full border rounded-md px-3 py-2 focus:ring-2 focus:outline-none ${
-                  errors.email ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-600"
-                }`}
+                className={`w-full border rounded-md px-3 py-2 focus:ring-2 focus:outline-none ${errors.email ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-600"
+                  }`}
               />
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
             </div>
@@ -210,9 +215,8 @@ export default function Signup() {
                 type="text"
                 value={form.contact}
                 onChange={handleChange}
-                className={`w-full border rounded-md px-3 py-2 focus:ring-2 focus:outline-none ${
-                  errors.contact ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-600"
-                }`}
+                className={`w-full border rounded-md px-3 py-2 focus:ring-2 focus:outline-none ${errors.contact ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-600"
+                  }`}
               />
               {errors.contact && <p className="text-red-500 text-xs mt-1">{errors.contact}</p>}
             </div>
@@ -228,9 +232,8 @@ export default function Signup() {
                   type={showPassword ? "text" : "password"}
                   value={form.password}
                   onChange={handleChange}
-                  className={`w-full pr-10 border rounded-md px-3 py-2 focus:ring-2 focus:outline-none ${
-                    errors.password ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-600"
-                  }`}
+                  className={`w-full pr-10 border rounded-md px-3 py-2 focus:ring-2 focus:outline-none ${errors.password ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-600"
+                    }`}
                 />
                 <button
                   type="button"
@@ -265,9 +268,8 @@ export default function Signup() {
                   type={showConfirmPassword ? "text" : "password"}
                   value={form.confirmPassword}
                   onChange={handleChange}
-                  className={`w-full pr-10 border rounded-md px-3 py-2 focus:ring-2 focus:outline-none ${
-                    errors.confirmPassword ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-600"
-                  }`}
+                  className={`w-full pr-10 border rounded-md px-3 py-2 focus:ring-2 focus:outline-none ${errors.confirmPassword ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-600"
+                    }`}
                 />
                 <button
                   type="button"

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   ShieldCheck,
@@ -9,6 +9,8 @@ import {
   CheckCircle,
 } from "lucide-react";
 import DatePicker from "react-datepicker";
+import { itemService } from "../../../services/itemService";
+import { nlpService } from "../../../services/nlpService";
 
 import iphoneImg from "../../../assets/home-assets/img-items/iphone.png";
 import bagImg from "../../../assets/home-assets/img-items/bag.png";
@@ -17,73 +19,11 @@ import walletImg from "../../../assets/home-assets/img-items/wallet.png";
 import glassesImg from "../../../assets/home-assets/img-items/glasses.png";
 import bottleImg from "../../../assets/home-assets/img-items/bottle.png";
 
-const categories = ["All Items", "Electronics", "Accessories", "Bags"];
-
-const items = [
-  {
-    id: 1,
-    title: "iPhone 15",
-    category: "Electronics",
-    tag: "Electronics",
-    description:
-      "Black iPhone 15 with baby blue phone case, found in Main Bldg",
-    location: "PUP - Main Bldg",
-    date: "2025-11-28",
-    image: iphoneImg,
-  },
-  {
-    id: 2,
-    title: "Brown Leather Bag",
-    category: "Bags",
-    tag: "Bag",
-    description: "Brown leather bag with books inside, found in Main Library",
-    location: "PUP - Main Library",
-    date: "2025-11-28",
-    image: bagImg,
-  },
-  {
-    id: 3,
-    title: "Car Keys",
-    category: "Accessories",
-    tag: "Accessories",
-    description: "Toyota car keys remote with black fur key chains.",
-    location: "PUP - Itech Parking",
-    date: "2025-11-28",
-    image: keysImg,
-  },
-  {
-    id: 4,
-    title: "Black Leather Wallet",
-    category: "Accessories",
-    tag: "Accessories",
-    description: "YSL black leather wallet containing credit cards and ID.",
-    location: "PUP - Lagoon",
-    date: "2025-11-28",
-    image: walletImg,
-  },
-  {
-    id: 5,
-    title: "Prescription Glasses",
-    category: "Accessories",
-    tag: "Accessories",
-    description: "Black frame prescription glasses with white cleaning cloth.",
-    location: "PUP - CEA",
-    date: "2025-11-28",
-    image: glassesImg,
-  },
-  {
-    id: 6,
-    title: "Water Bottle",
-    category: "Accessories",
-    tag: "Accessories",
-    description: "White Aquaflask water bottle, found in Itech Lab 105.",
-    location: "PUP - Itech Lab 105",
-    date: "2025-11-28",
-    image: bottleImg,
-  },
-];
+const categories = ["All Items", "Electronics", "Accessories", "Bags", "Documents", "Others"];
 
 export default function SubmitReport() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All Items");
   const [selectedItem, setSelectedItem] = useState(null);
   const [showClaim, setShowClaim] = useState(false);
@@ -91,6 +31,33 @@ export default function SubmitReport() {
   const [errors, setErrors] = useState({});
   const [file, setFile] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const fetchItems = async () => {
+    setLoading(true);
+    try {
+      let embedding = null;
+      if (searchQuery && searchQuery.trim().length > 2) {
+        // Generate embedding for smart search (must be > 2 chars to be meaningful)
+        embedding = await nlpService.generateEmbedding(searchQuery);
+      }
+
+      const data = await itemService.searchItems({
+        query: searchQuery,
+        category: activeCategory,
+        type: 'found',
+        embedding
+      });
+      setItems(data);
+    } catch (error) {
+      console.error("Error fetching items:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchItems();
+  }, [activeCategory, searchQuery]);
 
   const [form, setForm] = useState({
     fullName: "",
@@ -112,27 +79,8 @@ export default function SubmitReport() {
     lastSeen: "",
   });
 
-  const filteredItems =
-    activeCategory === "All Items"
-      ? items.filter((item) =>
-          searchQuery === ""
-            ? true
-            : item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              item.category.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      : items.filter((item) => {
-          const matchesCategory = item.category === activeCategory;
-          const matchesSearch =
-            searchQuery === ""
-              ? true
-              : item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                item.category.toLowerCase().includes(searchQuery.toLowerCase());
-          return matchesCategory && matchesSearch;
-        });
+  // Filtering is now handled by the fetchItems call to Supabase
+  const filteredItems = items;
 
   const validateStep1 = () => {
     const e = {};
@@ -195,11 +143,10 @@ export default function SubmitReport() {
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition ${
-              activeCategory === cat
-                ? "bg-blue-600 text-white"
-                : "border border-slate-300 bg-white text-slate-700"
-            }`}
+            className={`cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition ${activeCategory === cat
+              ? "bg-blue-600 text-white"
+              : "border border-slate-300 bg-white text-slate-700"
+              }`}
           >
             {cat}
           </button>
@@ -208,45 +155,59 @@ export default function SubmitReport() {
 
       {/* Items Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredItems.map((item) => (
-          <div
-            key={item.id}
-            className="overflow-hidden rounded-2xl bg-white shadow-sm"
-          >
-            <div className="relative">
-              <img
-                src={item.image}
-                alt={item.title}
-                className="h-56 w-full object-cover"
-              />
-              <span className="absolute right-3 top-3 rounded-full bg-green-500 px-3 py-1 text-xs font-semibold text-white">
-                Verified
-              </span>
-            </div>
-
-            <div className="p-4">
-              <h3 className="font-semibold text-slate-900">{item.title}</h3>
-
-              <span className="mt-1 inline-block rounded-md bg-slate-200 px-2 py-0.5 text-xs text-slate-700">
-                {item.tag}
-              </span>
-
-              <p className="mt-2 text-sm text-slate-600">{item.description}</p>
-
-              <div className="mt-3 flex justify-between text-xs text-slate-500">
-                <span>📍 {item.location}</span>
-                <span>📅 {item.date}</span>
-              </div>
-
-              <button
-                onClick={() => setSelectedItem(item)}
-                className="cursor-pointer mt-4 w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white"
-              >
-                View details
-              </button>
-            </div>
+        {loading ? (
+          <div className="col-span-full flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
           </div>
-        ))}
+        ) : filteredItems.length > 0 ? (
+          filteredItems.map((item) => (
+            <div
+              key={item.id}
+              className="overflow-hidden rounded-2xl bg-white shadow-sm flex flex-col"
+            >
+              <div className="relative">
+                <img
+                  src={item.image_url || iphoneImg}
+                  alt={item.title}
+                  className="h-56 w-full object-cover"
+                />
+                <span className="absolute right-3 top-3 rounded-full bg-green-500 px-3 py-1 text-xs font-semibold text-white">
+                  Verified
+                </span>
+                <span className="absolute left-3 top-3 rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white uppercase">
+                  {item.type}
+                </span>
+                {item.similarity > 0 && (
+                  <span className="absolute right-3 bottom-3 rounded-full bg-purple-600 px-3 py-1 text-xs font-semibold text-white shadow-sm z-10">
+                    {(item.similarity * 100).toFixed(0)}% Match
+                  </span>
+                )}
+              </div>
+              <div className="p-4 flex-1 flex flex-col">
+                <h3 className="font-semibold text-slate-900 truncate">{item.title}</h3>
+                <span className="mt-1 inline-block rounded-md bg-slate-200 px-2 py-0.5 text-xs text-slate-700 w-fit">
+                  {item.category}
+                </span>
+                <p className="mt-2 text-sm text-slate-600 line-clamp-2 min-h-[40px]">{item.description}</p>
+                <div className="mt-auto pt-3 flex justify-between text-[11px] text-slate-500 border-t">
+                  <span className="flex items-center gap-1">📍 {item.location}</span>
+                  <span className="flex items-center gap-1">📅 {new Date(item.date_reported).toLocaleDateString()}</span>
+                </div>
+                <button
+                  onClick={() => setSelectedItem(item)}
+                  className="cursor-pointer mt-4 w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
+                >
+                  View details
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="col-span-full py-20 bg-white rounded-2xl border-2 border-dashed border-slate-200 text-center">
+            <p className="text-slate-500 font-medium">No items matching your search</p>
+            <p className="text-slate-400 text-sm mt-1">Try adjusting your filters or search query</p>
+          </div>
+        )}
       </div>
 
       {/* MODAL */}
@@ -271,7 +232,7 @@ export default function SubmitReport() {
               {/* Image */}
               <div className="relative p-6 pb-0">
                 <img
-                  src={selectedItem.image}
+                  src={selectedItem.image_url || iphoneImg}
                   alt={selectedItem.title}
                   className="h-56 w-full rounded-xl object-cover"
                 />
@@ -282,16 +243,16 @@ export default function SubmitReport() {
 
               {/* Content */}
               <div className="px-6 py-4">
-                <div className="flex justify-between">
-                  <h3 className="text-lg font-bold">{selectedItem.title}</h3>
-                  <span className="text-xs text-slate-400">ITEM ID: 40257</span>
+                <div className="flex justify-between items-start gap-4">
+                  <h3 className="text-lg font-bold text-slate-900">{selectedItem.title}</h3>
+                  <span className="text-[10px] text-slate-400 font-mono mt-1 shrink-0">ID: {selectedItem.id.substring(0, 8)}</span>
                 </div>
 
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-2 text-sm text-slate-600 leading-relaxed">
                   {selectedItem.description}
                 </p>
 
-                <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+                <div className="mt-6 grid grid-cols-2 gap-4 text-sm">
                   <Info
                     icon={CheckCircle}
                     label="Category"
@@ -302,18 +263,20 @@ export default function SubmitReport() {
                     label="Location"
                     value={selectedItem.location}
                   />
-                  <Info icon={Calendar} label="Date" value={selectedItem.date} />
-                  <Info icon={User} label="Reported By" value="Dj Mod Kalkal" />
+                  <Info icon={Calendar} label="Date Reported" value={new Date(selectedItem.date_reported).toLocaleDateString()} />
+                  <Info icon={User} label="Reporter" value={selectedItem.metadata?.reporter?.name || "Anonymous"} />
                 </div>
 
-                <div className="mt-5 rounded-xl border border-blue-500 bg-blue-50 p-4 text-sm">
+                <div className="mt-6 rounded-xl border border-blue-500 bg-blue-50 p-4 text-sm">
                   <div className="flex items-center gap-2 font-semibold text-blue-600">
                     <CheckCircle className="h-4 w-4" />
-                    95% Match with your search
+                    AI-Verified Match {selectedItem.similarity ? `- ${(selectedItem.similarity * 100).toFixed(1)}% Confidence` : ''}
                   </div>
-                  <p className="mt-1 text-xs text-blue-600">
-                    This item closely matches your search criteria based on
-                    category, location, and description.
+                  <p className="mt-1 text-xs text-blue-600 leading-relaxed">
+                    {selectedItem.similarity
+                      ? `Our NLP model detected a strong semantic match between your search and this item's description.`
+                      : `This item appears in your results based on category or keyword matching.`}
+                    You can submit a claim request to verify ownership with the reporter or admin.
                   </p>
                 </div>
               </div>
@@ -387,11 +350,10 @@ export default function SubmitReport() {
                             setForm({ ...form, fullName: e.target.value });
                             setErrors((prev) => ({ ...prev, fullName: false }));
                           }}
-                          className={`w-full rounded-lg border px-4 py-2 text-sm ${
-                            errors.fullName
-                              ? "border-red-500"
-                              : "border-slate-300"
-                          }`}
+                          className={`w-full rounded-lg border px-4 py-2 text-sm ${errors.fullName
+                            ? "border-red-500"
+                            : "border-slate-300"
+                            }`}
                         />
                       </div>
 
@@ -405,11 +367,10 @@ export default function SubmitReport() {
                             setForm({ ...form, mobile: e.target.value });
                             setErrors((prev) => ({ ...prev, mobile: false }));
                           }}
-                          className={`w-full rounded-lg border px-4 py-2 text-sm ${
-                            errors.mobile
-                              ? "border-red-500"
-                              : "border-slate-300"
-                          }`}
+                          className={`w-full rounded-lg border px-4 py-2 text-sm ${errors.mobile
+                            ? "border-red-500"
+                            : "border-slate-300"
+                            }`}
                         />
                       </div>
 
@@ -442,11 +403,10 @@ export default function SubmitReport() {
                               lostLocation: false,
                             }));
                           }}
-                          className={`w-full rounded-lg border px-4 py-2 text-sm ${
-                            errors.lostLocation
-                              ? "border-red-500"
-                              : "border-slate-300"
-                          }`}
+                          className={`w-full rounded-lg border px-4 py-2 text-sm ${errors.lostLocation
+                            ? "border-red-500"
+                            : "border-slate-300"
+                            }`}
                         />
                       </div>
 
@@ -479,11 +439,10 @@ export default function SubmitReport() {
                             dateFormat="MMMM d, yyyy"
                             todayButton="Today"
                             showPopperArrow={false}
-                            className={`cursor-pointer w-full rounded-lg border py-2 pl-10 pr-4 text-sm ${
-                              errors.lostDate
-                                ? "border-red-500"
-                                : "border-slate-300"
-                            }`}
+                            className={`cursor-pointer w-full rounded-lg border py-2 pl-10 pr-4 text-sm ${errors.lostDate
+                              ? "border-red-500"
+                              : "border-slate-300"
+                              }`}
                             calendarClassName="rounded-xl shadow-lg"
                           />
                         </div>
@@ -504,11 +463,10 @@ export default function SubmitReport() {
                               description: false,
                             }));
                           }}
-                          className={`w-full rounded-lg border px-4 py-2 text-sm ${
-                            errors.description
-                              ? "border-red-500"
-                              : "border-slate-300"
-                          }`}
+                          className={`w-full rounded-lg border px-4 py-2 text-sm ${errors.description
+                            ? "border-red-500"
+                            : "border-slate-300"
+                            }`}
                         />
                       </div>
                     </div>
@@ -609,11 +567,10 @@ export default function SubmitReport() {
                               identifiers: false,
                             }));
                           }}
-                          className={`w-full rounded-lg border px-4 py-2 text-sm ${
-                            errors.identifiers
-                              ? "border-red-500"
-                              : "border-slate-300"
-                          }`}
+                          className={`w-full rounded-lg border px-4 py-2 text-sm ${errors.identifiers
+                            ? "border-red-500"
+                            : "border-slate-300"
+                            }`}
                         />
                       </div>
 

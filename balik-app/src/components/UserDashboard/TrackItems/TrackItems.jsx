@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   MapPin,
@@ -9,112 +9,125 @@ import {
   Edit,
   Trash2,
   ClockFading,
+  RefreshCw,
+  AlertCircle
 } from "lucide-react";
+import { useAuth } from "../../../shared/context/AuthContext";
+import { supabase } from "../../../utils/supabaseClient";
 
 const typeStyles = {
-  Lost: "bg-red-200 text-red-600",
-  Found: "bg-green-200 text-green-600",
-  Resolved: "bg-blue-200 text-blue-600",
+  lost: "bg-red-200 text-red-600",
+  found: "bg-green-200 text-green-600",
+  resolved: "bg-blue-200 text-blue-600",
 };
 
 const statusStyles = {
-  "Report Submitted": "bg-gray-200 text-gray-700 border border-gray-400",
-  "Under Review": "bg-red-400 text-white border border-red-600",
-  "Waiting for Matches": "bg-blue-200 text-blue-900 border border-blue-300",
-  "Potential Matches Found":
-    "bg-yellow-500 text-white border border-yellow-600",
-  "Match Found": "bg-green-500 text-white border border-green-700",
-  "Report Submission Approved":
-    "bg-green-700 text-white border border-green-400",
-  "Successfully Claimed": "bg-green-700 text-white border border-green-400",
+  "pending": "bg-gray-200 text-gray-700 border border-gray-400",
+  "matching": "bg-blue-200 text-blue-900 border border-blue-300",
+  "resolved": "bg-green-700 text-white border border-green-400",
+  "claimed": "bg-green-700 text-white border border-green-400",
 };
 
 export default function TrackItems() {
+  const { user } = useAuth();
   const [filter, setFilter] = useState("All");
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editFormData, setEditFormData] = useState({
+    title: "",
     category: "",
     location: "",
     date: "",
   });
 
-  const [items, setItems] = useState([
-    {
-      id: "ITEM - 10137",
-      category: "Electronics - Camera",
-      location: "PUP-Main Library",
-      date: "2025 - 09 - 10",
-      time: "1 hour ago",
-      type: "Lost",
-      status: "Report Submitted",
-    },
-    {
-      id: "ITEM - 20146",
-      category: "Personal Belongings - ID",
-      location: "PUP-ITech Lab 105",
-      date: "2025 - 09 - 10",
-      time: "1 hour ago",
-      type: "Found",
-      status: "Under Review",
-    },
-    {
-      id: "ITEM - 30146",
-      category: "Personal Belongings - Green card holder",
-      location: "PUP-Lagoon",
-      date: "2025 - 09 - 10",
-      time: "1 hour ago",
-      type: "Found",
-      status: "Potential Matches Found",
-    },
-    {
-      id: "ITEM - 4625",
-      category: "Electronics - Camera",
-      location: "PUP-CEA",
-      date: "2025 - 09 - 10",
-      time: "1 hour ago",
-      type: "Lost",
-      status: "Waiting for Matches",
-    },
-    {
-      id: "ITEM - 50784",
-      category: "Personal Belongings - ID",
-      location: "PUP-COC",
-      date: "2025 - 09 - 10",
-      time: "1 hour ago",
-      type: "Found",
-      status: "Report Submission Approved",
-    },
-  ]);
+  const fetchItems = async () => {
+    if (!user) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('items')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (fetchError) throw fetchError;
+      setItems(data);
+    } catch (err) {
+      console.error("Error fetching tracked items:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchItems();
+  }, [user]);
+
+  const stats = {
+    total: items.length,
+    lost: items.filter(i => i.type === 'lost').length,
+    found: items.filter(i => i.type === 'found').length,
+    resolved: items.filter(i => i.status === 'resolved' || i.status === 'claimed').length,
+  };
 
   const filteredItems = items.filter((item) => {
-    if (filter === "All") return true;
-    return item.type === filter;
+    const matchesFilter = filter === "All" || item.type === filter.toLowerCase();
+    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
   });
 
   const handleEditClick = (item) => {
     setEditingId(item.id);
     setEditFormData({
+      title: item.title,
       category: item.category,
       location: item.location,
-      date: item.date,
+      date: item.date_reported,
     });
   };
 
-  const handleSaveEdit = () => {
-    // Update the item in the items array
-    setItems(
-      items.map((item) =>
-        item.id === editingId
-          ? {
-              ...item,
-              category: editFormData.category,
-              location: editFormData.location,
-              date: editFormData.date,
-            }
-          : item
-      )
-    );
-    setEditingId(null);
+  const handleSaveEdit = async () => {
+    try {
+      const { error: updateError } = await supabase
+        .from('items')
+        .update({
+          title: editFormData.title,
+          category: editFormData.category,
+          location: editFormData.location,
+          date_reported: editFormData.date
+        })
+        .eq('id', editingId);
+
+      if (updateError) throw updateError;
+
+      setItems(items.map(item =>
+        item.id === editingId ? { ...item, ...editFormData, title: editFormData.title, date_reported: editFormData.date } : item
+      ));
+      setEditingId(null);
+    } catch (err) {
+      alert("Failed to update item: " + err.message);
+    }
+  };
+
+  const handleDeleteItem = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this report?")) return;
+    try {
+      const { error: deleteError } = await supabase
+        .from('items')
+        .delete()
+        .eq('id', id);
+
+      if (deleteError) throw deleteError;
+      setItems(items.filter(item => item.id !== id));
+    } catch (err) {
+      alert("Failed to delete item: " + err.message);
+    }
   };
 
   const handleCancelEdit = () => {
@@ -139,34 +152,41 @@ export default function TrackItems() {
             Track all your reported lost and found items in one place
           </p>
 
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center gap-3">
+              <AlertCircle size={20} />
+              <p>Failed to load items: {error}</p>
+            </div>
+          )}
+
           {/* STATS */}
           <div className="grid grid-cols-4 gap-4 mb-8">
             <StatCard
               color="bg-purple-500"
               title="Total Items"
               subtitle="All reported items"
-              value="6"
+              value={stats.total}
               icon={Files}
             />
             <StatCard
               color="bg-red-500"
               title="Lost Items"
               subtitle="Currently lost"
-              value="3"
+              value={stats.lost}
               icon={Search}
             />
             <StatCard
               color="bg-green-700"
               title="Found Items"
               subtitle="Recovered items"
-              value="3"
+              value={stats.found}
               icon={FileBadge}
             />
             <StatCard
               color="bg-green-500"
               title="Resolved"
               subtitle="Items claimed"
-              value="2"
+              value={stats.resolved}
               icon={CheckCircle}
             />
           </div>
@@ -197,15 +217,48 @@ export default function TrackItems() {
                 <input
                   type="text"
                   placeholder="Search items..."
-                  className="border-none bg-transparent text-sm outline-none"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="border-none bg-transparent text-sm outline-none w-full"
                 />
               </div>
+
+              <button
+                onClick={fetchItems}
+                className="cursor-pointer flex items-center justify-center p-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 transition"
+              >
+                <RefreshCw size={18} className={loading ? "animate-spin text-blue-600" : "text-gray-600"} />
+              </button>
             </div>
 
             <div className="space-y-5">
-              {filteredItems.map((item) => (
-                <TimelineItem key={item.id} {...item} onEditClick={handleEditClick} />
-              ))}
+              {loading ? (
+                <div className="flex justify-center items-center py-20">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+                </div>
+              ) : filteredItems.length > 0 ? (
+                filteredItems.map((item) => (
+                  <TimelineItem
+                    key={item.id}
+                    id={item.id.substring(0, 8)}
+                    category={item.category}
+                    title={item.title}
+                    location={item.location}
+                    date={new Date(item.date_reported).toLocaleDateString()}
+                    time={new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    type={item.type}
+                    status={item.status}
+                    image={item.image_url}
+                    onEditClick={() => handleEditClick(item)}
+                    onDeleteClick={() => handleDeleteItem(item.id)}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-20 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                  <p className="text-gray-500 font-medium">No items found</p>
+                  <p className="text-gray-400 text-sm">Your reported items will appear here for tracking.</p>
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -225,6 +278,20 @@ export default function TrackItems() {
 
               <div className="space-y-4">
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.title}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        title: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+                  />
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Category
                   </label>
@@ -320,51 +387,65 @@ function StatCard({ color, title, subtitle, value, icon: Icon }) {
   );
 }
 
-function TimelineItem({ id, category, location, date, time, type, status, onEditClick }) {
-  const typeClass = typeStyles[type] || "bg-gray-200 text-gray-700";
-  const statusClass = statusStyles[status] || "bg-gray-200 text-gray-700";
+function TimelineItem({ id, title, category, location, date, time, type, status, image, onEditClick, onDeleteClick }) {
+  const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+  const typeClass = typeStyles[type.toLowerCase()] || "bg-gray-200 text-gray-700";
+  const statusClass = statusStyles[status.toLowerCase()] || "bg-gray-200 text-gray-700";
+  const displayStatus = status.charAt(0).toUpperCase() + status.slice(1);
 
   return (
-    <div className="flex items-center gap-4 border border-gray-300 rounded-xl p-4 shadow-md">
-      <div className="w-20 h-20 bg-gray-200 rounded-lg" />
+    <div className="flex items-center gap-4 border border-gray-300 rounded-xl p-4 shadow-md bg-white">
+      <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden border flex-shrink-0">
+        {image ? (
+          <img src={image} alt={title} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-300">
+            <Files size={32} />
+          </div>
+        )}
+      </div>
 
-      <div className="flex-1">
-        <h4 className="font-bold">{id}</h4>
-        <p className="mb-1 text-sm text-gray-800">{category}</p>
-
-        <div className="flex items-center gap-1 mb-2">
-          <MapPin size={12} className="text-gray-600" />
-          <p className="text-xs text-gray-600">{location}</p>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <h4 className="font-bold text-gray-900 truncate">{title}</h4>
+          <span className="text-[10px] text-gray-400 font-mono">#{id}</span>
         </div>
+        <p className="mb-1 text-sm text-gray-600 italic">{category}</p>
 
-        <div className="flex items-center gap-1 mb-5">
-          <Calendar size={12} className="text-gray-600" />
-          <p className="text-xs text-gray-600">{date}</p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <ClockFading size={12} className="text-gray-600" />
-          <p className="text-xs text-gray-600">{time}</p>
-
-          <div className={`px-3 py-1 rounded-lg ${typeClass}`}>
-            <p className="text-xs font-bold leading-none">{type} Item</p>
+        <div className="grid grid-cols-2 gap-2 mt-2">
+          <div className="flex items-center gap-1">
+            <MapPin size={12} className="text-gray-400" />
+            <p className="text-xs text-gray-600 truncate">{location}</p>
+          </div>
+          <div className="flex items-center gap-1">
+            <Calendar size={12} className="text-gray-400" />
+            <p className="text-xs text-gray-600">{date}</p>
+          </div>
+          <div className="flex items-center gap-1">
+            <ClockFading size={12} className="text-gray-400" />
+            <p className="text-xs text-gray-600">{time}</p>
+          </div>
+          <div className={`px-2 py-0.5 rounded text-center w-fit ${typeClass}`}>
+            <p className="text-[10px] font-bold uppercase">{typeLabel}</p>
           </div>
         </div>
       </div>
 
-      <span
-        className={`text-xs font-bold px-3 py-1 rounded-full ${statusClass}`}
-      >
-        {status}
-      </span>
+      <div className="flex flex-col items-end gap-3 h-full justify-between">
+        <span
+          className={`text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap uppercase tracking-wider ${statusClass}`}
+        >
+          {displayStatus}
+        </span>
 
-      <div className="flex gap-2">
-        <button onClick={() => onEditClick({ id, category, location, date, time, type, status })} className="cursor-pointer bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition">
-          <Edit size={16} />
-        </button>
-        <button className="cursor-pointer bg-red-600 text-white p-2 rounded-lg hover:bg-red-700 transition">
-          <Trash2 size={16} />
-        </button>
+        <div className="flex gap-2">
+          <button onClick={onEditClick} className="cursor-pointer bg-blue-50 text-blue-600 p-2 rounded-lg hover:bg-blue-100 transition border border-blue-100">
+            <Edit size={16} />
+          </button>
+          <button onClick={onDeleteClick} className="cursor-pointer bg-red-50 text-red-600 p-2 rounded-lg hover:bg-red-100 transition border border-red-100">
+            <Trash2 size={16} />
+          </button>
+        </div>
       </div>
     </div>
   );

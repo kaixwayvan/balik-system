@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Search, MapPin, History, User } from "lucide-react";
+import { Plus, User } from "lucide-react";
 
-export default function QuickActions() {
+export default function QuickActions({ onReportClick }) {
   const [showReportModal, setShowReportModal] = useState(false);
 
   const actions = [
@@ -10,7 +10,7 @@ export default function QuickActions() {
       text: "Report Item",
       color: "bg-blue-600",
       icon: Plus,
-      onClick: () => setShowReportModal(true),
+      onClick: onReportClick || (() => setShowReportModal(true)),
     },
     {
       text: "Edit Profile",

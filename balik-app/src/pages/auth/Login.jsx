@@ -15,7 +15,7 @@ export default function Login() {
 
   // VALIDATION FUNCTIONS
   const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-  const isPUPEmail = (value) => /^[^\s@]+@iskolarngbayan\.pup\.edu\.ph$/.test(value);
+  const isPUPEmail = (value) => /^[^\s@]+@iskolarngbayan\.pup\.edu\.ph$/i.test(value);
   const isMobile = (value) => /^(09|\+639)\d{9}$/.test(value);
 
   const validateForm = () => {
@@ -75,18 +75,22 @@ export default function Login() {
     try {
       setLoading(true);
       setError("");
-      
+
       const result = await loginWithPasswordSupabase(form.identifier, form.password);
-      
+
       if (result.success) {
-        // Store session if needed
-        localStorage.setItem("session", JSON.stringify(result.session));
-        navigate('/dashboard', { replace: true })
+        // Remove manual session management to let Supabase handle it
+        localStorage.removeItem("session");
+
+        // Small delay to ensure Supabase internal state is updated before navigation
+        setTimeout(() => {
+          navigate('/dashboard', { replace: true });
+        }, 100);
       } else {
         setError(result.error || 'Invalid credentials. Please try again.')
       }
-    } catch (error) {
-      setError("Invalid credentials. Please try again.");
+    } catch (err) {
+      setError(err.message || "Invalid credentials. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -173,17 +177,16 @@ export default function Login() {
                     identifier: !e.target.value
                       ? "Email or mobile number is required."
                       : isEmail(e.target.value) && !isPUPEmail(e.target.value)
-                      ? "Please use your PUP email (@iskolarngbayan.pup.edu.ph)."
-                      : !isEmail(e.target.value) && !isMobile(e.target.value)
-                      ? "Enter a valid PUP email or PH mobile number."
-                      : "",
+                        ? "Please use your PUP email (@iskolarngbayan.pup.edu.ph)."
+                        : !isEmail(e.target.value) && !isMobile(e.target.value)
+                          ? "Enter a valid PUP email or PH mobile number."
+                          : "",
                   }));
                 }}
-                className={`w-full border rounded-md px-3 py-2 focus:ring-2 focus:outline-none ${
-                  errors.identifier
-                    ? "border-red-500 focus:ring-red-500"
-                    : "focus:ring-blue-600"
-                }`}
+                className={`w-full border rounded-md px-3 py-2 focus:ring-2 focus:outline-none ${errors.identifier
+                  ? "border-red-500 focus:ring-red-500"
+                  : "focus:ring-blue-600"
+                  }`}
               />
               {errors.identifier && (
                 <p className="text-red-500 text-xs mt-1">{errors.identifier}</p>
@@ -211,15 +214,14 @@ export default function Login() {
                       password: !e.target.value
                         ? "Password is required."
                         : e.target.value.length < 6
-                        ? "Password must be at least 6 characters."
-                        : "",
+                          ? "Password must be at least 6 characters."
+                          : "",
                     }));
                   }}
-                  className={`w-full pr-10 px-3 py-2 border rounded-md focus:ring-2 focus:outline-none ${
-                    errors.password
-                      ? "border-red-500 focus:ring-red-500"
-                      : "focus:ring-blue-600"
-                  }`}
+                  className={`w-full pr-10 px-3 py-2 border rounded-md focus:ring-2 focus:outline-none ${errors.password
+                    ? "border-red-500 focus:ring-red-500"
+                    : "focus:ring-blue-600"
+                    }`}
                 />
                 <button
                   type="button"
@@ -262,16 +264,13 @@ export default function Login() {
               </Link>
             </div>
 
-            {/* Submit */}
-            <Link to="/dashboard">
-              <button
-                type="submit"
-                disabled={loading || Object.keys(errors).length > 0}
-                className="w-full bg-blue-600 text-white py-2.5 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? "Logging in..." : "Login"}
-              </button>
-            </Link>
+            <button
+              type="submit"
+              disabled={loading || Object.values(errors).some(error => error !== "")}
+              className="w-full bg-blue-600 text-white py-2.5 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
           </form>
 
           {/* Divider */}

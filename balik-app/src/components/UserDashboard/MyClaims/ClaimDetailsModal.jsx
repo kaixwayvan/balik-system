@@ -38,7 +38,7 @@ export default function ClaimDetailsModal({ isOpen, onClose, claim }) {
           <h3 className="font-semibold text-gray-800">{claim.title}</h3>
 
           <div className="flex items-center gap-3 text-gray-500 mt-1">
-            <span className="flex items-center gap-1 px-2 py-0.5 font-bold bg-gray-200 rounded-full text-sm"><Tags size={13}/>{claim.category}</span>
+            <span className="flex items-center gap-1 px-2 py-0.5 font-bold bg-gray-200 rounded-full text-sm"><Tags size={13} />{claim.category}</span>
             <span className="flex items-center gap-1 px-2 py-0.5 font-bold bg-red-100 text-red-800 rounded-full text-sm"><MapPin size={13} />
               {claim.booth}
             </span>
@@ -91,11 +91,10 @@ export default function ClaimDetailsModal({ isOpen, onClose, claim }) {
 function InfoBox({ icon: Icon, label, value, highlight }) {
   return (
     <div
-      className={`rounded-lg p-3 border text-xs ${
-        highlight
+      className={`rounded-lg p-3 border text-xs ${highlight
           ? "bg-yellow-50 border-yellow-300 text-yellow-700"
           : "bg-gray-50 border-gray-200 text-gray-700"
-      }`}
+        }`}
     >
       <div className="flex items-center gap-1 mb-3">
         {Icon && <Icon size={12} />}

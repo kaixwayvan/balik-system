@@ -1,6 +1,6 @@
 import { supabase } from "../../../utils/supabaseClient";
 
-export const signupWithEmail = async (email, password, fullName) => {
+export const signupWithEmail = async (email, password, fullName, contact) => {
   try {
     const { data, error } = await supabase.auth.signUp({
       email: email,
@@ -8,13 +8,14 @@ export const signupWithEmail = async (email, password, fullName) => {
       options: {
         data: {
           full_name: fullName,
+          mobile_number: contact,
         },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
-    
+
     if (error) throw error;
-    
+
     return {
       success: true,
       message: "Check your email for confirmation link",
@@ -32,29 +33,33 @@ export const loginWithPasswordSupabase = async (identifier, password) => {
   try {
     // Check if identifier is email or mobile
     let email = identifier;
-    
+
     if (identifier.startsWith("09") || identifier.startsWith("+63")) {
       // If mobile, fetch user by phone from database first
       const { data, error } = await supabase
-        .from("users")
-        .select("email")
-        .eq("phone", identifier)
+        .from("profiles")
+        .select("id")
+        .eq("mobile_number", identifier)
         .single();
-      
+
       if (error || !data) {
-        throw new Error("User not found");
+        throw new Error("Mobile number not registered.");
       }
-      email = data.email;
+
+      // Since we don't have the email in the profiles table, we can't easily
+      // convert mobile to email for Supabase Auth's signInWithPassword.
+      // We will advise using email for now.
+      throw new Error("Mobile login is currently being configured. Please use your PUP email to log in.");
     }
-    
+
     // Login with email and password
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
     });
-    
+
     if (error) throw error;
-    
+
     return {
       success: true,
       user: data.user,
@@ -76,9 +81,9 @@ export const loginWithGoogleSupabase = async () => {
         redirectTo: `${window.location.origin}/dashboard`,
       },
     });
-    
+
     if (error) throw error;
-    
+
     return { success: true, data };
   } catch (error) {
     return { success: false, error: error.message };

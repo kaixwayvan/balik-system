@@ -11,15 +11,17 @@ import {
   CircleStar,
 } from "lucide-react";
 import BALIKLogo from "../../../assets/BALIK.png";
+import { useAuth } from "../../context/AuthContext";
+import { User as UserIcon } from "lucide-react";
 
 export default function UserDashboardSidebar() {
+  const { user } = useAuth();
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition ${
-      isActive ? "bg-red-100 text-red-700" : "text-gray-600 hover:bg-gray-100"
+    `flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition ${isActive ? "bg-red-100 text-red-700" : "text-gray-600 hover:bg-gray-100"
     }`;
 
   return (
-    <aside className="w-72 bg-white border-r border-gray-200 p-4">
+    <aside className="w-72 bg-white border-r border-gray-200 p-4 flex flex-col h-full">
       {/* Logo */}
       <NavLink to="/" end>
         <img src={BALIKLogo} className="h-30 mb-6 mx-auto -translate-y-3 translate-y-3" alt="BALIK Logo" />
@@ -65,7 +67,7 @@ export default function UserDashboardSidebar() {
             My Activity
           </p>
           <div className="space-y-1">
-            <NavLink to="/comingsoon" className={linkClass}>
+            <NavLink to="/dashboard/claims" className={linkClass}>
               <ClipboardCheck size={18} />
               My Claims
             </NavLink>
@@ -100,6 +102,27 @@ export default function UserDashboardSidebar() {
           </div>
         </div>
       </nav>
+
+      {/* User Profile at Bottom */}
+      <div className="mt-auto pt-6 border-t border-gray-200">
+        <div className="flex items-center gap-3 px-2">
+          <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden">
+            {user?.user_metadata?.avatar_url ? (
+              <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <UserIcon size={20} className="text-gray-400" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0 text-left">
+            <p className="text-sm font-bold text-gray-900 truncate">
+              {user?.user_metadata?.full_name || "Guest User"}
+            </p>
+            <p className="text-[10px] text-gray-500 truncate uppercase tracking-wider font-semibold">
+              ISKOLAR NG BAYAN
+            </p>
+          </div>
+        </div>
+      </div>
     </aside>
   );
 }

@@ -5,33 +5,33 @@ import {
   BarChart3,
 } from "lucide-react";
 
-const stats = [
-  {
-    label: "Items Claimed",
-    value: 8,
-    icon: Trophy,
-  },
-  {
-    label: "Lost Items",
-    value: 9,
-    icon: Search,
-  },
-  {
-    label: "Found Items",
-    value: 9,
-    icon: Package,
-  },
-  {
-    label: "Total Reports",
-    value: 9,
-    icon: BarChart3,
-  },
-];
+export default function StatsCards({ data = {} }) {
+  const statsList = [
+    {
+      label: "Items Claimed",
+      value: data.resolved || 0,
+      icon: Trophy,
+    },
+    {
+      label: "Lost Items",
+      value: data.lost || 0,
+      icon: Search,
+    },
+    {
+      label: "Found Items",
+      value: data.found || 0,
+      icon: Package,
+    },
+    {
+      label: "Total Reports",
+      value: data.total || 0,
+      icon: BarChart3,
+    },
+  ];
 
-export default function StatsCards() {
   return (
     <div className="grid grid-cols-4 gap-4">
-      {stats.map((s, i) => {
+      {statsList.map((s, i) => {
         const Icon = s.icon;
 
         return (

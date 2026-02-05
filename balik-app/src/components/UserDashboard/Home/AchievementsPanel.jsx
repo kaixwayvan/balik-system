@@ -14,53 +14,63 @@ const achievements = [
     description: "Report your first found item",
     icon: Search,
     iconColor: "text-blue-600",
-    unlocked: true,
+    unlocked: false,
+    progress: 0,
+    total: 1,
   },
   {
     title: "Good Samaritan",
     description: "Help return 5 items",
     icon: Heart,
     iconColor: "text-pink-600",
-    unlocked: true,
+    unlocked: false,
+    progress: 0,
+    total: 5,
   },
   {
     title: "Community Hero",
     description: "Help return 20 items",
     icon: Trophy,
     iconColor: "text-gray-500",
-    progress: 12,
+    progress: 0,
     total: 20,
+    unlocked: false,
   },
   {
     title: "Detail Master",
     description: "Provide detailed descriptions for 10 items",
     icon: PenTool,
     iconColor: "text-purple-600",
-    unlocked: true,
+    unlocked: false,
+    progress: 0,
+    total: 10,
   },
   {
     title: "Loyal BALIK User",
     description: "Active user for 3 consecutive months",
     icon: Shield,
     iconColor: "text-gray-500",
-    progress: 1,
+    progress: 0,
     total: 3,
+    unlocked: false,
   },
   {
     title: "Persistent Seeker",
     description: "Log in and check item updates 5 times",
     icon: Repeat,
     iconColor: "text-gray-500",
-    progress: 2,
+    progress: 0,
     total: 5,
+    unlocked: false,
   },
   {
     title: "Eco Warrior",
     description: "Choose digital reporting instead of printing posters",
     icon: Leaf,
     iconColor: "text-gray-500",
-    progress: 1,
+    progress: 0,
     total: 3,
+    unlocked: false,
   },
 ];
 
@@ -77,9 +87,8 @@ export default function AchievementsPanel() {
           return (
             <div
               key={i}
-              className={`border rounded-lg p-3 ${
-                isUnlocked ? "border-green-400" : "border-gray-200"
-              }`}
+              className={`border rounded-lg p-3 ${isUnlocked ? "border-green-400" : "border-gray-200"
+                }`}
             >
               <div className="flex gap-3 items-start">
                 {/* Icon */}
