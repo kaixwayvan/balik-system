@@ -70,7 +70,10 @@ export default function ActiveReports() {
   const categories = ["ID", "Wallet", "Electronics", "Others"];
 
   const fetchReports = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     setError(null);

@@ -24,7 +24,10 @@ export default function FoundItems() {
   const [previewUrls, setPreviewUrls] = useState([]);
 
   const fetchReports = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {

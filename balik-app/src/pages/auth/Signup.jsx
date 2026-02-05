@@ -298,7 +298,7 @@ export default function Signup() {
             {/* reCAPTCHA */}
             <div className="flex justify-center">
               <ReCAPTCHA
-                sitekey="6LcsPUUsAAAAAB_dTfyEs0LH_itBbNSjetrd9uI7"
+                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
                 onChange={(value) => {
                   setCaptchaValue(value);
                   setErrors((prev) => ({ ...prev, captcha: "" }));

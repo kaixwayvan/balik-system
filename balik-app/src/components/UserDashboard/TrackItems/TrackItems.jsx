@@ -44,7 +44,10 @@ export default function TrackItems() {
   });
 
   const fetchItems = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
