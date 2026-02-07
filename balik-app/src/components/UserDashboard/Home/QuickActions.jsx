@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Plus, Search, MapPin, History, User } from "lucide-react";
 
 export default function QuickActions() {
   const [showReportModal, setShowReportModal] = useState(false);
+  const navigate = useNavigate();
 
   const actions = [
     {
@@ -16,6 +18,7 @@ export default function QuickActions() {
       text: "Edit Profile",
       color: "bg-red-700",
       icon: User,
+      onClick:() => navigate("/dashboard/profile"),
     },
   ];
 

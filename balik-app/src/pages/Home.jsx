@@ -689,7 +689,7 @@ function Home() {
     </section>
 
     {/* SECTION 9 - FAQ SECTION */}
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-white" id="faqs">
       <div className="max-w-5xl mx-auto px-6">
         {/* Header */}
         <div className="text-center">

@@ -11,6 +11,7 @@ import DashboardReport from "./components/UserDashboard/ActiveReports/ActiveRepo
 import DashboardFound from "./components/UserDashboard/FoundItems/FoundItems"
 import DashboardClaims from "./components/UserDashboard/MyClaims/MyClaims"
 import DashboardHistory from "./components/UserDashboard/ActivityHistory/ActivityHistory"
+import DashboardProfile from "./components/UserDashboard/UserProfile/UserProfile"
 
 import UserDashboardLayout from "./shared/components/layouts/UserDashboardLayout";
 import SubmitReport from "./components/UserDashboard/Home/SubmitReport";
@@ -39,6 +40,7 @@ function App() {
         <Route path="/dashboard/found" element={<DashboardFound />} />
         <Route path="/dashboard/myclaims" element={<DashboardClaims />} />
         <Route path="/dashboard/history" element={<DashboardHistory />} />
+        <Route path="/dashboard/profile" element={<DashboardProfile />} />
       </Route>
     </Routes>
   );

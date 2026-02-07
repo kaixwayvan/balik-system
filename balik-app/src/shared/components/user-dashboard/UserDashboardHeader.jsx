@@ -42,7 +42,7 @@ export default function UserDashboardHeader() {
             onClick={() => setIsOpen(!isOpen)}
             className="flex items-center gap-3 cursor-pointer"
           >
-            <div className="w-9 h-9 rounded-full bg-slate-300" />
+            <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12" className="w-10 h-10 rounded-full object-cover" />
             <div className="text-left text-sm">
               <p className="font-medium">Mike Wazowski</p>
               <p className="text-xs text-gray-500">Registered User</p>
@@ -58,7 +58,7 @@ export default function UserDashboardHeader() {
             <div className="absolute right-0 mt-7 w-72 bg-white rounded-xl shadow-xl border border-gray-300 overflow-hidden z-50">
               {/* Profile Header */}
               <div className="flex items-center gap-3 p-4 border-b border-gray-300">
-                <div className="w-10 h-10 rounded-full bg-slate-300" />
+                <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12" className="w-10 h-10 rounded-full object-cover" />
                 <div>
                   <p className="font-semibold">Mike Wazowski</p>
                   <p className="text-sm text-gray-500">Registered User</p>
@@ -67,11 +67,13 @@ export default function UserDashboardHeader() {
 
               {/* Menu */}
               <div className="p-2">
-                <MenuItem
-                  icon={User}
-                  label="View Profile"
-                  className="cursor-pointer"
-                />
+                <Link to="/dashboard/profile">
+                  <MenuItem
+                    icon={User}
+                    label="View Profile"
+                    className="cursor-pointer"
+                  />
+                </Link>
                 <MenuItem icon={Bell} label="Notification" />
                 <MenuItem icon={HelpCircle} label="Help Center" />
                 <MenuItem icon={Settings} label="Settings" />
