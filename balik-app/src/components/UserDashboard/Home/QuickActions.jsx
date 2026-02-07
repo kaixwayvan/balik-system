@@ -4,6 +4,7 @@ import { Plus, User } from "lucide-react";
 
 export default function QuickActions({ onReportClick }) {
   const [showReportModal, setShowReportModal] = useState(false);
+  const navigate = useNavigate();
 
   const actions = [
     {
@@ -16,6 +17,7 @@ export default function QuickActions({ onReportClick }) {
       text: "Edit Profile",
       color: "bg-red-700",
       icon: User,
+      onClick:() => navigate("/dashboard/profile"),
     },
   ];
 
