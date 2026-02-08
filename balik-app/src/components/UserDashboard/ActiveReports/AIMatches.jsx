@@ -2,10 +2,9 @@ import { Brain, MapPin, CircleCheckBig } from "lucide-react";
 import Id from "../../../assets/home-assets/img-items/id.png";
 
 export default function AIMatches({ onClaim }) {
-  const matches = [
-    { confidence: 92, location: "PUP-ITECH", reporter: "Coco Martin" },
-    { confidence: 78, location: "PUP-ITECH 2nd floor", reporter: "Kim Mingyu" },
-  ];
+  const matches = [];
+
+  if (matches.length === 0) return null;
 
   return (
     <div className="mt-6 bg-yellow-100 border border-yellow-300 rounded-xl p-5">

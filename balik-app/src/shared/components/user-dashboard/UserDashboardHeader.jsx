@@ -81,13 +81,11 @@ export default function UserDashboardHeader() {
 
               {/* Menu */}
               <div className="p-2">
-                <Link to="/dashboard/profile">
-                  <MenuItem
-                    icon={User}
-                    label="View Profile"
-                    className="cursor-pointer"
-                  />
-                </Link>
+                <MenuItem
+                  icon={User}
+                  label="View Profile"
+                  className="cursor-pointer"
+                />
                 <MenuItem icon={Bell} label="Notification" />
                 <MenuItem icon={HelpCircle} label="Help Center" />
                 <MenuItem icon={Settings} label="Settings" />

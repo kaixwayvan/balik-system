@@ -12,87 +12,9 @@ import {
 import ClaimQrModal from "./ClaimQrModal";
 import ClaimDetailsModal from "./ClaimDetailsModal";
 
-import BlackWallet from "../../../assets/home-assets/img-items/wallet-black2.png";
-import BlueTumbler from "../../../assets/home-assets/img-items/bottle-blue.png";
-import Umbrella from "../../../assets/home-assets/img-items/umbrella.png";
-import Eyeglass from "../../../assets/home-assets/img-items/eyeglass.png";
-
 const TABS = ["All Claims", "Pending", "Approved", "Released"];
 
-const claimsData = [
-  {
-    id: 1,
-    title: "Black Leather Wallet",
-    category: "Wallet",
-    location: "ITECH Lost and Found Booth",
-    description: "YSL Black Leather Wallet containing credit cards and ID",
-    foundAt: "PUP Main Lagoon",
-    date: "2025-11-28",
-    points: 50,
-    status: "Approved",
-    image: BlackWallet,
-
-    booth: "ITECH Lost and Found Booth",
-    dateFound: "November 28, 2025",
-    dateClaimed: "November 29, 2025",
-    claimId: "CLM001",
-    qrCode: "QR-CLM001-2025",
-  },
-  {
-    id: 2,
-    title: "Blue Tumbler",
-    category: "Tumbler",
-    location: "Main Lost and Found booth / Information desk",
-    description: "Blue stainless steel tumbler with PUP sticker",
-    foundAt: "Main building - Library",
-    date: "2025-11-28",
-    points: 30,
-    status: "Released",
-    image: BlueTumbler,
-
-    booth: "PUP Main Lost and Found Booth",
-    dateFound: "November 28, 2025",
-    dateClaimed: "November 29, 2025",
-    claimId: "CLM002",
-    qrCode: "QR-CLM002-2025",
-  },
-  {
-    id: 3,
-    title: "Red Umbrella",
-    category: "Umbrella",
-    location: "USSO Office",
-    description: "Red folding umbrella with wooden handle",
-    foundAt: "USSO Office",
-    date: "2025-11-28",
-    points: 20,
-    status: "Pending",
-    image: Umbrella,
-
-    booth: "PUP Main Lost and Found Booth",
-    dateFound: "November 28, 2025",
-    dateClaimed: "November 29, 2025",
-    claimId: "CLM003",
-    qrCode: "QR-CLM003-2025",
-  },
-  {
-    id: 4,
-    title: "Black Eyeglasses",
-    category: "Accessories",
-    location: "ITECH Lost and Found Booth",
-    description: "Black frame eyeglasses in brown case",
-    foundAt: "Main Building Restroom",
-    date: "2025-11-28",
-    points: 0,
-    status: "Rejected",
-    image: Eyeglass,
-
-    booth: "ITECH Lost and Found Booth",
-    dateFound: "November 28, 2025",
-    dateClaimed: "November 29, 2025",
-    claimId: "CLM004",
-    qrCode: "QR-CLM004-2025",
-  },
-];
+const claimsData = [];
 
 const statusStyles = {
   Approved: "bg-green-100 text-green-700",
@@ -126,11 +48,10 @@ export default function MyClaims() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-medium ${
-              activeTab === tab
-                ? "bg-red-600 text-white hover:bg-red-800"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
+            className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-medium ${activeTab === tab
+              ? "bg-red-600 text-white hover:bg-red-800"
+              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
           >
             {tab}
           </button>
@@ -139,94 +60,100 @@ export default function MyClaims() {
 
       {/* Claims List */}
       <div className="space-y-5">
-        {filteredClaims.map((item) => (
-          <div
-            key={item.id}
-            className="bg-white rounded-xl shadow-sm p-5 flex gap-5"
-          >
-            {/* Image */}
-            <img
-              src={item.image}
-              alt={item.title}
-              className="w-28 h-28 rounded-lg object-cover bg-gray-100"
-            />
+        {filteredClaims.length > 0 ? (
+          filteredClaims.map((item) => (
+            <div
+              key={item.id}
+              className="bg-white rounded-xl shadow-sm p-5 flex gap-5"
+            >
+              {/* Image */}
+              <img
+                src={item.image}
+                alt={item.title}
+                className="w-28 h-28 rounded-lg object-cover bg-gray-100"
+              />
 
-            {/* Info */}
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <h2 className="font-semibold text-gray-800">{item.title}</h2>
-                <span
-                  className={`px-3 py-1 text-xs rounded-full font-medium ${statusStyles[item.status]}`}
-                >
-                  {item.status}
-                </span>
-              </div>
+              {/* Info */}
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <h2 className="font-semibold text-gray-800">{item.title}</h2>
+                  <span
+                    className={`px-3 py-1 text-xs rounded-full font-medium ${statusStyles[item.status]}`}
+                  >
+                    {item.status}
+                  </span>
+                </div>
 
-              <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                <p className="text-sm text-gray-600 mt-1">{item.description}</p>
 
-              <div className="flex flex-wrap gap-4 text-xs text-gray-500 mt-3">
-                <span className="flex items-center gap-1">
-                  <MapPin size={14} />
-                  Found at: <b>{item.foundAt}</b>
-                </span>
-                <span className="flex items-center gap-1">
-                  <Calendar size={14} />
-                  {item.date}
-                </span>
-                <span className="font-bold text-orange-500">
-                  +{item.points} points
-                </span>
-              </div>
+                <div className="flex flex-wrap gap-4 text-xs text-gray-500 mt-3">
+                  <span className="flex items-center gap-1">
+                    <MapPin size={14} />
+                    Found at: <b>{item.foundAt}</b>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Calendar size={14} />
+                    {item.date}
+                  </span>
+                  <span className="font-bold text-orange-500">
+                    +{item.points} points
+                  </span>
+                </div>
 
-              {/* Actions */}
-              <div className="flex gap-3 mt-4">
-                {item.status === "Approved" && (
+                {/* Actions */}
+                <div className="flex gap-3 mt-4">
+                  {item.status === "Approved" && (
+                    <button
+                      onClick={() => {
+                        setSelectedClaim(item);
+                        setShowQrModal(true);
+                      }}
+                      className="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm bg-red-600 hover:bg-red-800 text-white rounded-lg"
+                    >
+                      View QR Code
+                    </button>
+                  )}
+
+                  {item.status === "Released" && (
+                    <button className="cursor-not-allowed flex items-center gap-2 px-4 py-2 text-sm bg-green-100 text-green-700 rounded-lg">
+                      <CheckCircle size={16} />
+                      Item successfully collected
+                    </button>
+                  )}
+
+                  {item.status === "Pending" && (
+                    <button className="cursor-not-allowed flex items-center gap-2 px-4 py-2 text-sm bg-yellow-100 text-yellow-700 rounded-lg">
+                      <Clock size={16} />
+                      Waiting for admin approval
+                    </button>
+                  )}
+
+                  {item.status === "Rejected" && (
+                    <button className="cursor-not-allowed flex items-center gap-2 px-4 py-2 text-sm bg-red-100 text-red-700 rounded-lg">
+                      <XCircle size={16} />
+                      Claim rejected – Verification Failed
+                    </button>
+                  )}
+
                   <button
                     onClick={() => {
                       setSelectedClaim(item);
-                      setShowQrModal(true);
+                      setShowDetails(true);
                     }}
-                    className="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm bg-red-600 hover:bg-red-800 text-white rounded-lg"
+                    className="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg"
                   >
-                    View QR Code
+                    <Eye size={16} />
+                    View details
                   </button>
-                )}
-
-                {item.status === "Released" && (
-                  <button className="cursor-not-allowed flex items-center gap-2 px-4 py-2 text-sm bg-green-100 text-green-700 rounded-lg">
-                    <CheckCircle size={16} />
-                    Item successfully collected
-                  </button>
-                )}
-
-                {item.status === "Pending" && (
-                  <button className="cursor-not-allowed flex items-center gap-2 px-4 py-2 text-sm bg-yellow-100 text-yellow-700 rounded-lg">
-                    <Clock size={16} />
-                    Waiting for admin approval
-                  </button>
-                )}
-
-                {item.status === "Rejected" && (
-                  <button className="cursor-not-allowed flex items-center gap-2 px-4 py-2 text-sm bg-red-100 text-red-700 rounded-lg">
-                    <XCircle size={16} />
-                    Claim rejected – Verification Failed
-                  </button>
-                )}
-
-                <button
-                  onClick={() => {
-                    setSelectedClaim(item);
-                    setShowDetails(true);
-                  }}
-                  className="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg"
-                >
-                  <Eye size={16} />
-                  View details
-                </button>
+                </div>
               </div>
             </div>
+          ))
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm p-10 text-center">
+            <p className="text-gray-500 font-medium italic">You haven't claimed any items yet.</p>
           </div>
-        ))}
+        )}
       </div>
 
       {/* Claim Process Info */}

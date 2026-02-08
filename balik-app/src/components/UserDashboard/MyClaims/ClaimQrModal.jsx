@@ -30,18 +30,18 @@ export default function ClaimQrModal({ isOpen, onClose, claim }) {
             <div className="flex-col bg-white w-36 h-36 mx-auto rounded-lg shadow flex items-center justify-center mb-4">
               {/* Replace with real QR */}
               <QrCode2TwoToneIcon sx={{ fontSize: 85 }} />
-              <p className="text-xs">QR-CLM001-2024</p>
+              <p className="text-xs">{claim.qrCode}</p>
             </div>
 
             <p className="font-semibold text-gray-800">
               Show this QR Code at the Booth
             </p>
             <p className="text-xs text-gray-600 mt-1">
-              Present this QR code to the staff at <b>ITECH Booth</b> to collect
+              Present this QR code to the staff at <b>{claim.booth}</b> to collect
               your item
             </p>
             <p className="text-xs text-gray-500 mt-1">
-              Booth Location: <b>ITECH Building</b>
+              Booth Location: <b>{claim.location}</b>
             </p>
           </div>
         </div>
@@ -60,9 +60,9 @@ export default function ClaimQrModal({ isOpen, onClose, claim }) {
           <h3 className="font-semibold text-gray-800">{claim.title}</h3>
 
           <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-            <span>Wallet</span>
+            <span>{claim.category}</span>
             <span className="px-2 py-0.5 bg-red-100 text-red-600 rounded-full">
-              ITECH Lost and Found Booth
+              {claim.booth}
             </span>
           </div>
 
@@ -85,26 +85,26 @@ export default function ClaimQrModal({ isOpen, onClose, claim }) {
             <InfoBox
               icon={MapPin}
               label="Found Location"
-              value="PUP Main - Lagoon"
+              value={claim.foundAt}
             />
             <InfoBox
               icon={Calendar}
               label="Date Found"
-              value="November 28, 2025"
+              value={claim.dateFound}
             />
             <InfoBox
               icon={Calendar}
               label="Date Claimed"
-              value="November 29, 2025"
+              value={claim.dateClaimed}
             />
-            <InfoBox icon={Hash} label="Claim ID" value="CLM001" />
+            <InfoBox icon={Hash} label="Claim ID" value={claim.claimId} />
             <InfoBox
               icon={Trophy}
               label="Points Earned"
-              value="+50"
+              value={`+${claim.points}`}
               highlight
             />
-            <InfoBox icon={QrCode} label="QR Code" value="QR-CLM001-2025" />
+            <InfoBox icon={QrCode} label="QR Code" value={claim.qrCode} />
           </div>
 
           {/* Close Button */}
@@ -123,7 +123,7 @@ export default function ClaimQrModal({ isOpen, onClose, claim }) {
             </div>
             <ol className="list-decimal pl-6 list-inside space-y-1">
               <li>Save or screenshot your QR code</li>
-              <li>Visit the ITECH Booth during office hours</li>
+              <li>Visit the <b>{claim.booth}</b> during office hours</li>
               <li>Show your QR code to the booth staff</li>
               <li>Verify your identity and collect your item</li>
               <li>Points will be automatically added to your account</li>
@@ -138,11 +138,10 @@ export default function ClaimQrModal({ isOpen, onClose, claim }) {
 function InfoBox({ icon: Icon, label, value, highlight }) {
   return (
     <div
-      className={`rounded-lg p-3 border text-xs ${
-        highlight
+      className={`rounded-lg p-3 border text-xs ${highlight
           ? "bg-yellow-50 border-yellow-300 text-yellow-700"
           : "bg-gray-50 border-gray-200 text-gray-700"
-      }`}
+        }`}
     >
       <div className="flex items-center gap-1 mb-3">
         {Icon && <Icon size={12} />}

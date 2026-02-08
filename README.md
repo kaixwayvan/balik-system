@@ -1,2 +1,0 @@
-# balik-system
-prot

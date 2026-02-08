@@ -5,24 +5,12 @@ import App from './App.jsx'
 import { BrowserRouter } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-
-if (!googleClientId) {
-  console.warn("VITE_GOOGLE_CLIENT_ID is missing. Google Login will not work.");
-}
-
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {googleClientId ? (
-      <GoogleOAuthProvider clientId={googleClientId}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </GoogleOAuthProvider>
-    ) : (
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <BrowserRouter>
         <App />
       </BrowserRouter>
-    )}
+    </GoogleOAuthProvider>
   </StrictMode>
 )

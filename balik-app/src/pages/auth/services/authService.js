@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL
+const API_BASE = "http://localhost/BALIK/balik-system/balik-app/backend"
 
 export const loginWithGoogle = async (accessToken) => {
   return axios.post(`${API_BASE}/google.php`, {
@@ -38,5 +38,5 @@ export const getCurrentUser = () => {
 export const logout = () => {
   try {
     localStorage.removeItem("balik_user")
-  } catch (e) { }
+  } catch (e) {}
 }

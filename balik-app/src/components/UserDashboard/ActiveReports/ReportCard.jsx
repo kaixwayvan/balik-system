@@ -6,7 +6,7 @@ import {
   ScanEye,
 } from "lucide-react";
 
-import { STATUS_STYLES } from "./constants";
+import { STATUS_STYLES } from "./ActiveReports";
 import AIMatches from "./AIMatches";
 
 export default function ReportCard({
@@ -78,8 +78,9 @@ export default function ReportCard({
                 View 2 AI Matches
                 <ChevronDown
                   size={16}
-                  className={`transition-transform ${isOpen ? "rotate-180" : ""
-                    }`}
+                  className={`transition-transform ${
+                    isOpen ? "rotate-180" : ""
+                  }`}
                 />
               </button>
             )}
