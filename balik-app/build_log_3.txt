@@ -1,0 +1,43 @@
+
+> balik-app@0.0.0 build
+> vite build
+
+[36mvite v7.3.0 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 2450 modules transformed.
+[33mnode_modules/onnxruntime-web/dist/ort-web.min.js (6:62546): Use of eval in "node_modules/onnxruntime-web/dist/ort-web.min.js" is strongly discouraged as it poses security risks and may cause issues with minification.[39m
+[33m[plugin vite:reporter] 
+(!) C:/xampp/htdocs/BALIK/balik-system/balik-app/src/pages/auth/services/supabaseAuthService.js is dynamically imported by C:/xampp/htdocs/BALIK/balik-system/balik-app/src/shared/components/user-dashboard/UserDashboardHeader.jsx but also statically imported by C:/xampp/htdocs/BALIK/balik-system/balik-app/src/pages/auth/Login.jsx, C:/xampp/htdocs/BALIK/balik-system/balik-app/src/pages/auth/Signup.jsx, dynamic import will not move module into another chunk.
+[39m
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                          [39m[1m[2m    0.49 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[32massets/umbrella-D2oajlDa.png        [39m[1m[2m   21.40 kB[22m[1m[22m
+[2mdist/[22m[32massets/camera-0dHO6uUc.png          [39m[1m[2m   26.92 kB[22m[1m[22m
+[2mdist/[22m[32massets/id-BNklOaj9.png              [39m[1m[2m   28.36 kB[22m[1m[22m
+[2mdist/[22m[32massets/bottle-blue-BQPuANmF.png     [39m[1m[2m   29.52 kB[22m[1m[22m
+[2mdist/[22m[32massets/wallet-green-B0loHsko.png    [39m[1m[2m   30.49 kB[22m[1m[22m
+[2mdist/[22m[32massets/airpods-CJuIcChM.png         [39m[1m[2m   33.15 kB[22m[1m[22m
+[2mdist/[22m[32massets/eyeglass-d1mpYo2B.png        [39m[1m[2m   34.05 kB[22m[1m[22m
+[2mdist/[22m[32massets/wallet-black2-DONeusSi.png   [39m[1m[2m   36.90 kB[22m[1m[22m
+[2mdist/[22m[32massets/BALIK-icon-CVY41x02.png      [39m[1m[2m   93.06 kB[22m[1m[22m
+[2mdist/[22m[32massets/BALIK-CUlUhodf.png           [39m[1m[2m  114.71 kB[22m[1m[22m
+[2mdist/[22m[32massets/ring-C75D0AaC.png            [39m[1m[2m  137.79 kB[22m[1m[22m
+[2mdist/[22m[32massets/wallet-black-DsWAGvf8.png    [39m[1m[2m  146.83 kB[22m[1m[22m
+[2mdist/[22m[32massets/bag-green-2IvpOQer.png       [39m[1m[2m  154.58 kB[22m[1m[22m
+[2mdist/[22m[32massets/bottle-oI829nXZ.png          [39m[1m[2m  155.56 kB[22m[1m[22m
+[2mdist/[22m[32massets/glasses-B9hwoKzl.png         [39m[1m[2m  199.30 kB[22m[1m[22m
+[2mdist/[22m[32massets/iphone-nvmO8ZEn.png          [39m[1m[2m  201.10 kB[22m[1m[22m
+[2mdist/[22m[32massets/wallet-DwFdcnxV.png          [39m[1m[2m  224.77 kB[22m[1m[22m
+[2mdist/[22m[32massets/keys-DVSJdMfp.png            [39m[1m[2m  264.69 kB[22m[1m[22m
+[2mdist/[22m[32massets/bag-B1viyGQ4.png             [39m[1m[2m  267.41 kB[22m[1m[22m
+[2mdist/[22m[32massets/studentsupport-DvX1crCf.png  [39m[1m[2m  745.81 kB[22m[1m[22m
+[2mdist/[22m[32massets/bg-header-MdPPGniv.png       [39m[1m[2m3,186.40 kB[22m[1m[22m
+[2mdist/[22m[35massets/index-DeKiEhmi.css           [39m[1m[2m   71.07 kB[22m[1m[22m[2m │ gzip:  12.21 kB[22m
+[2mdist/[22m[36massets/index-BYwqNf4r.js            [39m[1m[33m1,800.70 kB[39m[22m[2m │ gzip: 457.89 kB[22m
+[33m
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[32m✓ built in 7.61s[39m
