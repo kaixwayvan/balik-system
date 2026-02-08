@@ -79,14 +79,14 @@ export default function Login() {
       const result = await loginWithPasswordSupabase(form.identifier, form.password);
 
       if (result.success) {
-        // Small delay to ensure Supabase internal state is updated before navigation
-        setTimeout(() => {
-          navigate('/dashboard', { replace: true });
-        }, 100);
+        // Clear any previous error and navigate immediately
+        setError("");
+        navigate('/dashboard', { replace: true });
       } else {
-        setError(result.error || 'Invalid credentials. Please try again.')
+        setError(result.error || 'Invalid credentials. Please try again.');
       }
     } catch (err) {
+      console.error("Login Error:", err);
       setError(err.message || "Invalid credentials. Please try again.");
     } finally {
       setLoading(false);

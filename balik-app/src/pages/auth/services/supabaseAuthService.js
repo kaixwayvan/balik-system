@@ -10,11 +10,22 @@ export const signupWithEmail = async (email, password, fullName, contact) => {
           full_name: fullName,
           mobile_number: contact,
         },
-        emailRedirectTo: `${import.meta.env.VITE_APP_URL || window.location.origin}/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 
     if (error) throw error;
+
+    // If session exists (email confirmation disabled), sync profile immediately
+    if (data?.user && data?.session) {
+      await supabase.from('profiles').upsert({
+        id: data.user.id,
+        full_name: fullName,
+        mobile_number: contact,
+        email: email,
+        updated_at: new Date(),
+      });
+    }
 
     return {
       success: true,
@@ -31,28 +42,25 @@ export const signupWithEmail = async (email, password, fullName, contact) => {
 
 export const loginWithPasswordSupabase = async (identifier, password) => {
   try {
-    // Check if identifier is email or mobile
     let email = identifier;
 
+    // Check if identifier is a mobile number
     if (identifier.startsWith("09") || identifier.startsWith("+63")) {
-      // If mobile, fetch user by phone from database first
-      const { data, error } = await supabase
+      // Fetch the email associated with this mobile number from profiles
+      const { data, error: profileError } = await supabase
         .from("profiles")
-        .select("id")
+        .select("email")
         .eq("mobile_number", identifier)
         .single();
 
-      if (error || !data) {
-        throw new Error("Mobile number not registered.");
+      if (profileError || !data?.email) {
+        throw new Error("Mobile number not registered or no email associated.");
       }
 
-      // Since we don't have the email in the profiles table, we can't easily
-      // convert mobile to email for Supabase Auth's signInWithPassword.
-      // We will advise using email for now.
-      throw new Error("Mobile login is currently being configured. Please use your PUP email to log in.");
+      email = data.email;
     }
 
-    // Login with email and password
+    // Login with the resolved email and password
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
@@ -78,7 +86,7 @@ export const loginWithGoogleSupabase = async () => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${import.meta.env.VITE_APP_URL || window.location.origin}/dashboard`,
+        redirectTo: `${window.location.origin}/dashboard`,
       },
     });
 

@@ -84,21 +84,8 @@ export default function UserDashboardSidebar() {
           <p className="text-lg font-extrabold text-yellow-700 mb-2 uppercase">
             Achievements
           </p>
-
-          <div className="cursor-not-allowed flex items-start gap-3 bg-yellow-100 p-3 rounded-lg mb-2">
-            <Award className="text-yellow-600 mt-1" size={20} />
-            <div>
-              <p className="font-medium text-yellow-700">Helper Badge</p>
-              <p className="text-xs text-yellow-600">5 items helped return</p>
-            </div>
-          </div>
-
-          <div className="cursor-not-allowed flex items-start gap-3 bg-blue-100 p-3 rounded-lg">
-            <CircleStar className="text-blue-800 mt-1" size={20} />
-            <div>
-              <p className="font-medium text-blue-800">Active Reporter</p>
-              <p className="text-xs text-blue-800">10+ reports submitted</p>
-            </div>
+          <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+            <p className="text-xs text-gray-500 text-center italic">No achievements yet. Keep helping the community to earn badges!</p>
           </div>
         </div>
       </nav>
@@ -113,14 +100,7 @@ export default function UserDashboardSidebar() {
               <UserIcon size={20} className="text-gray-400" />
             )}
           </div>
-          <div className="flex-1 min-w-0 text-left">
-            <p className="text-sm font-bold text-gray-900 truncate">
-              {user?.user_metadata?.full_name || "Guest User"}
-            </p>
-            <p className="text-[10px] text-gray-500 truncate uppercase tracking-wider font-semibold">
-              ISKOLAR NG BAYAN
-            </p>
-          </div>
+
         </div>
       </div>
     </aside>

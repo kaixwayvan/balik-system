@@ -19,7 +19,7 @@ import { FaPeopleGroup, FaHandsHoldingCircle } from "react-icons/fa6";
 export default function UserProfile() {
   const [activeTab, setActiveTab] = useState("achievements");
   const [achievementView, setAchievementView] = useState("challenges");
-  const [activeSection, setActiveSection] = useState(null);
+
 
   return (
     <div className="p-6">
@@ -71,22 +71,20 @@ export default function UserProfile() {
         <div className="flex gap-6 border-b mt-6">
           <button
             onClick={() => setActiveTab("achievements")}
-            className={`cursor-pointer pb-2 px-4 rounded-t-xl py-2 text-sm font-medium hover:bg-gray-200 ${
-              activeTab === "achievements"
+            className={`cursor-pointer pb-2 px-4 rounded-t-xl py-2 text-sm font-medium hover:bg-gray-200 ${activeTab === "achievements"
                 ? "border-b-2 border-black text-black"
                 : "text-gray-400"
-            }`}
+              }`}
           >
             Achievements
           </button>
 
           <button
             onClick={() => setActiveTab("settings")}
-            className={`cursor-pointer pb-2 px-4 py-2 rounded-t-xl text-sm font-medium hover:bg-gray-200 ${
-              activeTab === "settings"
+            className={`cursor-pointer pb-2 px-4 py-2 rounded-t-xl text-sm font-medium hover:bg-gray-200 ${activeTab === "settings"
                 ? "border-b-2 border-black text-black"
                 : "text-gray-400"
-            }`}
+              }`}
           >
             Account Settings
           </button>
@@ -154,22 +152,20 @@ function Achievements({ achievementView, setAchievementView }) {
       <div className="flex gap-3 items-center">
         <button
           onClick={() => setAchievementView("challenges")}
-          className={`cursor-pointer px-8 py-2 rounded-lg text-sm font-medium ${
-            achievementView === "challenges"
+          className={`cursor-pointer px-8 py-2 rounded-lg text-sm font-medium ${achievementView === "challenges"
               ? "bg-indigo-800 text-white"
               : "border text-gray-600"
-          }`}
+            }`}
         >
           Challenges
         </button>
 
         <button
           onClick={() => setAchievementView("certificates")}
-          className={`cursor-pointer px-8 py-2 rounded-lg text-sm font-medium ${
-            achievementView === "certificates"
+          className={`cursor-pointer px-8 py-2 rounded-lg text-sm font-medium ${achievementView === "certificates"
               ? "bg-indigo-800 text-white"
               : "border text-gray-600"
-          }`}
+            }`}
         >
           Certificates
         </button>
@@ -233,11 +229,10 @@ function AccountSettings() {
       <div className="w-64 h-46 bg-white rounded-xl border border-gray-300 shadow-md py-4 space-y-2">
         <button
           onClick={() => setActiveSection("profile")}
-          className={`cursor-pointer flex items-center relative w-full flex items-center gap-2 pl-6 pr-4 pl-9 py-3 text-sm ${
-            activeSection === "profile"
+          className={`cursor-pointer flex items-center relative w-full flex items-center gap-2 pl-6 pr-4 pl-9 py-3 text-sm ${activeSection === "profile"
               ? "bg-indigo-100 text-indigo-700 font-bold"
               : "hover:bg-gray-100"
-          }`}
+            }`}
         >
           {activeSection === "profile" && (
             <span className="absolute left-0 top-0 bottom-0 w-6 bg-indigo-300" />
@@ -247,11 +242,10 @@ function AccountSettings() {
 
         <button
           onClick={() => setActiveSection("security")}
-          className={`cursor-pointer relative w-full flex items-center gap-3 pl-6 pr-4 pl-9 py-3 text-sm ${
-            activeSection === "security"
+          className={`cursor-pointer relative w-full flex items-center gap-3 pl-6 pr-4 pl-9 py-3 text-sm ${activeSection === "security"
               ? "bg-indigo-100 text-indigo-700 font-bold"
               : "hover:bg-gray-100"
-          }`}
+            }`}
         >
           {activeSection === "security" && (
             <span className="absolute left-0 top-0 bottom-0 w-6 bg-indigo-300" />
@@ -261,11 +255,10 @@ function AccountSettings() {
 
         <button
           onClick={() => setActiveSection("preferences")}
-          className={`cursor-pointer relative w-full flex items-center gap-3 pl-6 pr-4 pl-9 py-3 text-sm ${
-            activeSection === "preferences"
+          className={`cursor-pointer relative w-full flex items-center gap-3 pl-6 pr-4 pl-9 py-3 text-sm ${activeSection === "preferences"
               ? "bg-indigo-100 text-indigo-700 font-bold"
               : "hover:bg-gray-100"
-          }`}
+            }`}
         >
           {activeSection === "preferences" && (
             <span className="absolute left-0 top-0 bottom-0 w-6 bg-indigo-300" />
@@ -303,7 +296,7 @@ function StatCard({ icon, title, subtitle }) {
   );
 }
 
-function Badge({ label, icon, color }) {
+function Badge({ label, icon }) {
   return (
     <div
       className={`flex items-center gap-1 px-5 py-3 bg-slate-200 border border-slate-300 rounded-lg text-sm font-medium`}
@@ -579,14 +572,12 @@ function ThemeToggle() {
   return (
     <div
       onClick={() => setDarkMode(!darkMode)}
-      className={`w-11 h-6 rounded-full relative cursor-pointer transition-colors ${
-        darkMode ? "bg-gray-700" : "bg-gray-300"
-      }`}
+      className={`w-11 h-6 rounded-full relative cursor-pointer transition-colors ${darkMode ? "bg-gray-700" : "bg-gray-300"
+        }`}
     >
       <div
-        className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${
-          darkMode ? "translate-x-5" : "translate-x-1"
-        }`}
+        className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${darkMode ? "translate-x-5" : "translate-x-1"
+          }`}
       />
     </div>
   );

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react"
+import UserProfile from "../components/UserDashboard/UserProfile/UserProfile";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { valuableItemsCards, systemCards } from "./data/cards"
 import { categories, foundItems } from "./data/recentlyFoundData"
@@ -10,6 +11,9 @@ import { securityData } from "./data/securityData";
 import { faqData } from "./data/faqData";
 import { Search, ChevronDown, Users, UserPlus, LogIn } from "lucide-react";
 import { joinFeaturesData } from "./data/joinFeaturesData";
+import { useAuth } from "../shared/context/AuthContext";
+import { itemService } from "../services/itemService";
+import { nlpService } from "../services/nlpService";
 import Joi from "joi";
 
 // Validation Schema
@@ -66,8 +70,10 @@ const countryCodes = [
 ];
 
 function Home() {
+  const categories = ["Electronics", "ID & Documents", "Wallets & Bags", "Clothing & Accessories", "Personal Items", "Others"];
   const navigate = useNavigate()
   const { hash } = useLocation()
+  const { user } = useAuth()
 
   useEffect(() => {
     if (hash) {
@@ -81,9 +87,29 @@ function Home() {
   const [step, setStep] = useState(1)
   const formRef = useRef(null)
   const [formMode, setFormMode] = useState("found") // 'found' | 'lost'
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [recentSupabaseItems, setRecentSupabaseItems] = useState([]);
+  const [itemsLoading, setItemsLoading] = useState(true);
 
-  const nextStep = () => setStep((s) => Math.min(s + 1, 3))
-  const prevStep = () => setStep((s) => Math.max(s - 1, 1))
+  // Fetch real data from Supabase for "Recently Found Items"
+  useEffect(() => {
+    async function fetchRecent() {
+      try {
+        setItemsLoading(true);
+        const data = await itemService.getRecentItems('found', 6);
+        setRecentSupabaseItems(data);
+      } catch (err) {
+        console.error("Error fetching items:", err);
+      } finally {
+        setItemsLoading(false);
+      }
+    }
+    fetchRecent();
+  }, []);
+
+  // Placeholder navigation logic for legacy support if needed
+  const nextStep = () => { }
+  const prevStep = () => { }
 
   const [index, setIndex] = useState(0);
   const story = successStories.length > 0 ? successStories[index] : null;
@@ -106,30 +132,29 @@ function Home() {
   const [selectedItem, setSelectedItem] = useState(null)
   const [showErrorsStep, setShowErrorsStep] = useState(null)
 
-  // Form state
+  // Form state (Aligned with Dashboard)
   const [formData, setFormData] = useState({
-    itemType: "",
-    customItemType: "",
-    category: "",
-    customCategory: "",
+    reportType: "Found Item",
+    whatWasFound: "",
+    itemCategory: "",
+    dateFound: "",
     brand: "",
     color: "",
-    customColor: "",
-    dateFound: "",
     location: "",
-    time: "",
     additionalInfo: "",
-    whereTurned: "",
-    anonymous: false,
-    fullName: "",
-    email: "",
-    phone: "",
-    phoneCountry: "+63",
     imageFile: null,
+    reporterName: "",
+    mobileNumber: "",
+    email: "",
   })
   const [imagePreview, setImagePreview] = useState(null)
   const [submitted, setSubmitted] = useState({ show: false, anonymous: false, mode: "found" })
-  const [formAnimate, setFormAnimate] = useState(false)
+  const [, setFormAnimate] = useState(false)
+  const [matchedItems, setMatchedItems] = useState([]);
+  const [showMatchModal, setShowMatchModal] = useState(false);
+  const [createdItemId, setCreatedItemId] = useState(null);
+
+
 
   const filteredFAQs = faqData.filter((item) =>
     item.question.toLowerCase().includes(search.toLowerCase()) ||
@@ -138,8 +163,8 @@ function Home() {
 
   const displayedFoundItems =
     activeCategory === "All Items"
-      ? foundItems
-      : foundItems.filter((it) => it.category === activeCategory)
+      ? recentSupabaseItems
+      : recentSupabaseItems.filter((it) => it.category === activeCategory)
 
   useEffect(() => {
     return () => {
@@ -171,17 +196,11 @@ function Home() {
     // STRICT VALIDATION: Only allow letters and spaces for these fields
     const textOnlyFields = [
       "brand",
-      "customColor",
-      "customItemType",
-      "customCategory",
-      "whereTurned",
-      "fullName"
+      "whatWasFound",
+      "reporterName"
     ];
 
     if (textOnlyFields.includes(name)) {
-      // If value contains anything that is NOT allowed by the regex, ignore the input
-      // Regex matches: Unicode letters, marks, spaces, dots, ampersands, apostrophes, hyphens
-      // This matches the Joi schema pattern: /^[\p{L}\p{M} .&'-]+$/u
       if (value && !/^[\p{L}\p{M} .&'-]*$/u.test(value)) {
         return;
       }
@@ -212,115 +231,122 @@ function Home() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    // validate final step
-    if (!validateStep(3)) {
-      setShowErrorsStep(3)
-      alert("Please fill all required fields before submitting.")
+    // validate form
+    if (!validateForm()) {
+      // alert("Please fill all required fields before submitting.") // Replaced by success modal logic
+      setSubmitted({ show: true, anonymous: false, mode: 'found', isError: true, message: "Please fill all required fields before submitting." });
       return
     }
 
-    const fullPhone = formData.phone ? `${formData.phoneCountry} ${formData.phone}` : ""
-
-    // Build FormData for file upload
-    const fd = new FormData()
-    fd.append('mode', formMode)
-    Object.keys(formData).forEach((k) => {
-      if (k === 'imageFile') {
-        if (formData.imageFile) fd.append('imageFile', formData.imageFile)
-      } else {
-        fd.append(k, formData[k])
-      }
-    })
-    fd.append('fullPhone', fullPhone)
-
+    setIsSubmitting(true)
     try {
-      const res = await fetch('http://localhost/BALIK/balik-system/balik-app/backend/report.php', { method: 'POST', body: fd })
-      const json = await res.json()
-      if (res.ok && json.success) {
-        setSubmitted({ show: true, anonymous: formData.anonymous, mode: formMode })
-        // reset
-        setFormData({
-          itemType: "",
-          customItemType: "",
-          category: "",
-          customCategory: "",
-          brand: "",
-          color: "",
-          dateFound: "",
-          location: "",
-          time: "",
-          additionalInfo: "",
-          whereTurned: "",
-          anonymous: false,
-          fullName: "",
-          email: "",
-          phone: "",
-          phoneCountry: "+63",
-          imageFile: null,
-        })
-        setImagePreview(null)
-        setStep(1)
-      } else {
-        alert('Submission failed: ' + (json.message || 'Server error'))
+      // 1. Upload image to Supabase Storage
+      let imageUrl = null
+      if (formData.imageFile) {
+        imageUrl = await itemService.uploadItemImage(formData.imageFile)
       }
+
+      // 2. Prepare data for Supabase
+      const mappedData = {
+        user_id: user?.id || null,
+        type: 'found',
+        category: formData.itemCategory,
+        title: formData.whatWasFound,
+        description: `Brand: ${formData.brand}\nColor: ${formData.color}\n\n${formData.additionalInfo}`,
+        location: formData.location,
+        date_reported: formData.dateFound,
+        status: 'pending',
+        image_url: imageUrl,
+        metadata: {
+          brand: formData.brand,
+          color: formData.color,
+          reporter: {
+            name: formData.reporterName,
+            mobile: formData.mobileNumber,
+            email: formData.email
+          }
+        }
+      }
+
+      // 3. Generate embedding for smart matching
+      let currentEmbedding = null;
+      try {
+        const searchText = `${formData.itemCategory} ${formData.whatWasFound} ${formData.brand} ${formData.color} ${formData.location} ${formData.additionalInfo}`;
+        currentEmbedding = await nlpService.generateEmbedding(searchText);
+        if (currentEmbedding) {
+          mappedData.description_embedding = currentEmbedding;
+        }
+      } catch (nlpError) {
+        console.warn("Embedding generation failed:", nlpError);
+      }
+
+      // 4. Submit to Supabase Items table
+      const createdItem = await itemService.reportItem(mappedData);
+      setCreatedItemId(createdItem?.id || null);
+
+      // 5. Fetch smart matches if embedding exists
+      if (currentEmbedding) {
+        try {
+          const matches = await itemService.getSmartMatches(
+            currentEmbedding,
+            'lost',
+            0.6, // Weighted sum threshold (Show matches above 60%)
+            4,
+            {
+              category: formData.itemCategory,
+              color: formData.color,
+              location: formData.location,
+              date: formData.dateFound
+            }
+          );
+          if (matches && matches.length > 0) {
+            setMatchedItems(matches);
+            setShowMatchModal(true);
+          } else {
+            setSubmitted({ show: true, anonymous: false, mode: 'found' });
+          }
+        } catch (matchError) {
+          console.error("Smart matching error:", matchError);
+          setSubmitted({ show: true, anonymous: false, mode: 'found' });
+        }
+      } else {
+        setSubmitted({ show: true, anonymous: false, mode: 'found' });
+      }
+
+      // reset form
+      setFormData({
+        reportType: "Found Item",
+        whatWasFound: "",
+        itemCategory: "",
+        dateFound: "",
+        brand: "",
+        color: "",
+        location: "",
+        additionalInfo: "",
+        imageFile: null,
+        reporterName: "",
+        mobileNumber: "",
+        email: "",
+      })
+      setImagePreview(null)
+
+      // Refresh the local items list
+      const data = await itemService.getRecentItems('found', 6);
+      setRecentSupabaseItems(data);
+
     } catch (err) {
-      alert('Submission failed: ' + err.message)
+      console.error("Submission Error:", err);
+      // alert('Submission failed: ' + err.message) // Replaced by success modal logic
+      setSubmitted({ show: true, anonymous: false, mode: 'found', isError: true, message: 'Submission failed: ' + err.message });
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
 
-  function validateStep(s) {
-    if (s === 1) {
-      // Brand validation
-      const brandValid = !schema.validate(formData.brand).error;
-
-      // Item Type validation: if Other is selected, customItemType must be filled and valid
-      const itemTypeValid = formData.itemType.trim() && (formData.itemType !== "Other" || (!schema.validate(formData.customItemType).error));
-
-      // Category validation: if Others is selected, customCategory must be filled and valid
-      const categoryValid = formData.category.trim() && (formData.category !== "Others" || (!schema.validate(formData.customCategory).error));
-
-      // Color validation: if Other is selected, customColor must be valid
-      const colorValid = formData.color.trim() && (formData.color !== "Other" || (!schema.validate(formData.customColor).error));
-
-      return (
-        itemTypeValid &&
-        categoryValid &&
-        brandValid &&
-        colorValid
-      )
-    }
-
-    if (s === 2) {
-      return (
-        formData.dateFound &&
-        formData.location.trim() &&
-        formData.time
-      )
-    }
-
-    if (s === 3) {
-      const meta = countryCodes.find((c) => c.code === formData.phoneCountry) || { minLength: 6 }
-      const digits = (formData.phone || "").replace(/\D/g, "")
-      const phoneOk = formData.anonymous ? true : (digits.length >= (meta.minLength || 6))
-
-      // Contact info validation
-      const fullNameValid = !schema.validate(formData.fullName).error;
-      const whereTurnedValid = !schema.validate(formData.whereTurned).error;
-
-      const contactOk = formData.anonymous
-        ? true
-        : (fullNameValid && formData.email.trim() && phoneOk)
-
-      return (
-        formData.additionalInfo.trim() &&
-        whereTurnedValid &&
-        formData.imageFile &&
-        contactOk
-      )
-    }
-
-    return true
+  function validateForm() {
+    const { whatWasFound, itemCategory, dateFound, location, reporterName, mobileNumber, email } = formData;
+    return whatWasFound && itemCategory && dateFound && location && reporterName && mobileNumber && email;
   }
 
   return (
@@ -375,7 +401,7 @@ function Home() {
         </p>
 
         {/* Stat Card */}
-        <div className="mb-12 p-4 text-xl rounded-2xl shadow-lg border border-[#a11010] hover:-translate-y-2 hover:shadow-xl transition-all duration-300 bg-white">
+        <div className="mb-12 p-4 text-xl rounded-2xl shadow-lg border border-[#a11010] hover:shadow-xl transition-all duration-300 bg-white">
           73% of people lose valuable items monthly, spending 12+ hours
           searching
         </div>
@@ -473,36 +499,43 @@ function Home() {
 
         {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {displayedFoundItems.length > 0 ? (
+          {itemsLoading ? (
+            <div className="col-span-full py-20 flex flex-col items-center justify-center bg-white rounded-2xl border-2 border-dashed border-gray-100">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+              <p className="text-gray-500 font-medium">Loading recently found items...</p>
+            </div>
+          ) : displayedFoundItems.length > 0 ? (
             displayedFoundItems.map((item) => (
               <div
                 key={item.id}
-                className="bg-white rounded-xl shadow-sm overflow-hidden"
+                className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow"
               >
                 {/* Image */}
                 <div className="relative">
                   <img
-                    src={item.image}
+                    src={item.image_url || "https://images.unsplash.com/photo-1544391439-1dfdc422e178?auto=format&fit=crop&q=80&w=400"}
                     alt={item.title}
-                    className="w-full h-56 object-cover"
+                    className="w-full h-56 object-cover bg-gray-100"
                   />
-                  <span className="absolute top-3 right-3 bg-green-500 text-white text-xs px-3 py-1 rounded-full">
+                  <span className="absolute top-3 right-3 bg-green-500 text-white text-xs px-3 py-1 rounded-full shadow-sm">
                     ✓ Verified
                   </span>
                 </div>
-                <div className="p-5">
-                  <h3 className="font-semibold text-lg mb-1">{item.title}</h3>
-                  <span className="inline-block bg-gray-100 text-xs px-2 py-1 rounded mb-2">
-                    {item.tag}
+                <div className="p-5 flex flex-col flex-1">
+                  <h3 className="font-semibold text-lg mb-1 truncate">{item.title}</h3>
+                  <span className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded mb-2 w-fit">
+                    {item.category}
                   </span>
-                  <p className="text-sm text-gray-600 mb-4">{item.description}</p>
-                  <div className="flex justify-between text-xs text-gray-500 mb-4">
-                    <span>{item.location}</span>
-                    <span>{item.date}</span>
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{item.description}</p>
+                  <div className="mt-auto">
+                    <div className="flex justify-between text-xs text-gray-500 mb-4">
+                      <span className="truncate max-w-[150px]">{item.location}</span>
+                      <span>{new Date(item.date_reported).toLocaleDateString()}</span>
+                    </div>
+                    <button onClick={() => setSelectedItem(item)} className="cursor-pointer w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                      View details
+                    </button>
                   </div>
-                  <button onClick={() => setSelectedItem(item)} className="cursor-pointer w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
-                    View details
-                  </button>
                 </div>
               </div>
             ))
@@ -515,739 +548,537 @@ function Home() {
         </div>
       </section>
 
-      {/* Forms (Report) Section 4 */}
-
+      {/* Item Detail Modal */}
       {selectedItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl max-w-3xl w-full p-6 relative mx-4">
-            <button onClick={() => setSelectedItem(null)} className="cursor-pointer absolute top-3 right-3 text-gray-600 text-2xl">×</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-2xl max-w-3xl w-full p-0 relative shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
+            <button
+              onClick={() => setSelectedItem(null)}
+              className="cursor-pointer absolute top-4 right-4 text-white bg-black/30 hover:bg-black/50 w-8 h-8 rounded-full flex items-center justify-center transition-colors z-10"
+            >
+              ×
+            </button>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              <img src={selectedItem.image} alt={selectedItem.title} className="w-full h-64 object-cover rounded" />
-
-              <div>
-                <h3 className="text-2xl font-bold mb-2">{selectedItem.title}</h3>
-                <p className="text-sm text-gray-500 mb-2">{selectedItem.tag}</p>
-                <p className="text-gray-700 mb-4">{selectedItem.description}</p>
-
-                <div className="text-sm text-gray-500 mb-2"><strong>Location:</strong> {selectedItem.location}</div>
-                <div className="text-sm text-gray-500 mb-2"><strong>Date:</strong> {selectedItem.date}</div>
+            <div className="flex flex-col md:flex-row h-full">
+              <div className="md:w-1/2">
+                <img
+                  src={selectedItem.image_url || "https://images.unsplash.com/photo-1544391439-1dfdc422e178?auto=format&fit=crop&q=80&w=400"}
+                  alt={selectedItem.title}
+                  className="w-full h-64 md:h-full object-cover"
+                />
               </div>
-            </div>
 
-            <div className="mt-6 flex justify-end">
-              <button onClick={() => { setSelectedItem(null); navigate("/login"); }} className="cursor-pointer px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded">Claim</button>
+              <div className="md:w-1/2 p-8 flex flex-col">
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded font-medium uppercase tracking-wider">
+                      {selectedItem.category}
+                    </span>
+                    <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded font-medium">
+                      Admin Verified
+                    </span>
+                  </div>
+                  <h3 className="text-3xl font-bold text-gray-900 mb-4">{selectedItem.title}</h3>
+                  <div className="space-y-3 text-gray-700 mb-6">
+                    <div className="flex gap-2">
+                      <span className="font-bold min-w-[80px]">Location:</span>
+                      <span>{selectedItem.location}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <span className="font-bold min-w-[80px]">Date:</span>
+                      <span>{new Date(selectedItem.date_reported).toLocaleDateString()}</span>
+                    </div>
+                    <div className="pt-4 border-t border-gray-100">
+                      <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+                        {selectedItem.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-auto flex flex-col gap-3">
+                  <button
+                    onClick={() => { setSelectedItem(null); navigate("/login"); }}
+                    className="cursor-pointer w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-all"
+                  >
+                    Login to Claim Item
+                  </button>
+                  <p className="text-xs text-center text-gray-400">
+                    You must be a registered member to claim items
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {/* Forms (Report) Section 4 */}
-      <div className="min-h-screen flex justify-center px-4 py-16 bg-gray-50">
-        <div className="w-full max-w-2xl bg-transparent" ref={formRef}>
-
-          {/* Header */}
-          <div className="text-center mb-10">
-            <h1 className="text-[2.8rem] text-black font-extrabold mb-2">{formMode === "found" ? "Report a Found Item" : "Report a Lost Item"}</h1>
-            <p className="text-gray-500">
-              {formMode === "found" ? "Help us reunite found items with their owners in just a few steps" : "Tell us about the item you lost so we can help locate it"}
+      <section className="min-h-screen py-24 bg-gray-50 flex justify-center px-4">
+        <div className="w-full max-w-5xl" ref={formRef}>
+          <div className="text-center mb-12">
+            <h2 className="text-[2.8rem] text-black font-extrabold mb-3">Report Found Item</h2>
+            <p className="text-gray-500 text-lg max-w-2xl mx-auto">
+              Help your community by reporting items you've found on campus.
             </p>
           </div>
 
-          {/* Step Indicator */}
-          <div className="flex items-center justify-between mb-10">
-            <div className="flex items-center gap-4">
-              {[1, 2, 3].map((num) => (
-                <div key={num} className="flex items-center gap-4">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-medium
-                    ${step === num ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700"}
-                  `}
-                  >
-                    {num}
-                  </div>
-                  {num !== 3 && <div className="w-10 h-1 bg-gray-200" />}
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-2xl space-y-10">
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="flex flex-col gap-2">
+                  <label className="font-bold text-[#7B1C1C] text-lg">Report Type <span className="text-red-500">*</span></label>
+                  <select name="reportType" value={formData.reportType} onChange={handleInputChange} className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none">
+                    <option value="Found Item">Found Item</option>
+                    <option value="Abandoned Item">Abandoned Item</option>
+                  </select>
                 </div>
-              ))}
-            </div>
+                <div className="flex flex-col gap-2">
+                  <label className="font-bold text-[#7B1C1C] text-lg">What was Found <span className="text-red-500">*</span></label>
+                  <p className="text-[11px] text-gray-400 -mt-1 font-medium">(Pen, Jacket, Smartphone, Wallet, etc.)</p>
+                  <input type="text" name="whatWasFound" value={formData.whatWasFound} onChange={handleInputChange} placeholder="Enter item name" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
+                </div>
+              </div>
 
-            <span className="text-sm text-gray-500">
-              Step {step} of 3
-            </span>
-          </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="flex flex-col gap-2">
+                  <label className="font-bold text-[#7B1C1C] text-lg">Item Category <span className="text-red-500">*</span></label>
+                  <select name="itemCategory" value={formData.itemCategory} onChange={handleInputChange} className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required>
+                    <option value="">Select category</option>
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="font-bold text-[#7B1C1C] text-lg">Date Found <span className="text-red-500">*</span></label>
+                  <p className="text-[11px] text-gray-400 -mt-1 font-medium">Approximate date of when the item was found.</p>
+                  <input type="date" name="dateFound" value={formData.dateFound} onChange={handleInputChange} className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
+                </div>
+              </div>
 
-          {/* Form */}
-          <form className="space-y-6" onSubmit={handleSubmit}>
-
-            {/* STEP 1 */}
-            {step === 1 && (
-              <div className="space-y-6">
-                <div className="input-group">
-                  <label className="font-medium">
-                    {formMode === "found" ? "What type of item did you find" : "What type of item did you lose"} <span className="text-red-500">*</span>
-                  </label>
-                  <select name="itemType" value={formData.itemType} onChange={handleInputChange} className={`input ${showErrorsStep === 1 && !formData.itemType ? 'border-red-500' : ''}`}>
-                    <option value="">Select item type</option>
-                    <option value="Smartphone">Smartphone</option>
-                    <option value="Laptop">Laptop</option>
-                    <option value="Tablet">Tablet</option>
-                    <option value="Wallet">Wallet</option>
-                    <option value="Keys">Keys</option>
-                    <option value="ID Card">ID Card</option>
-                    <option value="Backpack">Backpack</option>
-                    <option value="Handbag">Handbag</option>
-                    <option value="Watch">Watch</option>
-                    <option value="Jewelry">Jewelry</option>
-                    <option value="Glasses">Glasses</option>
-                    <option value="Headphones">Headphones</option>
-                    <option value="Charger">Charger</option>
-                    <option value="Book">Book</option>
-                    <option value="Notebook">Notebook</option>
-                    <option value="Umbrella">Umbrella</option>
-                    <option value="Jacket">Jacket</option>
-                    <option value="Water Bottle">Water Bottle</option>
-                    <option value="USB Drive">USB Drive</option>
-                    <option value="Calculator">Calculator</option>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="flex flex-col gap-2">
+                  <label className="font-bold text-[#7B1C1C] text-lg">Brand</label>
+                  <input type="text" name="brand" value={formData.brand} onChange={handleInputChange} placeholder="e.g. Samsung" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="font-bold text-[#7B1C1C] text-lg">Color</label>
+                  <select name="color" value={formData.color} onChange={handleInputChange} className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none">
+                    <option value="">Select color</option>
+                    <option value="Black">Black</option>
+                    <option value="White">White</option>
+                    <option value="Red">Red</option>
+                    <option value="Blue">Blue</option>
+                    <option value="Green">Green</option>
+                    <option value="Yellow">Yellow</option>
+                    <option value="Brown">Brown</option>
+                    <option value="Gray">Gray</option>
                     <option value="Other">Other</option>
                   </select>
-                  {/* Custom item type input */}
-                  {formData.itemType === "Other" && (
-                    <div className="input-group mt-4">
-                      <label className="font-medium">
-                        Specify Item Type <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        name="customItemType"
-                        value={formData.customItemType}
-                        onChange={handleInputChange}
-                        placeholder="Enter item type"
-                        className={`input ${showErrorsStep === 1 && formData.itemType === "Other" && !formData.customItemType.trim() ? 'border-red-500' : ''}`}
-                      />
-                    </div>
-                  )}
                 </div>
-
-                <div className="input-group">
-                  <label className="font-medium">
-                    Category <span className="text-red-500">*</span>
-                  </label>
-                  <select name="category" value={formData.category} onChange={handleInputChange} className={`input ${showErrorsStep === 1 && !formData.category ? 'border-red-500' : ''}`}>
-                    <option value="">Select category</option>
-                    <option value="Electronics">Electronics</option>
-                    <option value="Accessories">Accessories</option>
-                    <option value="Bags">Bags</option>
-                    <option value="Documents">Documents</option>
-                    <option value="Clothing">Clothing</option>
-                    <option value="Others">Others</option>
-                  </select>
-                  {/* Custom category input */}
-                  {formData.category === "Others" && (
-                    <div className="input-group mt-4">
-                      <label className="font-medium">
-                        Specify Category <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        name="customCategory"
-                        value={formData.customCategory}
-                        onChange={handleInputChange}
-                        placeholder="Enter category"
-                        className={`input ${showErrorsStep === 1 && formData.category === "Others" && !formData.customCategory.trim() ? 'border-red-500' : ''}`}
-                      />
-                    </div>
-                  )}
+                <div className="flex flex-col gap-2">
+                  <label className="font-bold text-[#7B1C1C] text-lg">Location <span className="text-red-500">*</span></label>
+                  <input type="text" name="location" value={formData.location} onChange={handleInputChange} placeholder="e.g. Library" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
                 </div>
+              </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="input-group">
-                    <label className="font-medium">
-                      Brand <span className="text-red-500">*</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="flex flex-col gap-2">
+                  <label className="font-bold text-[#7B1C1C] text-lg">Additional Information</label>
+                  <p className="text-[11px] text-gray-400 -mt-1 font-medium">Any identifying marks or features?</p>
+                  <textarea name="additionalInfo" value={formData.additionalInfo} onChange={handleInputChange} rows={3} className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none resize-none" placeholder="Provide more details..." />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="font-bold text-[#7B1C1C] text-lg">Photo (Optional)</label>
+                  <div className="flex items-center gap-4 mt-2">
+                    <label className="cursor-pointer bg-red-50 hover:bg-red-100 text-red-700 px-6 py-4 rounded-xl text-sm border-2 border-dashed border-red-200 transition-all flex-1 text-center font-bold">
+                      {formData.imageFile ? formData.imageFile.name : "Choose Image File"}
+                      <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
                     </label>
-                    <input
-                      name="brand"
-                      value={formData.brand}
-                      onChange={handleInputChange}
-                      placeholder="Enter brand name"
-                      className={`input ${showErrorsStep === 1 && (formData.brand.trim().length < 2 || !/^[A-Za-z\s]+$/.test(formData.brand.trim())) ? 'border-red-500' : ''}`}
-                    />
-                    {showErrorsStep === 1 && formData.brand.trim().length > 0 && (formData.brand.trim().length < 2 || !/^[A-Za-z\s]+$/.test(formData.brand.trim())) && (
-                      <span className="text-red-500 text-xs">Brand must be at least 2 characters and contain only letters</span>
+                    {imagePreview && (
+                      <div className="w-16 h-16 rounded-xl overflow-hidden border-4 border-white shadow-lg flex-shrink-0">
+                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                      </div>
                     )}
                   </div>
-
-                  <div className="input-group">
-                    <label className="font-medium">
-                      Color <span className="text-red-500">*</span>
-                    </label>
-                    <select name="color" value={formData.color} onChange={handleInputChange} className={`input ${showErrorsStep === 1 && !formData.color ? 'border-red-500' : ''}`}>
-                      <option value="">Select color</option>
-                      <option value="Black">Black</option>
-                      <option value="White">White</option>
-                      <option value="Red">Red</option>
-                      <option value="Blue">Blue</option>
-                      <option value="Green">Green</option>
-                      <option value="Yellow">Yellow</option>
-                      <option value="Orange">Orange</option>
-                      <option value="Purple">Purple</option>
-                      <option value="Pink">Pink</option>
-                      <option value="Brown">Brown</option>
-                      <option value="Gray">Gray</option>
-                      <option value="Silver">Silver</option>
-                      <option value="Gold">Gold</option>
-                      <option value="Multicolor">Multicolor</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-
-                  {/* Custom color input when Other is selected */}
-                  {formData.color === "Other" && (
-                    <div className="input-group mt-4">
-                      <label className="font-medium">
-                        Specify Color <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        name="customColor"
-                        value={formData.customColor}
-                        onChange={handleInputChange}
-                        placeholder="Enter the color"
-                        className={`input ${showErrorsStep === 1 && formData.color === "Other" && !formData.customColor.trim() ? 'border-red-500' : ''}`}
-                      />
-                    </div>
-                  )}
                 </div>
               </div>
-            )}
 
-            {/* STEP 2 */}
-            {step === 2 && (
-              <div className="space-y-6">
-                <div className="input-group">
-                  <label className="font-medium">
-                    {formMode === "found" ? "Date Found" : "Date Lost"} <span className="text-red-500">*</span>
-                  </label>
-                  <input name="dateFound" type="date" value={formData.dateFound} onChange={handleInputChange} onClick={(e) => e.target.showPicker?.()} className={`input cursor-pointer ${showErrorsStep === 2 && !formData.dateFound ? 'border-red-500' : ''}`} />
-                </div>
-
-                <div className="input-group">
-                  <label className="font-medium">
-                    Location <span className="text-red-500">*</span>
-                  </label>
-                  <select name="location" value={formData.location} onChange={handleInputChange} className={`input ${showErrorsStep === 2 && !formData.location ? 'border-red-500' : ''}`}>
-                    <option value="">Select location</option>
-                    <option>Main Building</option>
-                    <option>Library</option>
-                    <option>ITECH</option>
-                  </select>
-                </div>
-
-                <div className="input-group">
-                  <label className="font-medium">
-                    Time <span className="text-red-500">*</span>
-                  </label>
-                  <input name="time" type="time" value={formData.time} onChange={handleInputChange} onClick={(e) => e.target.showPicker?.()} className={`input cursor-pointer ${showErrorsStep === 2 && !formData.time ? 'border-red-500' : ''}`} />
-                </div>
-              </div>
-            )}
-
-            {/* STEP 3 */}
-            {step === 3 && (
-              <div className="space-y-6">
-                <div className="input-group">
-                  <label className="font-medium">
-                    Additional Information <span className="text-red-500">*</span>
-                  </label>
-                  <textarea name="additionalInfo" value={formData.additionalInfo} onChange={handleInputChange} className={`input h-28 resize-none ${showErrorsStep === 3 && !formData.additionalInfo ? 'border-red-500' : ''}`} />
-                </div>
-
-                <div className="input-group">
-                  <label className="font-medium">
-                    Upload Image <span className="text-red-500">*</span>
-                  </label>
-                  <input type="file" onChange={handleFileChange} className={`input ${showErrorsStep === 3 && !formData.imageFile ? 'border-red-500' : ''}`} />
-                  {imagePreview && (
-                    <img src={imagePreview} alt="preview" className="mt-3 w-40 h-40 object-cover rounded" />
-                  )}
-                </div>
-
-                <div className="input-group">
-                  <label className="font-medium">
-                    {formMode === "found" ? "Where did you turn in the item?" : "Where did you lose the item?"} <span className="text-red-500">*</span>
-                  </label>
-                  <input name="whereTurned" value={formData.whereTurned} onChange={handleInputChange} className={`input ${showErrorsStep === 3 && !formData.whereTurned ? 'border-red-500' : ''}`} />
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <input name="anonymous" type="checkbox" checked={formData.anonymous} onChange={handleInputChange} />
-                  <label className="text-red-600 font-medium">
-                    Report Anonymously
-                  </label>
-                </div>
-
-                <div className="input-group">
-                  <label className="font-medium">
-                    Full Name {formData.anonymous ? <span className="text-sm text-gray-500">(will be marked anonymous)</span> : <span className="text-red-500">*</span>}
-                  </label>
-                  <input name="fullName" value={formData.fullName} onChange={handleInputChange} className={`input ${showErrorsStep === 3 && !formData.fullName && !formData.anonymous ? 'border-red-500' : ''}`} />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="input-group">
-                    <label className="font-medium">
-                      Email {formData.anonymous ? <span className="text-sm text-gray-500">(will be marked anonymous)</span> : <span className="text-red-500">*</span>}
-                    </label>
-                    <input name="email" value={formData.email} onChange={handleInputChange} className={`input ${showErrorsStep === 3 && !formData.email && !formData.anonymous ? 'border-red-500' : ''}`} />
+              <div className="pt-8 border-t border-slate-100">
+                <h3 className="text-2xl font-extrabold text-[#7B1C1C] mb-8 flex items-center gap-3">
+                  <span className="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-sm">2</span>
+                  Reporter's Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div className="flex flex-col gap-2">
+                    <label className="font-bold text-[#7B1C1C] text-lg">Name <span className="text-red-500">*</span></label>
+                    <input type="text" name="reporterName" value={formData.reporterName} onChange={handleInputChange} className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
                   </div>
-
-                  <div className="input-group">
-                    <label className="font-medium">
-                      Phone Number {formData.anonymous ? <span className="text-sm text-gray-500">(will be marked anonymous)</span> : <span className="text-red-500">*</span>}
-                    </label>
-                    <div className={`flex items-center rounded-lg overflow-hidden ${showErrorsStep === 3 && !formData.phone && !formData.anonymous ? 'border border-red-500' : 'border border-gray-300'}`}>
-                      <select
-                        name="phoneCountry"
-                        value={formData.phoneCountry}
-                        onChange={handleInputChange}
-                        className="bg-white px-3 py-2 text-sm outline-none appearance-none"
-                      >
-                        {countryCodes.map((c) => (
-                          <option key={c.code + c.name} value={c.code}>{`${c.flag} ${c.code}`}</option>
-                        ))}
-                      </select>
-
-                      <input
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        placeholder={countryCodes.find(c => c.code === formData.phoneCountry)?.example || "9123456789"}
-                        className="flex-1 px-3 py-2 text-sm outline-none"
-                      />
-                    </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="font-bold text-[#7B1C1C] text-lg">Mobile Number <span className="text-red-500">*</span></label>
+                    <input type="tel" name="mobileNumber" value={formData.mobileNumber} onChange={handleInputChange} placeholder="e.g. 09123456789" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="font-bold text-[#7B1C1C] text-lg">Email <span className="text-red-500">*</span></label>
+                    <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="your@email.com" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
                   </div>
                 </div>
               </div>
-            )}
 
-            {/* Actions */}
-            <div className="flex gap-4 pt-6">
-              {step > 1 && (
-                <button
-                  type="button"
-                  onClick={prevStep}
-                  className="cursor-pointer flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-                >
-                  Back
-                </button>
-              )}
-
-              {step < 3 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (validateStep(step)) {
-                      setShowErrorsStep(null)
-                      nextStep()
-                    } else {
-                      setShowErrorsStep(step)
-                      // optional focus could be added here
-                    }
-                  }}
-                  className={`cursor-pointer flex-1 py-3 rounded-lg font-medium text-white transition-colors ${validateStep(step) ? 'bg-green-500 hover:bg-green-600' : 'bg-green-500/60'}`}
-                >
-                  Continue
-                </button>
-              )}
-
-              {step === 3 && (
+              <div className="flex justify-center pt-8">
                 <button
                   type="submit"
-                  className="cursor-pointer flex-1 bg-green-500 text-white py-3 rounded-lg font-medium hover:bg-green-600 transition-colors"
+                  disabled={isSubmitting}
+                  className={`w-full max-w-sm bg-[#00C853] hover:bg-[#00ad48] text-white font-black text-xl py-5 rounded-2xl shadow-xl shadow-green-200 transition-all active:scale-[0.98]
+                    ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}
+                  `}
                 >
-                  Submit Report
+                  {isSubmitting ? (
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Processing...
+                    </div>
+                  ) : (
+                    "Submit Report"
+                  )}
                 </button>
-              )}
+              </div>
             </div>
-
           </form>
         </div>
+      </section>
 
-        {/* Small utility styles */}
-        <style>
-          {`
-          .input {
-            width: 100%;
-            padding: 12px 14px;
-            border-radius: 10px;
-            border: 1px solid #e5e7eb;
-            outline: none;
-          }
-          .input:focus {
-            border-color: #22c55e;
-          }
-          .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-          }
-        `}
-        </style>
-      </div>
-
+      {/* Success Modal */}
       {submitted.show && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-gradient-to-b from-yellow-100 to-yellow-50 rounded-xl max-w-lg w-full p-8 relative mx-4 shadow-xl">
-            <button onClick={() => setSubmitted({ show: false, anonymous: false, mode: formMode })} className="absolute top-3 right-3 text-gray-600 text-2xl">×</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-[#FFF9E1] rounded-[2.5rem] max-w-lg w-full p-10 relative mx-4 shadow-2xl border border-yellow-100/50 animate-in zoom-in-95 duration-300">
+            <button
+              onClick={() => setSubmitted({ show: false, anonymous: false, mode: formMode })}
+              className="cursor-pointer absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X size={28} />
+            </button>
 
-            <div className="flex flex-col items-center text-center gap-4">
-              <div className="w-20 h-20 rounded-full border-4 border-green-200 flex items-center justify-center bg-white">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 00-1.414-1.414L8 11.172 4.707 7.879A1 1 0 003.293 9.293l4 4a1 1 0 001.414 0l8-8z" clipRule="evenodd" />
-                </svg>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-24 h-24 rounded-full border-[6px] border-green-500/20 flex items-center justify-center bg-white mb-6">
+                <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center shadow-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 00-1.414-1.414L8 11.172 4.707 7.879A1 1 0 003.293 9.293l4 4a1 1 0 001.414 0l8-8z" clipRule="evenodd" />
+                  </svg>
+                </div>
               </div>
 
-              <h3 className="text-2xl font-bold text-gray-900">
-                {submitted.mode === "found" ? "Found Item Report Submitted" : "Lost Item Report Submitted"}
+              <h3 className="text-3xl font-black text-[#374151] mb-6 leading-tight">
+                Report Submitted!
               </h3>
 
-              <p className="text-gray-700 max-w-md">
-                Thank you for providing your information. We have received your submission and our team is currently reviewing your report.
-              </p>
-
-              {submitted.anonymous && (
-                <p className="text-gray-700 max-w-md">
-                  As you reported anonymously, we want to assure you that your details will be kept secure and confidential.
-                </p>
-              )}
-
-              <p className="text-gray-700 max-w-md">
-                We appreciate you taking the time to report this item.
-              </p>
-
-              <div className="mt-4">
-                <button onClick={() => setSubmitted({ show: false, anonymous: false, mode: formMode })} className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium">OK</button>
+              <div className="space-y-2 text-[#4B5563] text-lg leading-relaxed mb-8 font-medium">
+                <p>Thank you for your report.</p>
+                <p>Our team will review the information and contact you if there's a match.</p>
               </div>
+
+              <button
+                onClick={() => setSubmitted({ show: false, anonymous: false, mode: formMode })}
+                className="cursor-pointer w-full max-w-[160px] bg-[#1D4ED8] hover:bg-[#1E40AF] text-white py-4 rounded-2xl font-black shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98] text-lg"
+              >
+                GOT IT
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* SECTION 5 */}
-      <section className="w-full py-24 px-6">
-        <div className="max-w-6xl mx-auto text-center">
-          {/* Header */}
-          <h2 className="text-[2.8rem] text-black font-extrabold mb-2">
-            Why Choose BALIK?
-          </h2>
-          <p className="text-gray-500 text-lg max-w-2xl mx-auto mb-16">
-            The most advanced lost and found platform powered by AI and community trust
+      {/* Smart Match Modal */}
+      {showMatchModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white rounded-[3rem] max-w-4xl w-full max-h-[90vh] overflow-hidden relative mx-4 shadow-2xl border border-blue-100 animate-in zoom-in-95 duration-300 flex flex-col">
+
+            <div className="p-10 pb-6 text-center border-b border-slate-50 relative">
+              <button
+                onClick={() => setShowMatchModal(false)}
+                className="cursor-pointer absolute top-8 right-10 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X size={32} />
+              </button>
+
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full font-black text-sm uppercase tracking-widest mb-4">
+                <Search size={16} />
+                AI Smart Match Found
+              </div>
+
+              <h3 className="text-4xl font-black text-slate-900 mb-4 tracking-tight">
+                Potential Matches Identified!
+              </h3>
+              <p className="text-slate-500 text-lg font-medium max-w-2xl mx-auto">
+                Our AI found {matchedItems.length} items that closely match your report.
+                Could one of these be what you're looking for?
+              </p>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-10 bg-slate-50/50">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {matchedItems.map((item) => (
+                  <div key={item.id} className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden hover:shadow-2xl transition-all group duration-500">
+                    <div className="relative h-48">
+                      <img
+                        src={item.image_url || "https://images.unsplash.com/photo-1544391439-1dfdc422e178?auto=format&fit=crop&q=80&w=400"}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        alt={item.title}
+                      />
+                      <div className="absolute top-4 left-4">
+                        <span className="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-full font-black uppercase tracking-tighter shadow-lg">
+                          {Math.round(item.similarity * 100)}% Match
+                        </span>
+                      </div>
+                    </div>
+                    <div className="p-6">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="bg-slate-100 text-slate-600 text-[10px] px-2 py-1 rounded font-black uppercase tracking-widest">
+                          {item.category}
+                        </span>
+                      </div>
+                      <h4 className="text-xl font-black text-slate-900 mb-2 truncate uppercase tracking-tight">{item.title}</h4>
+                      <p className="text-slate-500 text-sm font-medium mb-4 line-clamp-2">
+                        {item.description}
+                      </p>
+                      <button
+                        onClick={() => { setShowMatchModal(false); setSelectedItem(item); }}
+                        className="cursor-pointer w-full py-3 bg-slate-900 text-white rounded-xl font-black text-sm hover:bg-blue-600 transition-all active:scale-[0.98]"
+                      >
+                        VIEW DETAILS
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-8 bg-white border-t border-slate-50 text-center">
+              <button
+                onClick={() => setShowMatchModal(false)}
+                className="cursor-pointer text-slate-400 font-bold hover:text-slate-600 transition-colors uppercase tracking-widest text-sm"
+              >
+                None of these match my report
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SECTION 5 - Why Choose BALIK */}
+      <section className="w-full py-28 px-6 bg-white">
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-[3.2rem] text-black font-black mb-4 tracking-tight">Why Choose BALIK?</h2>
+          <p className="text-gray-500 text-xl max-w-2xl mx-auto mb-20 font-medium">
+            The most advanced lost and found platform powered by AI and community trust.
           </p>
 
-          {/* Grid inner section */}
-          <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-3">
-            {whyBalikData.length > 0 ? (
-              whyBalikData.map((item, index) => {
-                const Icon = item.icon;
-                return (
-                  <div
-                    key={index}
-                    className="flex flex-col items-center text-center gap-4"
-                  >
-                    <Icon className="w-10 h-10 text-blue-600" />
-                    <h3 className="text-lg font-semibold">{item.title}</h3>
-                    <p className="text-gray-500 text-sm leading-relaxed">
-                      {item.description}
-                    </p>
+          <div className="grid gap-12 md:grid-cols-3">
+            {whyBalikData.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <div key={index} className="flex flex-col items-center p-8 rounded-[2.5rem] bg-slate-50 hover:bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group">
+                  <div className="w-20 h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 mb-8 group-hover:scale-110 transition-transform">
+                    <Icon size={40} strokeWidth={2.5} />
                   </div>
-                );
-              })
-            ) : (
-              <div className="col-span-full text-center py-10 text-gray-500 italic">Information about BALIK features will be available soon.</div>
-            )}
+                  <h3 className="text-2xl font-black mb-4">{item.title}</h3>
+                  <p className="text-gray-500 text-lg leading-relaxed font-medium">
+                    {item.description}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* SECTION 6 */}
-      <section className="w-full py-28 px-6 bg-gray-50">
+      {/* SECTION 6 - Top Contributors */}
+      <section className="w-full py-28 px-6 bg-slate-50">
         <div className="max-w-5xl mx-auto text-center">
-          {/* Heading */}
-          <h2 className="text-[2.8rem] text-black font-extrabold mb-3">
-            Earn Rewards for Helping Others
-          </h2>
-          <p className="text-gray-500 text-lg max-w-2xl mx-auto mb-16">
-            Calculate your potential earnings and see top community contributors
+          <h2 className="text-[3.2rem] text-black font-black mb-4 tracking-tight">Community Heroes</h2>
+          <p className="text-gray-500 text-xl max-w-2xl mx-auto mb-20 font-medium">
+            Celebrating those who make reunions possible.
           </p>
 
-          {/* Card */}
-          <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm p-6">
-            <h3 className="text-2xl font-bold mb-6 text-left">
-              Top Contributors
-            </h3>
-
-            <div className="flex flex-col gap-4">
-              {topContributors.length > 0 ? (
-                topContributors.map((user) => (
-                  <div
-                    key={user.rank}
-                    className="
-                    flex items-center justify-between
-                    p-4 rounded-xl border border-gray-200
-                    transition-all duration-300 ease-out
-                    hover:-translate-y-2 hover:shadow-lg
-                  "
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-600 text-white font-semibold">
-                        {user.rank}
-                      </div>
-                      <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-semibold">
-                        {user.initials}
-                      </div>
-                      <div className="text-left">
-                        <p className="font-medium leading-tight">{user.name}</p>
-                        <p className="text-sm text-gray-500">{user.items} items reunited</p>
-                      </div>
+          <div className="bg-white rounded-[3rem] shadow-2xl p-10 border border-slate-100">
+            <div className="flex flex-col gap-6">
+              {topContributors.map((user) => (
+                <div key={user.rank} className="flex items-center justify-between p-6 rounded-3xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/30 transition-all group">
+                  <div className="flex items-center gap-6">
+                    <div className="w-14 h-14 flex items-center justify-center rounded-2xl bg-blue-600 text-white text-xl font-black">
+                      #{user.rank}
                     </div>
-                    <div className="text-right">
-                      <p className="text-blue-600 font-semibold">{user.points.toLocaleString()}</p>
-                      <p className="text-sm text-gray-500">points</p>
+                    <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600 text-xl border-4 border-white shadow-sm">
+                      {user.initials}
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xl font-black text-slate-900 group-hover:text-blue-600 transition-colors uppercase tracking-tight">{user.name}</p>
+                      <p className="text-slate-500 font-bold">{user.items} ITEMS RETURNED</p>
                     </div>
                   </div>
-                ))
-              ) : (
-                <p className="text-gray-500 py-4 italic">Community contributors will be listed here soon.</p>
-              )}
+                  <div className="text-right">
+                    <p className="text-2xl font-black text-blue-600">{user.points.toLocaleString()}</p>
+                    <p className="text-sm font-bold text-slate-400">POINTS</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* SECTION 7 - success stories */}
-      <section className="w-full py-25 px-6">
+      {/* SECTION 7 - Success Stories */}
+      <section className="w-full py-28 px-6 bg-slate-50">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Header */}
-          <h2 className="text-[2.8rem] text-black font-extrabold mb-2">
-            Success Stories
-          </h2>
-          <p className="text-gray-500 text-lg max-w-2xl mx-auto mb-16">
-            Real people, real reunions, real impact
+          <h2 className="text-[3.2rem] text-black font-black mb-4 tracking-tight">Success Stories</h2>
+          <p className="text-gray-500 text-xl max-w-2xl mx-auto mb-20 font-medium">
+            Real people, real reunions, real impact.
           </p>
 
-          {/* Story */}
           {story ? (
-            <div className="relative">
-              <div className="w-24 h-24 mx-auto rounded-full bg-gray-200 mb-6" />
-              <h3 className="text-xl font-semibold">{story.name}</h3>
-              <p className="text-gray-500 mb-2">{story.role}</p>
-              <div className="flex justify-center gap-1 mb-8">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <span
-                    key={i}
-                    className={
-                      i < story.rating
-                        ? "text-yellow-400 text-lg"
-                        : "text-gray-300 text-lg"
-                    }
-                  >
-                    ★
-                  </span>
-                ))}
+            <div className="relative bg-white p-12 rounded-[3rem] shadow-2xl border border-slate-100">
+              <div className="w-24 h-24 mx-auto rounded-3xl bg-blue-600 text-white flex items-center justify-center text-4xl font-black mb-8 shadow-lg">
+                {story.name.charAt(0)}
               </div>
-              <p className="italic text-lg text-gray-800 max-w-3xl mx-auto mb-10 leading-relaxed">
-                “{story.quote}”
+              <h3 className="text-2xl font-black mb-1 uppercase tracking-tight">{story.name}</h3>
+              <p className="text-blue-600 font-bold mb-6">{story.role}</p>
+
+              <p className="italic text-2xl text-slate-700 max-w-3xl mx-auto mb-10 leading-relaxed font-medium">
+                "{story.quote}"
               </p>
-              <div className="flex justify-center items-center gap-2 text-blue-600 font-medium mb-14">
-                <span className="w-5 h-5 rounded-full border-2 border-blue-600 flex items-center justify-center text-xs">
-                  ✓
-                </span>
-                Reunited: {story.reunitedItem}
+
+              <div className="flex justify-center items-center gap-3 text-green-600 font-black mb-12 bg-green-50 py-3 px-6 rounded-2xl inline-flex text-lg">
+                <div className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-xs">✓</div>
+                REUNITED: {story.reunitedItem}
               </div>
-              <div className="flex justify-between items-center max-w-3xl mx-auto">
-                <button
-                  onClick={prevStory}
-                  className="cursor-pointer w-20 h-20 flex items-center justify-center rounded-full text-3xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition"
-                > ‹
-                </button>
-                <div className="flex gap-2">
+
+              <div className="flex justify-between items-center max-w-lg mx-auto">
+                <button onClick={prevStory} className="cursor-pointer w-16 h-16 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-400 hover:bg-blue-600 hover:text-white transition-all text-2xl font-black">‹</button>
+                <div className="flex gap-3">
                   {successStories.map((_, i) => (
                     <div
                       key={i}
-                      className={`h-2 rounded-full transition-all cursor-pointer ${i === index
-                        ? "w-8 bg-blue-600"
-                        : "w-2 bg-gray-300 hover:bg-gray-400"
-                        }`}
+                      className={`h-3 rounded-full transition-all cursor-pointer ${i === index ? "w-10 bg-blue-600" : "w-3 bg-slate-200 hover:bg-slate-300"}`}
                       onClick={() => setIndex(i)}
                     />
                   ))}
                 </div>
-                <button
-                  onClick={nextStory}
-                  className="cursor-pointer w-20 h-20 flex items-center justify-center rounded-full text-3xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition"
-                > ›
-                </button>
+                <button onClick={nextStory} className="cursor-pointer w-16 h-16 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-400 hover:bg-blue-600 hover:text-white transition-all text-2xl font-black">›</button>
               </div>
             </div>
           ) : (
-            <div className="py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-              <p className="text-gray-500 italic">Success stories will be shared by our community members soon.</p>
+            <div className="py-20 bg-white rounded-[3rem] border-4 border-dashed border-slate-100">
+              <p className="text-slate-400 font-bold text-xl uppercase tracking-widest">Stories coming soon</p>
             </div>
           )}
         </div>
       </section>
 
-      {/* SECTION 8 */}
-      <section className="py-20 bg-gray-50">
+      {/* SECTION 8 - Security */}
+      <section className="py-28 bg-white overflow-hidden relative">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-[2.8rem] text-black font-extrabold mb-2">
-            Your Security is Our Priority
-          </h2>
-          <p className="text-gray-500 text-lg max-w-2xl mx-auto mb-16">
-            Multiple layers of protection ensure safe and trustworthy reunions
-          </p>
+          <h2 className="text-[3.2rem] text-black font-black mb-4 tracking-tight">Your Security is Our Priority</h2>
+          <p className="text-gray-500 text-xl max-w-2xl mx-auto mb-20 font-medium">Multiple layers of protection ensure safe and trustworthy reunions.</p>
 
-          <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {securityData.length > 0 ? (
-              securityData.map((item, index) => {
-                const Icon = item.icon;
-                return (
-                  <div
-                    key={index}
-                    className="bg-white border border-gray-200 rounded-xl p-8 text-left shadow-sm hover:shadow-lg transition"
-                  >
-                    <Icon className="w-10 h-10 text-green-500 mb-6" />
-                    <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-600 leading-relaxed">
-                      {item.description}
-                    </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {securityData.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <div key={index} className="bg-slate-50 border border-slate-100 rounded-[2.5rem] p-10 text-left hover:bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group">
+                  <div className="w-16 h-16 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 mb-8 group-hover:scale-110 transition-transform">
+                    <Icon size={32} strokeWidth={2.5} />
                   </div>
-                );
-              })
-            ) : (
-              <div className="col-span-full py-10 text-gray-500 italic">Security features overview coming soon.</div>
-            )}
+                  <h3 className="text-2xl font-black text-slate-900 mb-4">{item.title}</h3>
+                  <p className="text-slate-500 text-lg leading-relaxed font-medium">{item.description}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* SECTION 9 - FAQ SECTION */}
-      <section id="faq" className="py-20 bg-white">
+      {/* SECTION 9 - FAQ */}
+      <section id="faq" className="py-28 bg-slate-50 whitespace-pre-wrap">
         <div className="max-w-5xl mx-auto px-6">
-          {/* Header */}
-          <div className="text-center">
-            <h2 className="text-[2.8rem] text-black font-extrabold mb-2">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-gray-500 text-lg max-w-2xl mx-auto mb-10">
-              Everything you need to know about BALIK
-            </p>
+          <div className="text-center mb-16">
+            <h2 className="text-[3.2rem] text-black font-black mb-4 tracking-tight">Frequently Asked Questions</h2>
+            <p className="text-gray-500 text-xl max-w-2xl mx-auto font-medium">Everything you need to know about the BALIK platform.</p>
           </div>
 
-          {/* Search */}
-          <div className="relative mt-10">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
+          <div className="relative mb-16">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 w-6 h-6" />
             <input
               type="text"
               placeholder="Search for answers..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full bg-white border-2 border-slate-100 rounded-3xl pl-16 pr-8 py-6 text-xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-600 transition-all font-medium placeholder:text-slate-300 shadow-sm"
             />
           </div>
 
-          {/* FAQ List */}
-          <div className="mt-12 space-y-6">
-            {filteredFAQs.length === 0 && (
-              <p className="text-center text-gray-500">
-                No matching questions found.
-              </p>
-            )}
-
+          <div className="space-y-6">
             {filteredFAQs.map((item, index) => (
               <div
                 key={index}
-                className="border-b border-gray-300 pb-6 cursor-pointer"
-                onClick={() =>
-                  setOpenIndex(openIndex === index ? null : index)
-                }
+                className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden transition-all duration-300 hover:shadow-xl"
               >
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                <button
+                  onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                  className="w-full px-10 py-8 flex items-center justify-between text-left group"
+                >
+                  <h3 className="text-xl font-extrabold text-slate-900 group-hover:text-blue-600 transition-colors uppercase tracking-tight">
                     {item.question}
                   </h3>
-                  <ChevronDown
-                    className={`w-5 h-5 transition-transform ${openIndex === index ? "rotate-180" : ""
-                      }`}
-                  />
+                  <div className={`w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center transition-transform duration-300 ${openIndex === index ? "rotate-180 bg-blue-600 text-white" : "text-slate-400"}`}>
+                    <ChevronDown size={24} />
+                  </div>
+                </button>
+                <div className={`transition-all duration-300 ease-in-out ${openIndex === index ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
+                  <div className="px-10 pb-10">
+                    <p className="text-lg text-slate-500 font-medium leading-relaxed border-t border-slate-50 pt-8">
+                      {item.answer}
+                    </p>
+                  </div>
                 </div>
-
-                {openIndex === index && (
-                  <p className="mt-4 text-gray-600 leading-relaxed">
-                    {item.answer}
-                  </p>
-                )}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* SECTION 10 */}
-      <section className="py-24 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-6 text-center">
+      {/* SECTION 10 - Footer CTA */}
+      <section className="py-32 bg-white overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-50 rounded-full -mr-64 -mt-64 blur-3xl opacity-50"></div>
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-red-50 rounded-full -ml-64 -mb-64 blur-3xl opacity-50"></div>
 
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 border rounded-full text-green-600 font-medium mb-6  hover:-translate-y-2 hover:shadow-xl transition-all duration-300 bg-white">
-            <Users className="w-5 h-5" />
-            Join 1,200+ new members this week
+        <div className="max-w-6xl mx-auto px-6 text-center relative z-10">
+          <div className="inline-flex items-center gap-3 px-6 py-3 bg-green-50 text-green-700 font-black rounded-full mb-10 border border-green-100 animate-bounce">
+            <Users size={24} />
+            Join 1,200+ members today
           </div>
 
-          {/* Heading */}
-          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900">
-            Join the BALIK Community Today
+          <h2 className="text-5xl md:text-7xl font-black text-slate-900 mb-8 tracking-tighter">
+            Ready to help others?
           </h2>
-          <p className="mt-4 text-gray-500 max-w-2xl mx-auto">
-            Be part of the movement reuniting people with their belongings
+          <p className="text-xl md:text-2xl text-slate-500 max-w-3xl mx-auto mb-16 font-medium leading-relaxed">
+            Be part of the movement reuniting people with their belongings.
+            Join our growing community today.
           </p>
 
-          {/* Buttons */}
-          <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
-            <Link
-              to="/signup"
-              className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-blue-700 transition"
-            >
-              <UserPlus className="w-5 h-5" />
-              Sign Up for Free
+          <div className="flex flex-col sm:flex-row justify-center gap-6">
+            <Link to="/signup" className="group relative inline-flex items-center justify-center gap-3 bg-blue-600 text-white px-12 py-6 rounded-[2rem] font-black text-xl hover:bg-blue-700 hover:shadow-2xl hover:shadow-blue-200 transition-all active:scale-95 overflow-hidden">
+              <span className="relative z-10 flex items-center gap-3">
+                <UserPlus size={24} />
+                Get Started Now
+              </span>
             </Link>
 
-            <Link
-              to="/login"
-              className="inline-flex items-center justify-center gap-2 border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-blue-50 transition"
-            >
-              <LogIn className="w-5 h-5" />
-              Login
+            <Link to="/login" className="inline-flex items-center justify-center gap-3 border-4 border-slate-100 text-slate-900 px-12 py-6 rounded-[2rem] font-black text-xl hover:bg-slate-50 hover:border-slate-200 transition-all active:scale-95">
+              <LogIn size={24} />
+              Sign In
             </Link>
-          </div>
-
-          {/* Features */}
-          <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-12">
-            {joinFeaturesData.length > 0 ? (
-              joinFeaturesData.map((item, index) => {
-                const Icon = item.icon;
-                return (
-                  <div key={index}>
-                    <Icon className="w-7 h-7 mx-auto text-blue-600 mb-8" />
-                    <h3 className="text-xl font-semibold text-gray-900">
-                      {item.title}
-                    </h3>
-                    <p className="mt-2 text-gray-500">
-                      {item.description}
-                    </p>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="col-span-full py-10 text-gray-500 italic">Community features available soon.</div>
-            )}
           </div>
         </div>
       </section>

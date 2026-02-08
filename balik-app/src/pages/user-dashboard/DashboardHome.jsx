@@ -1,9 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, X, AlertCircle } from "lucide-react";
+import {
+  Plus,
+  X,
+  AlertCircle,
+  Brain,
+  MapPin,
+  CheckCircle,
+} from "lucide-react";
 import { useAuth } from "../../shared/context/AuthContext";
 import { itemService } from "../../services/itemService";
-import { nlpService } from "../../services/nlpService";
+// import { nlpService } from "../../services/nlpService";
+const nlpService = { generateEmbedding: () => Promise.resolve(null) };
 import WelcomeBanner from "../../components/UserDashboard/Home/WelcomeBanner";
 import StatsCards from "../../components/UserDashboard/Home/StatsCards";
 import QuickActions from "../../components/UserDashboard/Home/QuickActions";
@@ -46,31 +54,6 @@ export default function DashboardHome() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect to login if not authenticated (after loading completes)
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/login', { replace: true });
-    }
-  }, [loading, user, navigate]);
-
-  // Show loading spinner while checking authentication
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Don't render dashboard if no user (will redirect)
-  if (!user) {
-    return null;
-  }
-
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stats, setStats] = useState({ total: 0, lost: 0, found: 0, resolved: 0 });
   const [showReportModal, setShowReportModal] = useState(false);
@@ -86,6 +69,9 @@ export default function DashboardHome() {
   const [matchedItems, setMatchedItems] = useState([]);
   const [createdItemId, setCreatedItemId] = useState(null);
   const [matchType, setMatchType] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const categoriesList = ["Electronics", "ID & Documents", "Wallets & Bags", "Clothing & Accessories", "Personal Items", "Others"];
 
   // Fetch stats and recent items from Supabase
   useEffect(() => {
@@ -125,6 +111,10 @@ export default function DashboardHome() {
     }
     testConnection();
   }, []);
+
+  // DashboardHome no longer needs independent redirect logic as it is wrapped in Protected Layout
+  // Render dashboard contents directly as user and loading are guaranteed by UserDashboardLayout
+
 
   const handleReportClick = () => {
     setShowReportModal(true);
@@ -248,7 +238,18 @@ export default function DashboardHome() {
       if (embedding) {
         try {
           // If we reported a LOST item, we look for FOUND items
-          const matches = await itemService.getSmartMatches(embedding, 'found', 0.1); // Low threshold to ensure matches appear for demo
+          const matches = await itemService.getSmartMatches(
+            embedding,
+            'found',
+            0.6,
+            5,
+            {
+              category: lostFormData.itemCategory,
+              color: lostFormData.color,
+              location: lostFormData.location,
+              date: lostFormData.dateLost
+            }
+          );
 
           if (matches && matches.length > 0) {
             setMatchedItems(matches);
@@ -266,10 +267,9 @@ export default function DashboardHome() {
       const updatedStats = await itemService.getUserStats(user.id);
       setStats(updatedStats);
 
-      alert("Lost item report submitted successfully!");
+      setShowSuccess(true);
 
-      // Navigate to see the new report
-      navigate('/dashboard/reports');
+      // Reset form
       setShowLostItemForm(false);
       setLostFormData(initialLostFormData);
       setPhotoPreview(null);
@@ -354,7 +354,18 @@ export default function DashboardHome() {
       if (embedding) {
         try {
           // If we reported a FOUND item, we look for LOST items
-          const matches = await itemService.getSmartMatches(embedding, 'lost', 0.1);
+          const matches = await itemService.getSmartMatches(
+            embedding,
+            'lost',
+            0.6,
+            5,
+            {
+              category: foundFormData.itemCategory,
+              color: foundFormData.color,
+              location: foundFormData.location,
+              date: foundFormData.dateFound
+            }
+          );
 
           if (matches && matches.length > 0) {
             setMatchedItems(matches);
@@ -372,10 +383,7 @@ export default function DashboardHome() {
       const updatedStats = await itemService.getUserStats(user.id);
       setStats(updatedStats);
 
-      alert("Found item report submitted successfully!");
-
-      // Navigate to see the new report
-      navigate('/dashboard/track');
+      setShowSuccess(true);
 
       setShowFoundItemForm(false);
       setFoundFormData(initialFoundFormData);
@@ -471,12 +479,9 @@ export default function DashboardHome() {
                   <label className="block font-semibold mb-1">Item Category <span className="text-red-500">*</span></label>
                   <select name="itemCategory" value={lostFormData.itemCategory} onChange={handleLostFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500">
                     <option value="">Select category</option>
-                    <option value="Electronics">Electronics</option>
-                    <option value="Accessories">Accessories</option>
-                    <option value="Bags">Bags</option>
-                    <option value="Documents">Documents</option>
-                    <option value="Clothing">Clothing</option>
-                    <option value="Others">Others</option>
+                    {categoriesList.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -574,12 +579,9 @@ export default function DashboardHome() {
                   <label className="block font-semibold mb-1 text-[#7B1C1C]">Item Category <span className="text-red-500">*</span></label>
                   <select name="itemCategory" value={foundFormData.itemCategory} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500">
                     <option value="">Select category</option>
-                    <option value="Electronics">Electronics</option>
-                    <option value="Accessories">Accessories</option>
-                    <option value="Bags">Bags</option>
-                    <option value="Documents">Documents</option>
-                    <option value="Clothing">Clothing</option>
-                    <option value="Others">Others</option>
+                    {categoriesList.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -725,13 +727,65 @@ export default function DashboardHome() {
               <button
                 onClick={() => {
                   // If they want to check matches, we might send them to search page with filter
-                  // For now, let's just close and maybe navigate to search
                   navigate('/dashboard/find-items');
                 }}
                 className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition"
               >
                 View Details
               </button>
+            </div>
+            <div className="p-8 bg-white border-t border-slate-50 flex justify-center">
+              <button
+                onClick={() => setShowMatchModal(false)}
+                className="cursor-pointer text-slate-400 font-bold hover:text-slate-600 transition-colors uppercase tracking-widest text-sm"
+              >
+                None of these match my report
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-[#FFF9E1] rounded-2xl max-w-lg w-full p-10 relative mx-4 shadow-2xl border border-yellow-100/50 animate-in zoom-in-95 duration-300 font-sans">
+            <button
+              onClick={() => { setShowSuccess(false); navigate(showLostItemForm ? '/dashboard/reports' : '/dashboard/track'); }}
+              className="cursor-pointer absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X size={24} />
+            </button>
+
+            <div className="flex flex-col items-center text-center">
+              <div className="w-24 h-24 rounded-full border-[6px] border-green-500/20 flex items-center justify-center bg-white mb-6">
+                <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center shadow-sm">
+                  <CheckCircle className="h-10 w-10 text-white" />
+                </div>
+              </div>
+
+              <h3 className="text-[1.75rem] font-bold text-[#374151] mb-6 leading-tight">
+                Report Submitted Successfully
+              </h3>
+
+              <div className="space-y-1 text-[#4B5563] text-[1.05rem] leading-relaxed mb-8">
+                <p>Thank you for providing your information.</p>
+                <p>No immediate matches were found, but our AI is now constantly monitoring new reports for you.</p>
+                <p>We'll notify you the moment a potential match appears!</p>
+              </div>
+
+              <div className="w-full max-w-[140px]">
+                <button
+                  onClick={() => {
+                    setShowSuccess(false);
+                    // Navigation already handled logically or via dashboard redirect
+                    if (showLostItemForm) navigate('/dashboard/reports');
+                    else navigate('/dashboard/track');
+                  }}
+                  className="cursor-pointer w-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white py-3 rounded-xl font-bold shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98] text-lg"
+                >
+                  OK
+                </button>
+              </div>
             </div>
           </div>
         </div>

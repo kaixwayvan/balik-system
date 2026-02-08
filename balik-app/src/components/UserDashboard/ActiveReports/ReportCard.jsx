@@ -53,14 +53,24 @@ export default function ReportCard({
 
           {/* PROGRESS */}
           <div className="mt-4">
-            <p className="text-xs text-gray-500 mb-1">Search progress</p>
+            <div className="flex justify-between items-center mb-1">
+              <p className="text-xs text-gray-500">
+                {report.type === 'found' ? 'Reunion progress' : 'Search progress'}
+              </p>
+              {report.status === "matches" && (
+                <div className="flex items-center gap-1 animate-pulse">
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                  <p className="text-[10px] font-black text-yellow-700 uppercase tracking-tighter">AI Match Found! Please check suggestions.</p>
+                </div>
+              )}
+            </div>
             <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
               <div
-                className={`h-full ${styles.progress}`}
+                className={`h-full ${styles.progress} transition-all duration-1000 ease-out`}
                 style={{ width: `${report.progress}%` }}
               />
             </div>
-            <p className="text-right text-xs text-gray-500 mt-1">
+            <p className="text-right text-xs text-gray-500 mt-1 font-bold">
               {report.progress}%
             </p>
           </div>
@@ -72,23 +82,22 @@ export default function ReportCard({
                 onClick={() =>
                   setOpenReportId(isOpen ? null : report.id)
                 }
-                className="cursor-pointer font-extrabold flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm px-4 py-2 rounded-md"
+                className="cursor-pointer font-black flex items-center gap-2 bg-[#FFB639] hover:bg-yellow-600 text-slate-900 text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-yellow-200 transition-all active:scale-95"
               >
-                <ScanEye size={16} />
-                View 2 AI Matches
+                <ScanEye size={18} />
+                View {report.matches?.length || 0} AI Matches
                 <ChevronDown
                   size={16}
-                  className={`transition-transform ${
-                    isOpen ? "rotate-180" : ""
-                  }`}
+                  className={`transition-transform duration-300 ${isOpen ? "rotate-180" : ""
+                    }`}
                 />
               </button>
             )}
 
-            <button className="cursor-pointer border border-gray-300 text-sm px-4 py-2 rounded-md hover:bg-gray-100"> Update Description </button>
+            <button className="cursor-pointer border-2 border-slate-100 text-slate-600 font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-slate-50 transition-colors"> Update Description </button>
 
             {report.status === "claimed" && (
-              <span className="flex items-center gap-2 text-green-700 font-medium text-sm">
+              <span className="flex items-center gap-2 text-green-700 font-black text-sm bg-green-50 px-4 py-2 rounded-xl">
                 <CheckCircle size={18} />
                 Item Claimed
               </span>
@@ -98,7 +107,7 @@ export default function ReportCard({
       </div>
 
       {isOpen && report.status === "matches" && (
-        <AIMatches onClaim={onClaim} />
+        <AIMatches matches={report.matches || []} onClaim={onClaim} />
       )}
     </div>
   );

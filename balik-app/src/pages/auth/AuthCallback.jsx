@@ -21,7 +21,17 @@ export default function AuthCallback() {
         }
 
         if (data?.session) {
+          const user = data.session.user;
           console.log("✅ Email confirmed! Session created.");
+
+          // Sync profile to ensure mobile login and display data are available
+          await supabase.from("profiles").upsert({
+            id: user.id,
+            full_name: user.user_metadata?.full_name,
+            mobile_number: user.user_metadata?.mobile_number,
+            email: user.email,
+            updated_at: new Date(),
+          });
 
           // Redirect to dashboard
           setTimeout(() => navigate("/dashboard", { replace: true }), 2000);

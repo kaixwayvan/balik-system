@@ -3,7 +3,7 @@ import { pipeline, env } from '@xenova/transformers';
 
 // FORCE remote model loading to fix "unexpected token <" (HTML 404) error
 env.allowLocalModels = false;
-env.useBrowserCache = false; // Disable cache temporarily to clear bad files
+env.useBrowserCache = true; // Enabled for fast subsequent loads
 
 /**
  * Singleton class for handling NLP operations using Transformers.js
@@ -11,7 +11,7 @@ env.useBrowserCache = false; // Disable cache temporarily to clear bad files
  */
 class NLPService {
     static instance = null;
-    static modelName = 'Xenova/all-MiniLM-L6-v2';
+    static modelName = 'Xenova/paraphrase-multilingual-MiniLM-L12-v2';
 
     constructor() {
         this.extractor = null;

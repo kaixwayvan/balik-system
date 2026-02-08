@@ -83,7 +83,7 @@ export default function ActiveReports() {
         .from('items')
         .select('*')
         .eq('user_id', user.id)
-        .eq('type', 'lost')
+        .in('status', ['pending', 'matching'])
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
@@ -95,10 +95,11 @@ export default function ActiveReports() {
         // Map database status to UI status
         let uiStatus = 'searching';
         let progress = 45;
+        let detectedMatches = [];
 
         if (item.status === 'matching') {
           uiStatus = 'matches';
-          progress = 75;
+          progress = 95; // Increased from 75 to show high progress
         } else if (item.status === 'resolved' || item.status === 'claims') {
           uiStatus = 'claimed';
           progress = 100;
@@ -116,13 +117,28 @@ export default function ActiveReports() {
                 embedding = JSON.parse(embedding);
               }
 
-              // Check for smart matches (threshold 0.5 is standard, use 0.1 to be extremely generous for demo)
-              const matches = await itemService.getSmartMatches(embedding, 'found', 0.1, 1);
+              // Determine match target (Lost items search for Found, and vice versa)
+              const matchTarget = item.type === 'lost' ? 'found' : 'lost';
+
+              // Check for smart matches (threshold 0.6 as per weighted score requirement)
+              const matches = await itemService.getSmartMatches(
+                embedding,
+                matchTarget,
+                0.6,
+                5,
+                {
+                  category: item.category,
+                  color: item.metadata?.color,
+                  location: item.location,
+                  date: item.date_reported
+                }
+              );
 
               if (matches && matches.length > 0) {
                 console.log("🎯 NLP SMART MATCH FOUND for Item:", item.title, matches);
                 uiStatus = 'matches';
-                progress = 75;
+                progress = 95; // Significant jump to show user we found something
+                detectedMatches = matches;
               } else {
                 console.log("Item checked, no matches found via NLP for:", item.title);
               }
@@ -136,6 +152,7 @@ export default function ActiveReports() {
 
         return {
           id: item.id,
+          type: item.type,
           category: item.category,
           title: item.title,
           description: item.description,
@@ -144,7 +161,8 @@ export default function ActiveReports() {
           timeAgo: new Date(item.created_at).toLocaleDateString(),
           status: uiStatus,
           progress: progress,
-          image: item.image_url || null
+          image: item.image_url || null,
+          matches: detectedMatches
         };
       }));
 
@@ -175,7 +193,7 @@ export default function ActiveReports() {
         <div>
           <h1 className="text-2xl font-bold">Active Reports</h1>
           <p className="text-sm text-gray-600">
-            Track your reported lost items
+            Track and check AI matches for your reported items
           </p>
         </div>
 

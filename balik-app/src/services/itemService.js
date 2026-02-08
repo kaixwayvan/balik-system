@@ -98,16 +98,22 @@ export const itemService = {
 
     /**
      * NLP Smart Matching
-     * This uses the RPC function defined in the SQL schema
+     * This uses the multi-factor weighted scoring defined in the SQL schema
      * @param {number[]} embedding - The vector embedding of the query description
      * @param {string} itemType - The type of the item being matched (lost/found)
+     * @param {object} factors - Optional factors: category, color, location, date
      */
-    async getSmartMatches(embedding, itemType, threshold = 0.5, count = 5) {
+    async getSmartMatches(embedding, itemType, threshold = 0.6, count = 5, factors = {}) {
         const { data, error } = await supabase.rpc('match_items', {
             query_embedding: embedding,
             match_threshold: threshold,
             match_count: count,
-            item_type: itemType
+            item_type: itemType,
+            // Multi-factor parameters
+            query_category: factors.category || null,
+            query_color: factors.color || null,
+            query_location: factors.location || null,
+            query_date: factors.date || null
         })
 
         if (error) throw error
