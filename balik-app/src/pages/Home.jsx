@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react"
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { valuableItemsCards, systemCards } from "./data/cards"
 import { categories, foundItems } from "./data/recentlyFoundData"
 import headerBg from "../assets/home-assets/bg-header.png"
@@ -67,6 +67,16 @@ const countryCodes = [
 
 function Home() {
   const navigate = useNavigate()
+  const { hash } = useLocation()
+
+  useEffect(() => {
+    if (hash) {
+      const element = document.getElementById(hash.replace('#', ''))
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
+  }, [hash])
 
   const [step, setStep] = useState(1)
   const formRef = useRef(null)
@@ -1120,7 +1130,7 @@ function Home() {
       </section>
 
       {/* SECTION 9 - FAQ SECTION */}
-      <section className="py-20 bg-white">
+      <section id="faq" className="py-20 bg-white">
         <div className="max-w-5xl mx-auto px-6">
           {/* Header */}
           <div className="text-center">

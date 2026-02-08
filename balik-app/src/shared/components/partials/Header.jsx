@@ -11,25 +11,19 @@ function Header() {
         {/* Links + Button */}
         <div className="flex items-center gap-15 font-['Zalando_Sans_Expanded']">
           <Link
-            to="/"
-            className="font-extrabold text-[#230000de] hover:text-[#cb7300ff] transition-colors duration-300"
-          >
-            HOME
-          </Link>
-          <Link
             to="/comingsoon"
             className="font-extrabold text-[#230000de] hover:text-[#cb7300ff] transition-colors duration-300"
           >
             ABOUT
           </Link>
           <Link
-            to="/comingsoon"
+            to="/#footer"
             className="font-extrabold text-[#230000de] hover:text-[#cb7300ff] transition-colors duration-300"
           >
             CONTACT
           </Link>
           <Link
-            to="/comingsoon"
+            to="/#faq"
             className="font-extrabold text-[#230000de] hover:text-[#cb7300ff] transition-colors duration-300"
           >
             LEARN MORE

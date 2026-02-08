@@ -26,7 +26,11 @@ function Footer() {
   ];
 
   return (
+<<<<<<< HEAD
     <footer className="bg-white">
+=======
+    <footer id="footer" className="bg-white">
+>>>>>>> main
       <div className="max-w-8xl mx-auto py-16 px-10">
         {/* Top Section */}
         <div className="grid grid-cols-1 md:grid-cols-6 h-full">
