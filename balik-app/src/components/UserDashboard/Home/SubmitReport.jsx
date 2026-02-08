@@ -7,6 +7,7 @@ import { X, CheckCircle, Search, Brain, MapPin, MapPinned } from "lucide-react";
 import "react-datepicker/dist/react-datepicker.css";
 import { useAuth } from "../../../shared/context/AuthContext";
 import { itemService } from "../../../services/itemService";
+import { nlpService } from "../../../services/nlpService";
 
 export default function SubmitReport() {
   const [reportType, setReportType] = useState("");
@@ -25,6 +26,7 @@ export default function SubmitReport() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isMatching, setIsMatching] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [matchedItems, setMatchedItems] = useState([]);
   const [showMatchModal, setShowMatchModal] = useState(false);
@@ -128,13 +130,14 @@ export default function SubmitReport() {
       setCreatedItemId(newItem?.id);
 
       // 3. Immediate Smart Match Check
+      setIsMatching(true);
       if (mappedData.description_embedding) {
         try {
           const targetType = mappedData.type === "lost" ? "found" : "lost";
           const matches = await itemService.getSmartMatches(
             mappedData.description_embedding,
             targetType,
-            0.6,
+            0.5, // Lowered for better discovery
             5,
             {
               category,
@@ -148,13 +151,14 @@ export default function SubmitReport() {
             setMatchedItems(matches);
             setMatchType(targetType);
             setShowMatchModal(true);
-            setIsSubmitting(false);
+            setIsMatching(false);
             return; // Don't show regular success, show matches
           }
         } catch (matchError) {
           console.warn("Match check failed:", matchError);
         }
       }
+      setIsMatching(false);
 
       setShowSuccess(true);
 
@@ -464,10 +468,10 @@ export default function SubmitReport() {
               </Link>
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className={`cursor-pointer px-10 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={isSubmitting || isMatching}
+                className={`cursor-pointer px-10 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 ${isSubmitting || isMatching ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                {isSubmitting ? "Submitting..." : "Submit"}
+                {isSubmitting ? "Submitting..." : isMatching ? "Finding Matches..." : "Submit"}
               </button>
             </div>
           </form>

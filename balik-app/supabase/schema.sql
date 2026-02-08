@@ -16,7 +16,7 @@ create table public.profiles (
 -- Items table (Lost and Found)
 create table public.items (
   id uuid default gen_random_uuid() primary key,
-  user_id uuid references public.profiles(id) on delete cascade not null,
+  user_id uuid references public.profiles(id) on delete cascade, -- Nullable for anonymous reports
   type text check (type in ('lost', 'found')) not null,
   category text not null,
   title text not null,
@@ -27,7 +27,7 @@ create table public.items (
   status text default 'pending' not null, -- pending, matching, resolved, claimed
   image_url text,
   -- For NLP vector search
-  description_embedding vector(1536), -- Assuming 1536 dimensions (like OpenAI)
+  description_embedding vector(384), -- Matches Xenova model dimension (384)
   metadata jsonb default '{}'::jsonb,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -65,12 +65,12 @@ create policy "Public profiles are viewable by everyone." on public.profiles for
 create policy "Users can update own profile." on public.profiles for update using (auth.uid() = id);
 
 create policy "Items are viewable by everyone." on public.items for select using (true);
-create policy "Users can insert their own items." on public.items for insert with check (auth.uid() = user_id);
+create policy "Anyone can insert items." on public.items for insert with check (true);
 create policy "Users can update their own items." on public.items for update using (auth.uid() = user_id);
 
 -- NLP Smart Matching Function (Basic Vector Similarity)
 create or replace function match_items (
-  query_embedding vector(1536),
+  query_embedding vector(384),
   match_threshold float,
   match_count int,
   item_type text

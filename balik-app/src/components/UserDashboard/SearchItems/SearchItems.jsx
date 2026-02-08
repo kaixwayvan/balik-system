@@ -11,6 +11,7 @@ import {
 import DatePicker from "react-datepicker";
 import { itemService } from "../../../services/itemService";
 import { nlpService } from "../../../services/nlpService";
+import { ALL_CATEGORIES } from "../../../shared/constants/categories";
 
 import iphoneImg from "../../../assets/home-assets/img-items/iphone.png";
 import bagImg from "../../../assets/home-assets/img-items/bag.png";
@@ -19,7 +20,7 @@ import walletImg from "../../../assets/home-assets/img-items/wallet.png";
 import glassesImg from "../../../assets/home-assets/img-items/glasses.png";
 import bottleImg from "../../../assets/home-assets/img-items/bottle.png";
 
-const categories = ["All Items", "Electronics", "Accessories", "Bags", "Documents", "Others"];
+
 
 export default function SubmitReport() {
   const [items, setItems] = useState([]);
@@ -139,7 +140,7 @@ export default function SubmitReport() {
 
       {/* Categories */}
       <div className="mb-6 flex flex-wrap gap-2">
-        {categories.map((cat) => (
+        {ALL_CATEGORIES.map((cat) => (
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}

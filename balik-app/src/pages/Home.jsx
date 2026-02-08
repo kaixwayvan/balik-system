@@ -2,14 +2,15 @@ import { useState, useRef, useEffect } from "react"
 import UserProfile from "../components/UserDashboard/UserProfile/UserProfile";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { valuableItemsCards, systemCards } from "./data/cards"
-import { categories, foundItems } from "./data/recentlyFoundData"
+import { ALL_CATEGORIES } from "../shared/constants/categories"
+import { foundItems } from "./data/recentlyFoundData"
 import headerBg from "../assets/home-assets/bg-header.png"
 import { whyBalikData } from "./data/whyBalikData"
 import { topContributors } from "./data/topContributorsData"
 import { successStories } from "./data/successStoriesData"
 import { securityData } from "./data/securityData";
 import { faqData } from "./data/faqData";
-import { Search, ChevronDown, Users, UserPlus, LogIn } from "lucide-react";
+import { Search, ChevronDown, Users, UserPlus, LogIn, X, Brain } from "lucide-react";
 import { joinFeaturesData } from "./data/joinFeaturesData";
 import { useAuth } from "../shared/context/AuthContext";
 import { itemService } from "../services/itemService";
@@ -88,6 +89,7 @@ function Home() {
   const formRef = useRef(null)
   const [formMode, setFormMode] = useState("found") // 'found' | 'lost'
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isMatching, setIsMatching] = useState(false);
   const [recentSupabaseItems, setRecentSupabaseItems] = useState([]);
   const [itemsLoading, setItemsLoading] = useState(true);
 
@@ -146,6 +148,7 @@ function Home() {
     reporterName: "",
     mobileNumber: "",
     email: "",
+    anonymous: false,
   })
   const [imagePreview, setImagePreview] = useState(null)
   const [submitted, setSubmitted] = useState({ show: false, anonymous: false, mode: "found" })
@@ -238,6 +241,7 @@ function Home() {
       return
     }
 
+    // Allow non-logged-in users to submit (they will have user_id: null)
     setIsSubmitting(true)
     try {
       // 1. Upload image to Supabase Storage
@@ -248,7 +252,6 @@ function Home() {
 
       // 2. Prepare data for Supabase
       const mappedData = {
-        user_id: user?.id || null,
         type: 'found',
         category: formData.itemCategory,
         title: formData.whatWasFound,
@@ -261,11 +264,17 @@ function Home() {
           brand: formData.brand,
           color: formData.color,
           reporter: {
-            name: formData.reporterName,
-            mobile: formData.mobileNumber,
-            email: formData.email
-          }
+            name: formData.anonymous ? "Anonymous" : formData.reporterName,
+            mobile: formData.anonymous ? "N/A" : formData.mobileNumber,
+            email: formData.anonymous ? "N/A" : formData.email
+          },
+          is_anonymous: formData.anonymous
         }
+      }
+
+      // 2.5 Only attach user_id if logged in
+      if (user?.id) {
+        mappedData.user_id = user.id;
       }
 
       // 3. Generate embedding for smart matching
@@ -284,36 +293,11 @@ function Home() {
       const createdItem = await itemService.reportItem(mappedData);
       setCreatedItemId(createdItem?.id || null);
 
-      // 5. Fetch smart matches if embedding exists
-      if (currentEmbedding) {
-        try {
-          const matches = await itemService.getSmartMatches(
-            currentEmbedding,
-            'lost',
-            0.6, // Weighted sum threshold (Show matches above 60%)
-            4,
-            {
-              category: formData.itemCategory,
-              color: formData.color,
-              location: formData.location,
-              date: formData.dateFound
-            }
-          );
-          if (matches && matches.length > 0) {
-            setMatchedItems(matches);
-            setShowMatchModal(true);
-          } else {
-            setSubmitted({ show: true, anonymous: false, mode: 'found' });
-          }
-        } catch (matchError) {
-          console.error("Smart matching error:", matchError);
-          setSubmitted({ show: true, anonymous: false, mode: 'found' });
-        }
-      } else {
-        setSubmitted({ show: true, anonymous: false, mode: 'found' });
-      }
+      // 5. Smart Matching Phase
+      setIsMatching(true);
 
-      // reset form
+      // Reset form immediately after successful DB submission
+      const submittedFormData = { ...formData }; // Keep a copy for matching search
       setFormData({
         reportType: "Found Item",
         whatWasFound: "",
@@ -327,17 +311,60 @@ function Home() {
         reporterName: "",
         mobileNumber: "",
         email: "",
-      })
-      setImagePreview(null)
+      });
+      setImagePreview(null);
 
-      // Refresh the local items list
+      if (currentEmbedding) {
+        try {
+          const matches = await itemService.getSmartMatches(
+            currentEmbedding,
+            'lost',
+            0.5,
+            4,
+            {
+              category: submittedFormData.itemCategory,
+              color: submittedFormData.color,
+              location: submittedFormData.location,
+              date: submittedFormData.dateFound
+            }
+          );
+          if (matches && matches.length > 0) {
+            setMatchedItems(matches);
+            setShowMatchModal(true);
+            setIsMatching(false);
+
+            // Refresh items list in background and ensure visibility
+            const data = await itemService.getRecentItems('found', 6);
+            setRecentSupabaseItems(data);
+            setActiveCategory("All Items");
+            return;
+          }
+        } catch (matchError) {
+          console.error("Smart matching error:", matchError);
+        }
+      }
+      setIsMatching(false);
+      setSubmitted({
+        show: true,
+        anonymous: submittedFormData.anonymous,
+        mode: 'found',
+        isError: false
+      });
+
+      // Refresh the local items list and reset filter to show new item
       const data = await itemService.getRecentItems('found', 6);
       setRecentSupabaseItems(data);
+      setActiveCategory("All Items");
 
     } catch (err) {
       console.error("Submission Error:", err);
-      // alert('Submission failed: ' + err.message) // Replaced by success modal logic
-      setSubmitted({ show: true, anonymous: false, mode: 'found', isError: true, message: 'Submission failed: ' + err.message });
+      setSubmitted({
+        show: true,
+        anonymous: formData.anonymous,
+        mode: 'found',
+        isError: true,
+        message: err.message || "Something went wrong. Please try again."
+      });
     } finally {
       setIsSubmitting(false)
     }
@@ -345,8 +372,10 @@ function Home() {
 
 
   function validateForm() {
-    const { whatWasFound, itemCategory, dateFound, location, reporterName, mobileNumber, email } = formData;
-    return whatWasFound && itemCategory && dateFound && location && reporterName && mobileNumber && email;
+    const { whatWasFound, itemCategory, dateFound, location, reporterName, mobileNumber, email, anonymous } = formData;
+    const baseFields = whatWasFound && itemCategory && dateFound && location;
+    if (anonymous) return baseFields;
+    return baseFields && reporterName && mobileNumber && email;
   }
 
   return (
@@ -481,8 +510,8 @@ function Home() {
         </div>
 
         {/* Filters */}
-        <div className="flex justify-center gap-3 mb-12">
-          {categories.map((cat, index) => (
+        <div className="flex flex-wrap justify-center gap-3 mb-12">
+          {ALL_CATEGORIES.map((cat, index) => (
             <button
               key={index}
               onClick={() => setActiveCategory(cat)}
@@ -631,7 +660,6 @@ function Home() {
                   <label className="font-bold text-[#7B1C1C] text-lg">Report Type <span className="text-red-500">*</span></label>
                   <select name="reportType" value={formData.reportType} onChange={handleInputChange} className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none">
                     <option value="Found Item">Found Item</option>
-                    <option value="Abandoned Item">Abandoned Item</option>
                   </select>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -646,7 +674,7 @@ function Home() {
                   <label className="font-bold text-[#7B1C1C] text-lg">Item Category <span className="text-red-500">*</span></label>
                   <select name="itemCategory" value={formData.itemCategory} onChange={handleInputChange} className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required>
                     <option value="">Select category</option>
-                    {categories.map((cat) => (
+                    {ALL_CATEGORIES.filter(c => c !== "All Items").map((cat) => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
                   </select>
@@ -706,44 +734,70 @@ function Home() {
                 </div>
               </div>
 
-              <div className="pt-8 border-t border-slate-100">
-                <h3 className="text-2xl font-extrabold text-[#7B1C1C] mb-8 flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-sm">2</span>
-                  Reporter's Information
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="flex flex-col gap-2">
-                    <label className="font-bold text-[#7B1C1C] text-lg">Name <span className="text-red-500">*</span></label>
-                    <input type="text" name="reporterName" value={formData.reporterName} onChange={handleInputChange} className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
+              <div className="pt-8 border-t border-slate-100 flex flex-col items-center">
+                <div className="flex items-center gap-4 mb-8 bg-blue-50/50 px-8 py-4 rounded-[2rem] border border-blue-100 shadow-sm transition-all hover:bg-blue-50">
+                  <div className="relative flex items-center">
+                    <input
+                      type="checkbox"
+                      name="anonymous"
+                      id="anonymous"
+                      checked={formData.anonymous}
+                      onChange={handleInputChange}
+                      className="w-6 h-6 cursor-pointer rounded-lg border-2 border-blue-300 text-blue-600 focus:ring-blue-500 transition-all"
+                    />
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="font-bold text-[#7B1C1C] text-lg">Mobile Number <span className="text-red-500">*</span></label>
-                    <input type="tel" name="mobileNumber" value={formData.mobileNumber} onChange={handleInputChange} placeholder="e.g. 09123456789" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="font-bold text-[#7B1C1C] text-lg">Email <span className="text-red-500">*</span></label>
-                    <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="your@email.com" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
-                  </div>
+                  <label htmlFor="anonymous" className="font-extrabold text-blue-900 text-xl cursor-pointer select-none">
+                    Submit Anonymously
+                    <span className="block text-xs text-blue-500 font-bold ml-0.5">Your identity won't be shared with claimants</span>
+                  </label>
                 </div>
-              </div>
 
-              <div className="flex justify-center pt-8">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className={`w-full max-w-sm bg-[#00C853] hover:bg-[#00ad48] text-white font-black text-xl py-5 rounded-2xl shadow-xl shadow-green-200 transition-all active:scale-[0.98]
-                    ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}
-                  `}
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center justify-center gap-3">
-                      <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      Processing...
+                {!formData.anonymous && (
+                  <div className="w-full animate-in slide-in-from-top duration-500">
+                    <h3 className="text-2xl font-extrabold text-[#7B1C1C] mb-8 flex items-center gap-3 text-left">
+                      <span className="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-sm">2</span>
+                      Reporter's Information
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      <div className="flex flex-col gap-2">
+                        <label className="font-bold text-[#7B1C1C] text-lg text-left">Name <span className="text-red-500">*</span></label>
+                        <input type="text" name="reporterName" value={formData.reporterName} onChange={handleInputChange} placeholder="Full Name" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="font-bold text-[#7B1C1C] text-lg text-left">Mobile Number <span className="text-red-500">*</span></label>
+                        <input type="tel" name="mobileNumber" value={formData.mobileNumber} onChange={handleInputChange} placeholder="e.g. 09123456789" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="font-bold text-[#7B1C1C] text-lg text-left">Email <span className="text-red-500">*</span></label>
+                        <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="your@email.com" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
+                      </div>
                     </div>
-                  ) : (
-                    "Submit Report"
-                  )}
-                </button>
+                  </div>
+                )}
+
+                <div className="flex justify-center pt-8">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || isMatching}
+                    className={`w-full max-w-sm bg-[#00C853] hover:bg-[#00ad48] text-white font-black text-xl py-5 rounded-2xl shadow-xl shadow-green-200 transition-all active:scale-[0.98]
+                      ${(isSubmitting || isMatching) ? 'opacity-50 cursor-not-allowed' : ''}
+                    `}
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center justify-center gap-3">
+                        <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        Processing...
+                      </div>
+                    ) : isMatching ? (
+                      <div className="flex items-center justify-center gap-3">
+                        <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        Finding Matches...
+                      </div>
+                    ) : (
+                      "Submit Report"
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </form>
@@ -756,35 +810,65 @@ function Home() {
           <div className="bg-[#FFF9E1] rounded-[2.5rem] max-w-lg w-full p-10 relative mx-4 shadow-2xl border border-yellow-100/50 animate-in zoom-in-95 duration-300">
             <button
               onClick={() => setSubmitted({ show: false, anonymous: false, mode: formMode })}
-              className="cursor-pointer absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors"
+              className="cursor-pointer absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors bg-white/50 w-10 h-10 rounded-full flex items-center justify-center"
             >
-              <X size={28} />
+              <X size={24} />
             </button>
 
             <div className="flex flex-col items-center text-center">
-              <div className="w-24 h-24 rounded-full border-[6px] border-green-500/20 flex items-center justify-center bg-white mb-6">
-                <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center shadow-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 00-1.414-1.414L8 11.172 4.707 7.879A1 1 0 003.293 9.293l4 4a1 1 0 001.414 0l8-8z" clipRule="evenodd" />
-                  </svg>
+              <div className={`w-24 h-24 rounded-full border-[6px] ${submitted.isError ? 'border-red-500/20' : 'border-green-500/20'} flex items-center justify-center bg-white mb-6`}>
+                <div className={`w-16 h-16 rounded-full ${submitted.isError ? 'bg-red-500' : 'bg-green-500'} flex items-center justify-center shadow-sm`}>
+                  {submitted.isError ? (
+                    <X className="h-10 w-10 text-white" />
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 00-1.414-1.414L8 11.172 4.707 7.879A1 1 0 003.293 9.293l4 4a1 1 0 001.414 0l8-8z" clipRule="evenodd" />
+                    </svg>
+                  )}
                 </div>
               </div>
 
-              <h3 className="text-3xl font-black text-[#374151] mb-6 leading-tight">
-                Report Submitted!
+              <h3 className={`text-3xl font-black ${submitted.isError ? 'text-red-600' : 'text-[#374151]'} mb-6 leading-tight`}>
+                {submitted.isError ? 'Submission Failed' : 'Report Submitted Successfully'}
               </h3>
 
-              <div className="space-y-2 text-[#4B5563] text-lg leading-relaxed mb-8 font-medium">
-                <p>Thank you for your report.</p>
-                <p>Our team will review the information and contact you if there's a match.</p>
+              <div className="space-y-1 text-[#4B5563] text-[1.05rem] leading-relaxed mb-8 font-medium">
+                {submitted.isError ? (
+                  <p>{submitted.message || "An unexpected error occurred while submitting your report."}</p>
+                ) : (
+                  <>
+                    <p>Thank you for providing your information.</p>
+                    <p>No immediate matches were found, but our AI is now constantly monitoring new reports for you.</p>
+                    <p>We'll notify you the moment a potential match appears!</p>
+
+                    <div className="mt-8 bg-white/50 p-6 rounded-[2rem] border border-yellow-200/50 shadow-sm">
+                      <p className="mb-2">Your report is now live in the <span className="font-bold text-blue-600">Recently Found Items</span> section.</p>
+                      {user ? (
+                        <p>It's also been added to your <span className="font-bold text-[#7B1C1C]">Dashboard</span> for easy tracking.</p>
+                      ) : (
+                        <p className="text-sm italic">Tip: <Link to="/login" className="text-blue-600 font-bold hover:underline">Log in</Link> so you can manage this report from your personal dashboard.</p>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
 
-              <button
-                onClick={() => setSubmitted({ show: false, anonymous: false, mode: formMode })}
-                className="cursor-pointer w-full max-w-[160px] bg-[#1D4ED8] hover:bg-[#1E40AF] text-white py-4 rounded-2xl font-black shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98] text-lg"
-              >
-                GOT IT
-              </button>
+              <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+                <button
+                  onClick={() => setSubmitted({ show: false, anonymous: false, mode: formMode })}
+                  className="cursor-pointer flex-1 max-w-[200px] bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-600 py-4 rounded-2xl font-black transition-all active:scale-[0.98] text-lg"
+                >
+                  {submitted.isError ? 'TRY AGAIN' : 'OK'}
+                </button>
+                {user && (
+                  <button
+                    onClick={() => navigate("/dashboard/found")}
+                    className="cursor-pointer flex-1 max-w-[200px] bg-[#1D4ED8] hover:bg-[#1E40AF] text-white py-4 rounded-2xl font-black shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98] text-lg"
+                  >
+                    GO TO DASHBOARD
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -803,8 +887,8 @@ function Home() {
                 <X size={32} />
               </button>
 
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full font-black text-sm uppercase tracking-widest mb-4">
-                <Search size={16} />
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full font-black text-sm uppercase tracking-widest mb-4 animate-pulse">
+                <Brain size={18} className="animate-bounce" />
                 AI Smart Match Found
               </div>
 

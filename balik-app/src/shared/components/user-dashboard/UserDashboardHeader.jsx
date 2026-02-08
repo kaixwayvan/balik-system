@@ -119,10 +119,10 @@ export default function UserDashboardHeader() {
                   try {
                     const { logoutSupabase } = await import("../../../pages/auth/services/supabaseAuthService");
                     await logoutSupabase();
-                    window.location.href = "/login";
+                    window.location.href = "/";
                   } catch (err) {
                     console.error("Logout error:", err);
-                    window.location.href = "/login";
+                    window.location.href = "/";
                   }
                 }}
                 className="cursor-pointer w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50 text-red-600 font-medium"

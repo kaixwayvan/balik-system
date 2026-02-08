@@ -8,6 +8,7 @@ import { itemService } from "../../../services/itemService";
 import ReportCard from "./ReportCard";
 import ConfirmMatchModal from "./ConfirmMatchModal";
 import ClaimModal from "./ClaimModal";
+import { CATEGORIES } from "../../../shared/constants/categories";
 
 import Id from "../../../assets/home-assets/img-items/id.png";
 import Camera from "../../../assets/home-assets/img-items/camera.png";
@@ -67,7 +68,7 @@ export default function ActiveReports() {
   });
 
   const [errors, setErrors] = useState({});
-  const categories = ["ID", "Wallet", "Electronics", "Others"];
+
 
   const fetchReports = async () => {
     if (!user) {
@@ -264,7 +265,7 @@ export default function ActiveReports() {
           setForm={setForm}
           errors={errors}
           setErrors={setErrors}
-          categories={categories}
+          categories={CATEGORIES}
         />
       )}
     </div>

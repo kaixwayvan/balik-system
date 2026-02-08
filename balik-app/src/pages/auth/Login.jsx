@@ -270,26 +270,7 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="my-6 flex items-center gap-3">
-            <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-sm text-gray-500">or</span>
-            <div className="flex-1 h-px bg-gray-200" />
-          </div>
 
-          {/* Google Login */}
-          <button
-            onClick={googleLogin}
-            disabled={loading}
-            className="w-full border py-2.5 rounded-md font-medium flex items-center justify-center gap-3 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50"
-          >
-            <img
-              src="https://www.pngall.com/wp-content/uploads/5/Google-G-Logo-PNG-Image.png"
-              alt="Google Logo"
-              className="w-5"
-            />
-            Continue with Google
-          </button>
 
           {/* Signup */}
           <p className="mt-6 text-center text-sm text-gray-600">

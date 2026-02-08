@@ -10,14 +10,14 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../shared/context/AuthContext";
 import { itemService } from "../../services/itemService";
-// import { nlpService } from "../../services/nlpService";
-const nlpService = { generateEmbedding: () => Promise.resolve(null) };
+import { nlpService } from "../../services/nlpService";
 import WelcomeBanner from "../../components/UserDashboard/Home/WelcomeBanner";
 import StatsCards from "../../components/UserDashboard/Home/StatsCards";
 import QuickActions from "../../components/UserDashboard/Home/QuickActions";
 import RecentActivity from "../../components/UserDashboard/Home/RecentActivity";
 import PointsPanel from "../../components/UserDashboard/Home/PointsPanel";
 import AchievementsPanel from "../../components/UserDashboard/Home/AchievementsPanel";
+import { CATEGORIES } from "../../shared/constants/categories";
 import { supabase } from "../../utils/supabaseClient";
 
 const initialLostFormData = {
@@ -33,6 +33,7 @@ const initialLostFormData = {
   reporterName: "",
   mobileNumber: "",
   email: "",
+  anonymous: false,
 };
 
 const initialFoundFormData = {
@@ -48,6 +49,7 @@ const initialFoundFormData = {
   reporterName: "",
   mobileNumber: "",
   email: "",
+  anonymous: false,
 };
 
 export default function DashboardHome() {
@@ -55,6 +57,7 @@ export default function DashboardHome() {
   const navigate = useNavigate();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isMatching, setIsMatching] = useState(false);
   const [stats, setStats] = useState({ total: 0, lost: 0, found: 0, resolved: 0 });
   const [showReportModal, setShowReportModal] = useState(false);
   const [showLostItemForm, setShowLostItemForm] = useState(false);
@@ -71,7 +74,7 @@ export default function DashboardHome() {
   const [matchType, setMatchType] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const categoriesList = ["Electronics", "ID & Documents", "Wallets & Bags", "Clothing & Accessories", "Personal Items", "Others"];
+
 
   // Fetch stats and recent items from Supabase
   useEffect(() => {
@@ -136,8 +139,12 @@ export default function DashboardHome() {
   };
 
   const handleFoundFormChange = (e) => {
-    const { name, value } = e.target;
-    setFoundFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    if (type === "checkbox") {
+      setFoundFormData((prev) => ({ ...prev, [name]: checked }));
+    } else {
+      setFoundFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handlePhotoChange = (e) => {
@@ -234,14 +241,18 @@ export default function DashboardHome() {
 
       const newItem = await itemService.reportItem(mappedData);
 
-      // Check for matches immediately
+      const updatedStats = await itemService.getUserStats(user.id);
+      setStats(updatedStats);
+
+      // Step 2: Smart Matching Phase
+      setIsMatching(true);
       if (embedding) {
         try {
           // If we reported a LOST item, we look for FOUND items
           const matches = await itemService.getSmartMatches(
             embedding,
             'found',
-            0.6,
+            0.5, // Lowered threshold slightly for better discoverability
             5,
             {
               category: lostFormData.itemCategory,
@@ -253,19 +264,17 @@ export default function DashboardHome() {
 
           if (matches && matches.length > 0) {
             setMatchedItems(matches);
-            setMatchType('found'); // We are looking at found items that match our lost item
+            setMatchType('found');
             setShowMatchModal(true);
-            setIsSubmitting(false);
+            setIsMatching(false);
             setCreatedItemId(newItem?.id);
-            return; // Stop navigation, let user review matches
+            return;
           }
         } catch (matchError) {
           console.warn("Smart matching check failed:", matchError);
         }
       }
-
-      const updatedStats = await itemService.getUserStats(user.id);
-      setStats(updatedStats);
+      setIsMatching(false);
 
       setShowSuccess(true);
 
@@ -294,8 +303,11 @@ export default function DashboardHome() {
     e.preventDefault();
     if (!user) return alert("You must be logged in to submit a report.");
 
-    const { whatWasFound, itemCategory, dateFound, location, reporterName, mobileNumber, email } = foundFormData;
-    if (!whatWasFound || !itemCategory || !dateFound || !location || !reporterName || !mobileNumber || !email) {
+    const { whatWasFound, itemCategory, dateFound, location, reporterName, mobileNumber, email, anonymous } = foundFormData;
+    const baseFields = whatWasFound && itemCategory && dateFound && location;
+    const contactFields = anonymous || (reporterName && mobileNumber && email);
+
+    if (!baseFields || !contactFields) {
       return alert("Please fill in all required fields.");
     }
 
@@ -320,10 +332,11 @@ export default function DashboardHome() {
           brand: foundFormData.brand,
           color: foundFormData.color,
           reporter: {
-            name: foundFormData.reporterName,
-            mobile: foundFormData.mobileNumber,
-            email: foundFormData.email
-          }
+            name: foundFormData.anonymous ? "Anonymous" : foundFormData.reporterName,
+            mobile: foundFormData.anonymous ? "N/A" : foundFormData.mobileNumber,
+            email: foundFormData.anonymous ? "N/A" : foundFormData.email
+          },
+          is_anonymous: foundFormData.anonymous
         }
       };
 
@@ -350,6 +363,11 @@ export default function DashboardHome() {
 
       const newItem = await itemService.reportItem(mappedData);
 
+      const updatedStats = await itemService.getUserStats(user.id);
+      setStats(updatedStats);
+
+      // Step 2: Smart Matching Phase
+      setIsMatching(true);
       // Check for matches immediately
       if (embedding) {
         try {
@@ -357,7 +375,7 @@ export default function DashboardHome() {
           const matches = await itemService.getSmartMatches(
             embedding,
             'lost',
-            0.6,
+            0.5, // Lowered threshold slightly for better discoverability
             5,
             {
               category: foundFormData.itemCategory,
@@ -369,19 +387,17 @@ export default function DashboardHome() {
 
           if (matches && matches.length > 0) {
             setMatchedItems(matches);
-            setMatchType('lost'); // We are looking at lost items that match our found item
+            setMatchType('lost');
             setShowMatchModal(true);
-            setIsSubmitting(false);
+            setIsMatching(false);
             setCreatedItemId(newItem?.id);
-            return; // Stop navigation
+            return;
           }
         } catch (matchError) {
           console.warn("Smart matching check failed:", matchError);
         }
       }
-
-      const updatedStats = await itemService.getUserStats(user.id);
-      setStats(updatedStats);
+      setIsMatching(false);
 
       setShowSuccess(true);
 
@@ -479,7 +495,7 @@ export default function DashboardHome() {
                   <label className="block font-semibold mb-1">Item Category <span className="text-red-500">*</span></label>
                   <select name="itemCategory" value={lostFormData.itemCategory} onChange={handleLostFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500">
                     <option value="">Select category</option>
-                    {categoriesList.map(cat => (
+                    {CATEGORIES.map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
                   </select>
@@ -545,8 +561,8 @@ export default function DashboardHome() {
               </div>
               <div className="flex justify-center gap-4 mt-8">
                 <button type="button" onClick={handleLostFormCancel} className="px-12 py-3 border border-gray-400 rounded-lg font-semibold hover:bg-gray-100 transition">Cancel</button>
-                <button type="submit" disabled={isSubmitting} className={`px-12 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                  {isSubmitting ? "Submitting..." : "Submit"}
+                <button type="submit" disabled={isSubmitting || isMatching} className={`px-12 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition ${isSubmitting || isMatching ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  {isSubmitting ? "Submitting..." : isMatching ? "Finding Matches..." : "Submit"}
                 </button>
               </div>
             </form>
@@ -565,7 +581,6 @@ export default function DashboardHome() {
                   <label className="block font-semibold mb-1 text-[#7B1C1C]">Report Type <span className="text-red-500">*</span></label>
                   <select name="reportType" value={foundFormData.reportType} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500">
                     <option value="Found Item">Found Item</option>
-                    <option value="Abandoned Item">Abandoned Item</option>
                   </select>
                 </div>
                 <div>
@@ -579,7 +594,7 @@ export default function DashboardHome() {
                   <label className="block font-semibold mb-1 text-[#7B1C1C]">Item Category <span className="text-red-500">*</span></label>
                   <select name="itemCategory" value={foundFormData.itemCategory} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500">
                     <option value="">Select category</option>
-                    {categoriesList.map(cat => (
+                    {CATEGORIES.map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
                   </select>
@@ -628,25 +643,46 @@ export default function DashboardHome() {
                   {photoPreview && <img src={photoPreview} alt="Preview" className="mt-2 w-20 h-20 object-cover rounded" />}
                 </div>
               </div>
-              <h3 className="text-xl font-bold text-[#7B1C1C] mb-4">Reporters Information</h3>
-              <div className="grid grid-cols-3 gap-6 mb-6">
-                <div>
-                  <label className="block font-semibold mb-1 text-[#7B1C1C]">Name <span className="text-red-500">*</span></label>
-                  <input type="text" name="reporterName" value={foundFormData.reporterName} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
-                </div>
-                <div>
-                  <label className="block font-semibold mb-1 text-[#7B1C1C]">Mobile Number <span className="text-red-500">*</span></label>
-                  <input type="tel" name="mobileNumber" value={foundFormData.mobileNumber} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
-                </div>
-                <div>
-                  <label className="block font-semibold mb-1 text-[#7B1C1C]">Email <span className="text-red-500">*</span></label>
-                  <input type="email" name="email" value={foundFormData.email} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
-                </div>
+
+              <div className="flex items-center gap-3 mb-6 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                <input
+                  type="checkbox"
+                  name="anonymous"
+                  id="dashboard-anonymous"
+                  checked={foundFormData.anonymous}
+                  onChange={handleFoundFormChange}
+                  className="w-5 h-5 cursor-pointer accent-blue-600"
+                />
+                <label htmlFor="dashboard-anonymous" className="font-bold text-blue-900 cursor-pointer select-none">
+                  Submit Anonymously
+                  <span className="block text-xs text-blue-500 font-normal">Hide your identity from claimants</span>
+                </label>
               </div>
+
+              {!foundFormData.anonymous && (
+                <div className="animate-in slide-in-from-top duration-300">
+                  <h3 className="text-xl font-bold text-[#7B1C1C] mb-4">Reporters Information</h3>
+                  <div className="grid grid-cols-3 gap-6 mb-6">
+                    <div>
+                      <label className="block font-semibold mb-1 text-[#7B1C1C]">Name <span className="text-red-500">*</span></label>
+                      <input type="text" name="reporterName" value={foundFormData.reporterName} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
+                    </div>
+                    <div>
+                      <label className="block font-semibold mb-1 text-[#7B1C1C]">Mobile Number <span className="text-red-500">*</span></label>
+                      <input type="tel" name="mobileNumber" value={foundFormData.mobileNumber} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
+                    </div>
+                    <div>
+                      <label className="block font-semibold mb-1 text-[#7B1C1C]">Email <span className="text-red-500">*</span></label>
+                      <input type="email" name="email" value={foundFormData.email} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex justify-center gap-4 mt-8">
                 <button type="button" onClick={handleFoundFormCancel} className="px-12 py-3 border border-gray-400 rounded-lg font-semibold hover:bg-gray-100 transition">Cancel</button>
-                <button type="submit" disabled={isSubmitting} className={`px-12 py-3 bg-[#00C853] hover:bg-[#00ad48] text-white font-semibold rounded-lg transition ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                  {isSubmitting ? "Submitting..." : "Submit"}
+                <button type="submit" disabled={isSubmitting || isMatching} className={`px-12 py-3 bg-[#00C853] hover:bg-[#00ad48] text-white font-semibold rounded-lg transition ${isSubmitting || isMatching ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  {isSubmitting ? "Submitting..." : isMatching ? "Finding Matches..." : "Submit"}
                 </button>
               </div>
             </form>
@@ -655,141 +691,140 @@ export default function DashboardHome() {
       )}
 
       {/* MATCH CONFIRMATION MODAL */}
-      {showMatchModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-xl max-w-2xl w-full p-6 relative shadow-2xl flex flex-col max-h-[90vh]">
-            <button
-              onClick={() => {
-                setShowMatchModal(false);
-                // Redirect based on what they were reporting
-                if (matchType === 'found') {
-                  navigate('/dashboard/reports'); // They reported lost, so go to reports
-                } else {
-                  navigate('/dashboard/track'); // They reported found, so go to track
-                }
-              }}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-            >
-              <X size={24} />
-            </button>
+      {
+        showMatchModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+            <div className="bg-white rounded-[3rem] max-w-4xl w-full max-h-[90vh] overflow-hidden relative mx-4 shadow-2xl border border-blue-100 animate-in zoom-in-95 duration-300 flex flex-col">
 
-            <div className="mb-6 text-center">
-              <div className="mx-auto w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-                <AlertCircle size={32} className="text-purple-600" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-800">Potential Matches Found!</h2>
-              <p className="text-gray-600 mt-2">
-                Good news! We found {matchedItems.length} items that might match your report.
-              </p>
-            </div>
-
-            <div className="flex-1 overflow-y-auto space-y-4 mb-6 pr-2">
-              {matchedItems.map((item) => (
-                <div key={item.id} className="flex gap-4 p-4 border rounded-xl hover:border-purple-300 transition bg-slate-50">
-                  <div className="w-24 h-24 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
-                    {item.image_url ? (
-                      <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">No Img</div>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-bold text-lg text-slate-800">{item.title}</h3>
-                      <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full font-bold">
-                        {(item.similarity * 100).toFixed(0)}% Match
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">{item.description}</p>
-                    <div className="flex gap-4 mt-3 text-xs text-slate-500">
-                      <span>📍 {item.location}</span>
-                      <span>📅 {new Date(item.date_reported).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-4">
-              <button
-                onClick={() => {
-                  setShowMatchModal(false);
-                  if (matchType === 'found') {
-                    navigate('/dashboard/reports');
-                  } else {
-                    navigate('/dashboard/track');
-                  }
-                }}
-                className="flex-1 py-3 text-gray-600 font-semibold hover:bg-gray-100 rounded-lg transition"
-              >
-                Review Later
-              </button>
-              <button
-                onClick={() => {
-                  // If they want to check matches, we might send them to search page with filter
-                  navigate('/dashboard/find-items');
-                }}
-                className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition"
-              >
-                View Details
-              </button>
-            </div>
-            <div className="p-8 bg-white border-t border-slate-50 flex justify-center">
-              <button
-                onClick={() => setShowMatchModal(false)}
-                className="cursor-pointer text-slate-400 font-bold hover:text-slate-600 transition-colors uppercase tracking-widest text-sm"
-              >
-                None of these match my report
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showSuccess && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-[#FFF9E1] rounded-2xl max-w-lg w-full p-10 relative mx-4 shadow-2xl border border-yellow-100/50 animate-in zoom-in-95 duration-300 font-sans">
-            <button
-              onClick={() => { setShowSuccess(false); navigate(showLostItemForm ? '/dashboard/reports' : '/dashboard/track'); }}
-              className="cursor-pointer absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <X size={24} />
-            </button>
-
-            <div className="flex flex-col items-center text-center">
-              <div className="w-24 h-24 rounded-full border-[6px] border-green-500/20 flex items-center justify-center bg-white mb-6">
-                <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center shadow-sm">
-                  <CheckCircle className="h-10 w-10 text-white" />
-                </div>
-              </div>
-
-              <h3 className="text-[1.75rem] font-bold text-[#374151] mb-6 leading-tight">
-                Report Submitted Successfully
-              </h3>
-
-              <div className="space-y-1 text-[#4B5563] text-[1.05rem] leading-relaxed mb-8">
-                <p>Thank you for providing your information.</p>
-                <p>No immediate matches were found, but our AI is now constantly monitoring new reports for you.</p>
-                <p>We'll notify you the moment a potential match appears!</p>
-              </div>
-
-              <div className="w-full max-w-[140px]">
+              <div className="p-10 pb-6 text-center border-b border-slate-50 relative">
                 <button
                   onClick={() => {
-                    setShowSuccess(false);
-                    // Navigation already handled logically or via dashboard redirect
-                    if (showLostItemForm) navigate('/dashboard/reports');
+                    setShowMatchModal(false);
+                    if (matchType === 'found') navigate('/dashboard/reports');
                     else navigate('/dashboard/track');
                   }}
-                  className="cursor-pointer w-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white py-3 rounded-xl font-bold shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98] text-lg"
+                  className="cursor-pointer absolute top-8 right-10 text-slate-400 hover:text-slate-600 transition-colors"
                 >
-                  OK
+                  <X size={32} />
+                </button>
+
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full font-black text-sm uppercase tracking-widest mb-4 animate-pulse">
+                  <Brain size={16} />
+                  AI Smart Match Found
+                </div>
+
+                <h3 className="text-4xl font-black text-slate-900 mb-4 tracking-tight">
+                  Potential Matches Identified!
+                </h3>
+                <p className="text-slate-500 text-lg font-medium max-w-2xl mx-auto">
+                  Our AI found {matchedItems.length} items that closely match your report.
+                  Could one of these be what you're looking for?
+                </p>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-10 bg-slate-50/50">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {matchedItems.map((item) => (
+                    <div key={item.id} className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden hover:shadow-2xl transition-all group duration-500">
+                      <div className="relative h-48">
+                        <img
+                          src={item.image_url || "https://images.unsplash.com/photo-1544391439-1dfdc422e178?auto=format&fit=crop&q=80&w=400"}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          alt={item.title}
+                        />
+                        <div className="absolute top-4 left-4">
+                          <span className="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-full font-black uppercase tracking-tighter shadow-lg">
+                            {Math.round(item.similarity * 100)}% Match
+                          </span>
+                        </div>
+                      </div>
+                      <div className="p-6">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="bg-slate-100 text-slate-600 text-[10px] px-2 py-1 rounded font-black uppercase tracking-widest">
+                            {item.category}
+                          </span>
+                        </div>
+                        <h4 className="text-xl font-black text-slate-900 mb-2 truncate uppercase tracking-tight">{item.title}</h4>
+                        <div className="space-y-1 mb-4">
+                          <p className="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+                            <MapPin size={12} className="text-slate-400" /> {item.location}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => navigate('/dashboard/find-items')}
+                          className="cursor-pointer w-full py-3 bg-slate-900 text-white rounded-xl font-black text-sm hover:bg-blue-600 transition-all active:scale-[0.98]"
+                        >
+                          VIEW DETAILS
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-8 bg-white border-t border-slate-50 flex justify-center">
+                <button
+                  onClick={() => {
+                    setShowMatchModal(false);
+                    if (matchType === 'found') navigate('/dashboard/reports');
+                    else navigate('/dashboard/track');
+                  }}
+                  className="cursor-pointer text-slate-400 font-bold hover:text-slate-600 transition-colors uppercase tracking-widest text-sm"
+                >
+                  None of these match my report
                 </button>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
+
+      {
+        showSuccess && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="bg-[#FFF9E1] rounded-2xl max-w-lg w-full p-10 relative mx-4 shadow-2xl border border-yellow-100/50 animate-in zoom-in-95 duration-300 font-sans">
+              <button
+                onClick={() => { setShowSuccess(false); navigate(showLostItemForm ? '/dashboard/reports' : '/dashboard/track'); }}
+                className="cursor-pointer absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X size={24} />
+              </button>
+
+              <div className="flex flex-col items-center text-center">
+                <div className="w-24 h-24 rounded-full border-[6px] border-green-500/20 flex items-center justify-center bg-white mb-6">
+                  <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center shadow-sm">
+                    <CheckCircle className="h-10 w-10 text-white" />
+                  </div>
+                </div>
+
+                <h3 className="text-[1.75rem] font-bold text-[#374151] mb-6 leading-tight">
+                  Report Submitted Successfully
+                </h3>
+
+                <div className="space-y-1 text-[#4B5563] text-[1.05rem] leading-relaxed mb-8">
+                  <p>Thank you for providing your information.</p>
+                  <p>No immediate matches were found, but our AI is now constantly monitoring new reports for you.</p>
+                  <p>We'll notify you the moment a potential match appears!</p>
+                </div>
+
+                <div className="w-full max-w-[140px]">
+                  <button
+                    onClick={() => {
+                      setShowSuccess(false);
+                      // Navigation already handled logically or via dashboard redirect
+                      if (showLostItemForm) navigate('/dashboard/reports');
+                      else navigate('/dashboard/track');
+                    }}
+                    className="cursor-pointer w-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white py-3 rounded-xl font-bold shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98] text-lg"
+                  >
+                    OK
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      }
     </div>
   );
 }
