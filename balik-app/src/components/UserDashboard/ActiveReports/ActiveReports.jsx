@@ -98,57 +98,66 @@ export default function ActiveReports() {
         let progress = 45;
         let detectedMatches = [];
 
-        if (item.status === 'matching') {
-          uiStatus = 'matches';
-          progress = 95; // Increased from 75 to show high progress
-        } else if (item.status === 'resolved' || item.status === 'claims') {
-          uiStatus = 'claimed';
-          progress = 100;
+        // LIVE MATCH CHECK: Always check for matches if we have embeddings
+        // This ensures we display the most up-to-date match status and can show actual match data
+        if (item.description_embedding) {
+          try {
+            console.log(`🔍 Checking matches for item: ${item.title} (Status: ${item.status})`);
+            // Parse embedding if it's returned as a string from DB
+            let embedding = item.description_embedding;
+            if (typeof embedding === 'string') {
+              embedding = JSON.parse(embedding);
+            }
+
+            // Determine match target (Lost items search for Found, and vice versa)
+            const matchTarget = item.type === 'lost' ? 'found' : 'lost';
+
+            // Check for smart matches (threshold 0.5 aligns with multi-factor weighted scoring)
+            // Weighted scoring: NLP (50%) + Color (20%) + Location (15%) + Time (15%) = max 100%
+            const matches = await itemService.getSmartMatches(
+              embedding,
+              matchTarget,
+              0.5,
+              5,
+              {
+                category: item.category,
+                color: item.metadata?.color,
+                location: item.location,
+                date: item.date_reported
+              }
+            );
+
+            if (matches && matches.length > 0) {
+              console.log(`🎯 NLP SMART MATCH FOUND for ${item.title}:`, matches.length, 'matches');
+              uiStatus = 'matches';
+              progress = 95; // Significant jump to show user we found something
+              detectedMatches = matches;
+            } else {
+              console.log(`❌ No matches found for: ${item.title}`);
+              uiStatus = 'searching';
+              progress = 45;
+            }
+          } catch (e) {
+            console.warn("⚠️ Live match check error for item", item.id, ":", e.message);
+            // If match check fails, fall back to database status
+            if (item.status === 'matching') {
+              uiStatus = 'matches';
+              progress = 95;
+            }
+          }
+        } else {
+          console.log(`⏭️ Skipping match check for ${item.title}: No Embedding (Old Item?)`);
+          // For items without embeddings, use database status
+          if (item.status === 'matching') {
+            uiStatus = 'matches';
+            progress = 95;
+          }
         }
 
-        // LIVE CHECK: If status is still 'searching', check if NLP finds matches right now
-        // This ensures the bar updates even if the DB status wasn't perfectly synced
-        if (uiStatus === 'searching') {
-          if (item.description_embedding) {
-            try {
-              console.log(`Checking matches for item: ${item.title} (Has Embedding)`);
-              // Parse embedding if it's returned as a string from DB
-              let embedding = item.description_embedding;
-              if (typeof embedding === 'string') {
-                embedding = JSON.parse(embedding);
-              }
-
-              // Determine match target (Lost items search for Found, and vice versa)
-              const matchTarget = item.type === 'lost' ? 'found' : 'lost';
-
-              // Check for smart matches (threshold 0.6 as per weighted score requirement)
-              const matches = await itemService.getSmartMatches(
-                embedding,
-                matchTarget,
-                0.6,
-                5,
-                {
-                  category: item.category,
-                  color: item.metadata?.color,
-                  location: item.location,
-                  date: item.date_reported
-                }
-              );
-
-              if (matches && matches.length > 0) {
-                console.log("🎯 NLP SMART MATCH FOUND for Item:", item.title, matches);
-                uiStatus = 'matches';
-                progress = 95; // Significant jump to show user we found something
-                detectedMatches = matches;
-              } else {
-                console.log("Item checked, no matches found via NLP for:", item.title);
-              }
-            } catch (e) {
-              console.warn("Live match check error for item", item.id, e);
-            }
-          } else {
-            console.log(`Skipping match check for ${item.title}: No Embedding Found (Old Item?)`);
-          }
+        // Handle resolved/claimed items
+        if (item.status === 'resolved' || item.status === 'claimed') {
+          uiStatus = 'claimed';
+          progress = 100;
         }
 
         return {

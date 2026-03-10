@@ -148,10 +148,9 @@ function Home() {
     reporterName: "",
     mobileNumber: "",
     email: "",
-    anonymous: false,
   })
   const [imagePreview, setImagePreview] = useState(null)
-  const [submitted, setSubmitted] = useState({ show: false, anonymous: false, mode: "found" })
+  const [submitted, setSubmitted] = useState({ show: false, mode: "found" })
   const [, setFormAnimate] = useState(false)
   const [matchedItems, setMatchedItems] = useState([]);
   const [showMatchModal, setShowMatchModal] = useState(false);
@@ -210,13 +209,7 @@ function Home() {
     }
 
     if (type === "checkbox") {
-      // special handling for anonymous: clear contact fields when checked
-      if (name === "anonymous") {
-        setFormData((s) => ({ ...s, anonymous: checked }))
-        setShowErrorsStep(null)
-      } else {
-        setFormData((s) => ({ ...s, [name]: checked }))
-      }
+      setFormData((s) => ({ ...s, [name]: checked }))
     } else {
       setFormData((s) => ({ ...s, [name]: value }))
     }
@@ -237,7 +230,7 @@ function Home() {
     // validate form
     if (!validateForm()) {
       // alert("Please fill all required fields before submitting.") // Replaced by success modal logic
-      setSubmitted({ show: true, anonymous: false, mode: 'found', isError: true, message: "Please fill all required fields before submitting." });
+      setSubmitted({ show: true, mode: 'found', isError: true, message: "Please fill all required fields before submitting." });
       return
     }
 
@@ -264,11 +257,11 @@ function Home() {
           brand: formData.brand,
           color: formData.color,
           reporter: {
-            name: formData.anonymous ? "Anonymous" : formData.reporterName,
-            mobile: formData.anonymous ? "N/A" : formData.mobileNumber,
-            email: formData.anonymous ? "N/A" : formData.email
+            name: formData.reporterName,
+            mobile: formData.mobileNumber,
+            email: formData.email
           },
-          is_anonymous: formData.anonymous
+          is_anonymous: false
         }
       }
 
@@ -346,7 +339,6 @@ function Home() {
       setIsMatching(false);
       setSubmitted({
         show: true,
-        anonymous: submittedFormData.anonymous,
         mode: 'found',
         isError: false
       });
@@ -360,7 +352,6 @@ function Home() {
       console.error("Submission Error:", err);
       setSubmitted({
         show: true,
-        anonymous: formData.anonymous,
         mode: 'found',
         isError: true,
         message: err.message || "Something went wrong. Please try again."
@@ -372,10 +363,8 @@ function Home() {
 
 
   function validateForm() {
-    const { whatWasFound, itemCategory, dateFound, location, reporterName, mobileNumber, email, anonymous } = formData;
-    const baseFields = whatWasFound && itemCategory && dateFound && location;
-    if (anonymous) return baseFields;
-    return baseFields && reporterName && mobileNumber && email;
+    const { whatWasFound, itemCategory, dateFound, location, reporterName, mobileNumber, email } = formData;
+    return whatWasFound && itemCategory && dateFound && location && reporterName && mobileNumber && email;
   }
 
   return (
@@ -463,7 +452,7 @@ function Home() {
       </section>
 
       {/* SECTION 2*/}
-      <section className="flex flex-col p-12 items-center justify-center">
+      <section id="how-it-works" className="flex flex-col p-12 items-center justify-center">
         <h2 className="text-3xl text-black font-extrabold mb-10 text-center">
           How Our System Works
         </h2>
@@ -658,9 +647,7 @@ function Home() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="flex flex-col gap-2">
                   <label className="font-bold text-[#7B1C1C] text-lg">Report Type <span className="text-red-500">*</span></label>
-                  <select name="reportType" value={formData.reportType} onChange={handleInputChange} className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none">
-                    <option value="Found Item">Found Item</option>
-                  </select>
+                  <input type="text" value="Found Item" readOnly className="w-full p-4 rounded-xl border border-slate-200 bg-slate-100 text-gray-700 font-semibold cursor-not-allowed outline-none" />
                 </div>
                 <div className="flex flex-col gap-2">
                   <label className="font-bold text-[#7B1C1C] text-lg">What was Found <span className="text-red-500">*</span></label>
@@ -682,7 +669,7 @@ function Home() {
                 <div className="flex flex-col gap-2">
                   <label className="font-bold text-[#7B1C1C] text-lg">Date Found <span className="text-red-500">*</span></label>
                   <p className="text-[11px] text-gray-400 -mt-1 font-medium">Approximate date of when the item was found.</p>
-                  <input type="date" name="dateFound" value={formData.dateFound} onChange={handleInputChange} className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
+                  <input type="date" name="dateFound" value={formData.dateFound} onChange={handleInputChange} max="9999-12-31" className="date-input-visible w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
                 </div>
               </div>
 
@@ -735,45 +722,26 @@ function Home() {
               </div>
 
               <div className="pt-8 border-t border-slate-100 flex flex-col items-center">
-                <div className="flex items-center gap-4 mb-8 bg-blue-50/50 px-8 py-4 rounded-[2rem] border border-blue-100 shadow-sm transition-all hover:bg-blue-50">
-                  <div className="relative flex items-center">
-                    <input
-                      type="checkbox"
-                      name="anonymous"
-                      id="anonymous"
-                      checked={formData.anonymous}
-                      onChange={handleInputChange}
-                      className="w-6 h-6 cursor-pointer rounded-lg border-2 border-blue-300 text-blue-600 focus:ring-blue-500 transition-all"
-                    />
-                  </div>
-                  <label htmlFor="anonymous" className="font-extrabold text-blue-900 text-xl cursor-pointer select-none">
-                    Submit Anonymously
-                    <span className="block text-xs text-blue-500 font-bold ml-0.5">Your identity won't be shared with claimants</span>
-                  </label>
-                </div>
-
-                {!formData.anonymous && (
-                  <div className="w-full animate-in slide-in-from-top duration-500">
-                    <h3 className="text-2xl font-extrabold text-[#7B1C1C] mb-8 flex items-center gap-3 text-left">
-                      <span className="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-sm">2</span>
-                      Reporter's Information
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                      <div className="flex flex-col gap-2">
-                        <label className="font-bold text-[#7B1C1C] text-lg text-left">Name <span className="text-red-500">*</span></label>
-                        <input type="text" name="reporterName" value={formData.reporterName} onChange={handleInputChange} placeholder="Full Name" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <label className="font-bold text-[#7B1C1C] text-lg text-left">Mobile Number <span className="text-red-500">*</span></label>
-                        <input type="tel" name="mobileNumber" value={formData.mobileNumber} onChange={handleInputChange} placeholder="e.g. 09123456789" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <label className="font-bold text-[#7B1C1C] text-lg text-left">Email <span className="text-red-500">*</span></label>
-                        <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="your@email.com" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
-                      </div>
+                <div className="w-full">
+                  <h3 className="text-2xl font-extrabold text-[#7B1C1C] mb-8 flex items-center gap-3 text-left">
+                    <span className="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-sm">2</span>
+                    Reporter's Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="flex flex-col gap-2">
+                      <label className="font-bold text-[#7B1C1C] text-lg text-left">Name <span className="text-red-500">*</span></label>
+                      <input type="text" name="reporterName" value={formData.reporterName} onChange={handleInputChange} placeholder="Full Name" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="font-bold text-[#7B1C1C] text-lg text-left">Mobile Number <span className="text-red-500">*</span></label>
+                      <input type="tel" name="mobileNumber" value={formData.mobileNumber} onChange={handleInputChange} placeholder="e.g. 09123456789" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="font-bold text-[#7B1C1C] text-lg text-left">Email <span className="text-red-500">*</span></label>
+                      <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="your@email.com" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
                     </div>
                   </div>
-                )}
+                </div>
 
                 <div className="flex justify-center pt-8">
                   <button
@@ -809,7 +777,7 @@ function Home() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-[#FFF9E1] rounded-[2.5rem] max-w-lg w-full p-10 relative mx-4 shadow-2xl border border-yellow-100/50 animate-in zoom-in-95 duration-300">
             <button
-              onClick={() => setSubmitted({ show: false, anonymous: false, mode: formMode })}
+              onClick={() => setSubmitted({ show: false, mode: formMode })}
               className="cursor-pointer absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors bg-white/50 w-10 h-10 rounded-full flex items-center justify-center"
             >
               <X size={24} />
@@ -855,7 +823,7 @@ function Home() {
 
               <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
                 <button
-                  onClick={() => setSubmitted({ show: false, anonymous: false, mode: formMode })}
+                  onClick={() => setSubmitted({ show: false, mode: formMode })}
                   className="cursor-pointer flex-1 max-w-[200px] bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-600 py-4 rounded-2xl font-black transition-all active:scale-[0.98] text-lg"
                 >
                   {submitted.isError ? 'TRY AGAIN' : 'OK'}
@@ -1014,7 +982,7 @@ function Home() {
       </section>
 
       {/* SECTION 7 - Success Stories */}
-      <section className="w-full py-28 px-6 bg-slate-50">
+      <section id="success-stories" className="w-full py-28 px-6 bg-slate-50">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-[3.2rem] text-black font-black mb-4 tracking-tight">Success Stories</h2>
           <p className="text-gray-500 text-xl max-w-2xl mx-auto mb-20 font-medium">

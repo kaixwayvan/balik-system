@@ -47,13 +47,21 @@ function Footer() {
                 {section.title}
               </h4>
               <ul className="space-y-3 text-gray-600">
-                {section.links.map((link, i) => (
-                  <li key={i}>
-                    <a href="#" className="hover:text-black transition">
-                      {link}
-                    </a>
-                  </li>
-                ))}
+                {section.links.map((link, i) => {
+                  const linkMap = {
+                    "How It Works": "/#how-it-works",
+                    "FAQs": "/#faq",
+                    "Success Stories": "/#success-stories",
+                  };
+                  const href = linkMap[link] || "#";
+                  return (
+                    <li key={i}>
+                      <a href={href} className="hover:text-black transition">
+                        {link}
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
