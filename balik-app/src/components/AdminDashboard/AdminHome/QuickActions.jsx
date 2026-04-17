@@ -1,51 +1,98 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import { Plus, Search, MapPin, History, User, AlertTriangle } from "lucide-react";
+import {
+  Plus,
+  ScanLine,
+  SquaresExclude,
+  Bell,
+  Download,
+  Coins,
+  Trophy,
+  AlertTriangle,
+} from "lucide-react";
+
+const actions = [
+  {
+    icon: Plus,
+    title: "Report Item",
+    sub: "Lost or Found",
+    color: "bg-green-500",
+    action: "report",
+  },
+  {
+    icon: ScanLine,
+    title: "Scan QR Code",
+    sub: "Verify items",
+    color: "bg-blue-500",
+  },
+  {
+    icon: SquaresExclude,
+    title: "Run AI Matching",
+    sub: "Find Matches",
+    color: "bg-purple-500",
+  },
+  {
+    icon: Bell,
+    title: "Send Notification",
+    sub: "Alert Users",
+    color: "bg-orange-500",
+  },
+  {
+    icon: Download,
+    title: "Export Reports",
+    sub: "Generate CSV",
+    color: "bg-emerald-500",
+  },
+  {
+    icon: Coins,
+    title: "Manage Points",
+    sub: "Gamification",
+    color: "bg-yellow-500",
+  },
+  {
+    icon: Trophy,
+    title: "View Leaderboard",
+    sub: "Top Users",
+    color: "bg-red-500",
+  },
+];
 
 export default function QuickActions() {
   const [showReportModal, setShowReportModal] = useState(false);
-  const navigate = useNavigate();
-
-  const actions = [
-    {
-      text: "Report Item",
-      color: "bg-blue-600",
-      icon: Plus,
-      onClick: () => setShowReportModal(true),
-    },
-    {
-      text: "Edit Profile",
-      color: "bg-red-700",
-      icon: User,
-      onClick: () => navigate("/dashboard/profile"),
-    },
-  ];
 
   return (
     <>
-      <div className="bg-white rounded-xl p-6 shadow">
-        <h2 className="font-semibold mb-4">Quick Actions</h2>
+      <div className="bg-white rounded-xl p-6">
+        <h2 className="font-semibold text-lg mb-4">Quick Actions</h2>
 
-        <div className="flex flex-col items-center justify-center space-y-3">
+        <div className="grid grid-cols-7 gap-4">
           {actions.map((a, i) => {
             const Icon = a.icon;
 
             return (
-              <button
+              <div
                 key={i}
-                onClick={a.onClick}
-                className={`${a.color} cursor-pointer text-white w-full py-3 px-4 rounded-lg font-medium flex items-left justify-center gap-3 hover:opacity-80 transition`}
+                onClick={() => {
+                  if (a.action === "report") {
+                    setShowReportModal(true);
+                  }
+                }}
+                className="border border-gray-300 rounded-lg p-4 text-center hover:shadow-md cursor-pointer"
               >
-                <Icon size={18} />
-                <span>{a.text}</span>
-              </button>
+                <div
+                  className={`w-10 h-10 mx-auto rounded-lg flex items-center justify-center text-white ${a.color}`}
+                >
+                  <Icon size={18} />
+                </div>
+
+                <p className="text-sm font-bold mt-2">{a.title}</p>
+                <p className="text-xs font-medium text-gray-500">{a.sub}</p>
+              </div>
             );
           })}
         </div>
       </div>
 
-      {/* MODAL */}
       {showReportModal && (
         <div
           className="h-full fixed inset-0 z-50 flex items-center justify-center"
@@ -66,13 +113,13 @@ export default function QuickActions() {
             </div>
 
             <div className="space-y-3">
-              <Link to="/submitreport">
+              <Link to="/adminreport">
                 <button className="cursor-pointer w-full bg-red-700 text-white py-3 rounded-lg mb-4">
                   + Report Lost Item
                 </button>
               </Link>
 
-              <Link to="/submitreport">
+              <Link to="/adminreport">
                 <button className="cursor-pointer w-full bg-blue-600 text-white py-3 rounded-lg mb-4">
                   + Report Found Item
                 </button>
