@@ -37,7 +37,11 @@ export default function MatchDetailsModal({ match, open, onClose }) {
               title="Lost Item"
               data={{
                 item: match.lost,
+<<<<<<< HEAD
                 category: match.category || "Not Specified",
+=======
+                category: "Bags",
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
                 email: match.lostEmail,
                 date: match.lostDate,
               }}
@@ -46,7 +50,11 @@ export default function MatchDetailsModal({ match, open, onClose }) {
               title="Found Item"
               data={{
                 item: match.found,
+<<<<<<< HEAD
                 category: match.category || "Not Specified",
+=======
+                category: "Bags",
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
                 email: match.foundEmail,
                 date: match.foundDate,
               }}

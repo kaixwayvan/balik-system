@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { supabase } from "../../../utils/supabaseClient";
@@ -46,23 +47,68 @@ export default function RecentReports() {
     }
     fetchReports();
   }, []);
+=======
+import { useState } from "react";
+import { Search } from "lucide-react";
+
+export default function RecentReports() {
+  const [filter, setFilter] = useState("All");
+
+  const items = [
+    {
+      date: "Nov 12, 2024",
+      time: "10:30 AM",
+      item: "Blue Water Bottle",
+      description: "Stainless steel, university logo sticker",
+      location: "University Library",
+      name: "Michael Chue",
+      email: "mchen@gluoglu.com",
+      contact: "(555) 123-4567",
+      status: "Verified",
+      qrStat: "Scanned",
+      aiMatch: "95% Match",
+      type: "Found",
+    },
+    {
+      date: "Nov 10, 2024",
+      time: "4:30 PM",
+      item: "Black Wallet",
+      description: "contains student ID and credit cards",
+      location: "Cafeteria",
+      name: "John Cruz",
+      email: "djmod@sophia.com",
+      contact: "(911) 123-4567",
+      status: "Pending",
+      qrStat: "Not Scanned",
+      aiMatch: "80% Match",
+      type: "Lost",
+    },
+  ];
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
 
   const typeStyles = (type) => {
     if (type === "Lost") return "bg-red-100 text-red-600";
     if (type === "Found") return "bg-green-100 text-green-600";
+<<<<<<< HEAD
     return "bg-gray-100 text-gray-600";
+=======
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
   };
 
   const statusStyles = (status) => {
     if (status === "Verified") return "bg-green-100 text-green-600";
     if (status === "Pending") return "bg-yellow-100 text-yellow-600";
     if (status === "Resolved") return "bg-blue-100 text-blue-600";
+<<<<<<< HEAD
     return "bg-gray-100 text-gray-600";
+=======
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
   };
 
   const qrStyles = (qr) => {
     if (qr === "Scanned") return "bg-green-100 text-green-600";
     if (qr === "Not Scanned") return "bg-gray-100 text-gray-600";
+<<<<<<< HEAD
     return "bg-gray-100 text-gray-600";
   };
 
@@ -71,6 +117,14 @@ export default function RecentReports() {
     if (match === "AI Processed") return "bg-green-100 text-green-600";
     if (match.includes("%")) return "bg-purple-100 text-purple-600";
     return "bg-gray-100 text-gray-600";
+=======
+  };
+
+  const aiStyles = (match) => {
+    if (match === "No Match") return "bg-red-100 text-red-600";
+    if (match === "Match") return "bg-green-100 text-green-600";
+    if (match.includes("%")) return "bg-purple-100 text-purple-600";
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
   };
 
   const filteredItems = items.filter((item) => {
@@ -127,6 +181,7 @@ export default function RecentReports() {
         </thead>
 
         <tbody>
+<<<<<<< HEAD
           {loading ? (
             <tr><td colSpan="10" className="py-8 text-center text-gray-500">Loading reports...</td></tr>
           ) : filteredItems.length === 0 ? (
@@ -134,6 +189,11 @@ export default function RecentReports() {
           ) : filteredItems.map((item, index) => (
             <tr
               key={item.id || index}
+=======
+          {filteredItems.map((item, index) => (
+            <tr
+              key={index}
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
               className="border-b align-top hover:bg-gray-50 transition"
             >
               <td className="py-4 px-4">{item.date}</td>

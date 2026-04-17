@@ -46,8 +46,13 @@ const defaultMatches = [
   },
 ];
 
+<<<<<<< HEAD
 export default function AIMatchesTable({ matches, loading, counts }) {
   const data = loading ? [] : matches;
+=======
+export default function AIMatchesTable({ matches }) {
+  const data = matches?.length ? matches : defaultMatches;
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
 
   /**
    * AI FLOW STATE
@@ -55,7 +60,10 @@ export default function AIMatchesTable({ matches, loading, counts }) {
    */
   const [aiStage, setAiStage] = useState("idle");
   const [selectedMatch, setSelectedMatch] = useState(null);
+<<<<<<< HEAD
   const [processingTime, setProcessingTime] = useState("0.0");
+=======
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
 
   /* ---------------- AI FLOW ---------------- */
 
@@ -65,10 +73,14 @@ export default function AIMatchesTable({ matches, loading, counts }) {
 
   const startMatching = () => {
     setAiStage("processing");
+<<<<<<< HEAD
     const startTime = performance.now();
     setTimeout(() => {
       const endTime = performance.now();
       setProcessingTime(((endTime - startTime) / 1000).toFixed(1));
+=======
+    setTimeout(() => {
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
       setAiStage("complete");
     }, 2500);
   };
@@ -110,11 +122,15 @@ export default function AIMatchesTable({ matches, loading, counts }) {
         </thead>
 
         <tbody>
+<<<<<<< HEAD
           {loading ? (
             <tr><td colSpan="5" className="px-6 py-6 text-center text-gray-500">Loading matches...</td></tr>
           ) : data.length === 0 ? (
             <tr><td colSpan="5" className="px-6 py-6 text-center text-gray-500">No AI matches found.</td></tr>
           ) : data.map((match) => (
+=======
+          {data.map((match) => (
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
             <AIMatchRow key={match.id} match={match} onAction={handleAction} />
           ))}
         </tbody>
@@ -126,7 +142,10 @@ export default function AIMatchesTable({ matches, loading, counts }) {
         onClose={closeAllModals}
         onStart={startMatching}
         isProcessing={aiStage === "processing"}
+<<<<<<< HEAD
         counts={counts || { lost: 0, found: 0 }}
+=======
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
       />
 
       {/* LOADING + RESULT MODAL */}
@@ -138,8 +157,11 @@ export default function AIMatchesTable({ matches, loading, counts }) {
       <MatchingCompleteModal
         open={aiStage === "complete"}
         onViewMatches={handleViewMatches}
+<<<<<<< HEAD
         matches={matches}
         processingTime={processingTime}
+=======
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
       />
 
       <MatchDetailsModal

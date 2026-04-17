@@ -4,6 +4,7 @@ export default function MatchingCompleteModal({
   open,
   onViewMatches,
   onClose,
+<<<<<<< HEAD
   matches = [],
   processingTime = "2.3"
 }) {
@@ -17,6 +18,14 @@ export default function MatchingCompleteModal({
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
       <div className="bg-white w-[720px] max-h-[90vh] overflow-y-auto rounded-xl p-8 space-y-6">
+=======
+}) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+      <div className="bg-white w-[720px] rounded-xl p-8 space-y-6">
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
 
         {/* ICON */}
         <div className="flex justify-center">
@@ -41,22 +50,36 @@ export default function MatchingCompleteModal({
             <p className="text-green-700 font-medium">
               New Matches Found
             </p>
+<<<<<<< HEAD
             <p className="text-2xl font-bold">{total}</p>
+=======
+            <p className="text-2xl font-bold">7</p>
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
           </div>
 
           <div className="border border-blue-400 rounded-lg p-5 text-center bg-blue-50">
             <p className="text-blue-700 font-medium">
               Processing Time
             </p>
+<<<<<<< HEAD
             <p className="text-2xl font-bold">{processingTime}s</p>
+=======
+            <p className="text-2xl font-bold">2.3s</p>
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
           </div>
         </div>
 
         {/* CONFIDENCE SUMMARY */}
         <div className="space-y-3 text-sm">
+<<<<<<< HEAD
           <Row label="High Confidence (>90%)" value={`${high} ${high === 1 ? 'match' : 'matches'}`} color="text-green-600" />
           <Row label="Medium Confidence (70–90%)" value={`${med} ${med === 1 ? 'match' : 'matches'}`} color="text-yellow-600" />
           <Row label="Low Confidence (<70%)" value={`${low} ${low === 1 ? 'match' : 'matches'}`} color="text-red-600" />
+=======
+          <Row label="High Confidence (>90%)" value="4 matches" color="text-green-600" />
+          <Row label="Medium Confidence (70–90%)" value="2 matches" color="text-yellow-600" />
+          <Row label="Low Confidence (<70%)" value="1 match" color="text-red-600" />
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
         </div>
 
         {/* NEXT STEP */}

@@ -1,9 +1,14 @@
+<<<<<<< HEAD
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, ScanSearch, ScanEye, SearchCheck, ArchiveRestore, Loader2 } from "lucide-react";
 import MatchingCompleteModal from "../AIMatches/modals/MatchingCompleteModal";
 import RunAIMatchingModal from "../AIMatches/modals/RunAIMatchingModal";
 import { itemService } from "../../../services/itemService";
+=======
+import { useEffect } from "react";
+import { X, ScanSearch, ScanEye, SearchCheck, ArchiveRestore } from "lucide-react";
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
 
 const statusStyles = {
   Active: "bg-blue-100 text-blue-600",
@@ -13,6 +18,7 @@ const statusStyles = {
 };
 
 export default function LostItemDetailsModal({ item, onClose }) {
+<<<<<<< HEAD
   const navigate = useNavigate();
   const [showRunModal, setShowRunModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -79,6 +85,22 @@ export default function LostItemDetailsModal({ item, onClose }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       {/* MODAL */}
       <div className="bg-white w-max min-w-[650px] max-w-full rounded-xl shadow-xl">
+=======
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
+  if (!item) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      {/* MODAL */}
+      <div className="bg-white w-[650px] rounded-xl shadow-xl">
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
         {/* HEADER */}
         <div className="flex justify-between items-center p-6 py-5 border-b border-gray-300">
           <h2 className="text-xl font-semibold">Lost Item Details</h2>
@@ -101,7 +123,11 @@ export default function LostItemDetailsModal({ item, onClose }) {
 
             <div>
               <p className="text-gray-500 font-bold">Description</p>
+<<<<<<< HEAD
               <p className="whitespace-pre-wrap">{item.description}</p>
+=======
+              <p>{item.description}</p>
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
             </div>
 
             <div>
@@ -116,7 +142,11 @@ export default function LostItemDetailsModal({ item, onClose }) {
           </div>
 
           {/* RIGHT */}
+<<<<<<< HEAD
           <div className="space-y-5 min-w-0">
+=======
+          <div className="space-y-5">
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
             <h3 className="font-semibold text-base">Owner Information</h3>
 
             <div>
@@ -126,12 +156,21 @@ export default function LostItemDetailsModal({ item, onClose }) {
 
             <div>
               <p className="text-gray-500 font-bold">Email</p>
+<<<<<<< HEAD
               <p className="text-[14px]">{item.email}</p>
             </div>
 
             <div>
               <p className="text-gray-500 font-bold">Contact Number</p>
               <p>{item.raw?.metadata?.reporter?.mobile || "Not provided"}</p>
+=======
+              <p>{item.email}</p>
+            </div>
+
+            <div>
+              <p className="text-gray-500 font-bold">Proof of Ownership</p>
+              <p>Purchase receipt and photos</p>
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
             </div>
 
             <div>
@@ -150,10 +189,14 @@ export default function LostItemDetailsModal({ item, onClose }) {
         {/* FOOTER */}
         <div className="flex justify-end gap-3 p-3 border-t border-gray-300">
           {item.status === "Active" && (
+<<<<<<< HEAD
             <button 
               onClick={handleOpenRunModal}
               className="flex items-center gap-2 cursor-pointer bg-purple-600 hover:bg-purple-700 font-medium text-white px-5 py-2 rounded-lg hover:shadow-sm"
             >
+=======
+            <button className="flex items-center gap-2 cursor-pointer bg-purple-600 hover:bg-purple-700 font-medium text-white px-5 py-2 rounded-lg hover:shadow-sm">
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
               <ScanSearch size={16} />
               Trigger AI Matching
             </button>
@@ -188,6 +231,7 @@ export default function LostItemDetailsModal({ item, onClose }) {
           </button>
         </div>
       </div>
+<<<<<<< HEAD
 
       <MatchingCompleteModal
         open={showResult}
@@ -207,6 +251,8 @@ export default function LostItemDetailsModal({ item, onClose }) {
         isProcessing={isProcessing}
         counts={{ lost: 1, found: pendingFoundCount }}
       />
+=======
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
     </div>
   );
 }

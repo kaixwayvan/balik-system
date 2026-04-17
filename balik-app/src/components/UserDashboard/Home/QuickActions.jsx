@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Plus, Search, MapPin, History, User, AlertTriangle } from "lucide-react";
 
 export default function QuickActions({ onReportClick }) {
   const [showReportModal, setShowReportModal] = useState(false);
@@ -17,7 +18,7 @@ export default function QuickActions({ onReportClick }) {
       text: "Edit Profile",
       color: "bg-red-700",
       icon: User,
-      onClick:() => navigate("/dashboard/profile"),
+      onClick: () => navigate("/dashboard/profile"),
     },
   ];
 
@@ -50,13 +51,19 @@ export default function QuickActions({ onReportClick }) {
           className="h-full fixed inset-0 z-50 flex items-center justify-center"
           style={{ backgroundColor: "rgba(0,0,0,0.75)" }}
         >
-          <div className="bg-white border border-gray-300 w-full max-w-md rounded-xl p-6 shadow-2xl">
-            <h3 className="text-lg font-semibold mb-2">Choose Report Type</h3>
+          <div className="bg-white border border-gray-300 w-full max-w-lg rounded-xl p-6 shadow-2xl">
+            <h3 className="text-xl font-bold mb-2">Choose Report Type</h3>
 
-            <p className="text-sm text-gray-500 mb-4">
-              Please select whether you are reporting an item you lost or
-              submitting details about an item you found.
-            </p>
+            <div className="flex items-start gap-3 bg-red-40 border border-red-200 rounded-lg p-3 mb-6">
+              <div className="bg-red-500 text-white rounded-full p-2 flex items-center justify-center">
+                <AlertTriangle size={16} />
+              </div>
+
+              <p className="text-sm font-semibold text-red-700">
+                Please select whether you are reporting an item you lost or
+                submitting details about an item you found.
+              </p>
+            </div>
 
             <div className="space-y-3">
               <Link to="/submitreport">
@@ -73,7 +80,7 @@ export default function QuickActions({ onReportClick }) {
 
               <button
                 onClick={() => setShowReportModal(false)}
-                className="cursor-pointer w-full bg-gray-200 text-gray-700 py-2 rounded-lg"
+                className="cursor-pointer w-full bg-gray-200 font-bold text-gray-700 py-2 rounded-lg"
               >
                 Cancel
               </button>
