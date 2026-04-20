@@ -36,88 +36,7 @@ const tableHeaders = [
   { label: "Actions", align: "text-center" },
 ];
 
-const lostItems = [
-  {
-    name: "iPhone 14 Pro",
-    description: "Space Black iPhone 14 Pro 128GB with clear case",
-    category: "Electronics",
-    location: "Library Building A, 2nd Floor",
-    owner: "John Doe",
-    email: "john.doe@gmail.com",
-    status: "Active",
-    date: "2025-01-26 14:30",
-  },
-  {
-    name: "MacBook Air M2",
-    description: "Silver MacBook Air M2 with black sleeve",
-    category: "Electronics",
-    location: "Engineering Lab Room 204",
-    owner: "Sarah Williams",
-    email: "sarah.williams@gmail.com",
-    status: "Matched",
-    date: "2025-02-02 10:15",
-  },
-  {
-    name: "Black Backpack",
-    description: "Nike black backpack containing notebooks",
-    category: "Bags",
-    location: "Student Lounge",
-    owner: "Michael Tan",
-    email: "michael.tan@gmail.com",
-    status: "Active",
-    date: "2025-01-30 09:45",
-  },
-  {
-    name: "Car Keys",
-    description: "Toyota key fob with red lanyard",
-    category: "Keys",
-    location: "Parking Lot B",
-    owner: "Angela Cruz",
-    email: "angela.cruz@gmail.com",
-    status: "Claimed",
-    date: "2025-01-18 17:20",
-  },
-  {
-    name: "Student ID",
-    description: "University student ID with blue holder",
-    category: "Documents",
-    location: "Cafeteria",
-    owner: "Daniel Reyes",
-    email: "daniel.reyes@gmail.com",
-    status: "Archived",
-    date: "2025-01-10 12:05",
-  },
-  {
-    name: "Silver Necklace",
-    description: "Thin silver necklace with heart pendant",
-    category: "Jewelry",
-    location: "Gym Locker Room",
-    owner: "Maria Santos",
-    email: "maria.santos@gmail.com",
-    status: "Active",
-    date: "2025-02-05 16:40",
-  },
-  {
-    name: "Blue Jacket",
-    description: "Uniqlo blue windbreaker jacket size M",
-    category: "Clothing",
-    location: "Auditorium Hall",
-    owner: "Kevin Lim",
-    email: "kevin.lim@gmail.com",
-    status: "Matched",
-    date: "2025-01-22 11:10",
-  },
-  {
-    name: "Scientific Calculator",
-    description: "Casio FX-991EX scientific calculator",
-    category: "Equipment",
-    location: "Math Building Room 305",
-    owner: "Lisa Ong",
-    email: "lisa.ong@gmail.com",
-    status: "Active",
-    date: "2025-02-08 13:55",
-  },
-];
+import { supabase } from "../../../utils/supabaseClient";
 
 function TooltipIcon({ icon: Icon, color, label, onClick }) {
   return (
@@ -142,6 +61,45 @@ function TooltipIcon({ icon: Icon, color, label, onClick }) {
 export default function LostItems() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [lostItems, setLostItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchLostItems() {
+      try {
+        const { data, error } = await supabase
+          .from("items")
+          .select("*")
+          .eq("type", "lost")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        const formattedData = data.map(dbItem => {
+          const reporter = dbItem.metadata?.reporter || {};
+          return {
+            id: dbItem.id,
+            name: dbItem.title || dbItem.category || "Unknown Item",
+            description: dbItem.description,
+            category: dbItem.category || "Other",
+            location: dbItem.location,
+            owner: reporter.name || "Unknown",
+            email: reporter.email || "No email",
+            status: dbItem.status === 'pending' ? 'Active' : dbItem.status === 'resolved' ? 'Claimed' : 'Active',
+            date: dbItem.created_at,
+            formattedDate: new Date(dbItem.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
+            raw: dbItem
+          }
+        });
+        setLostItems(formattedData);
+      } catch (err) {
+        console.error("Error fetching lost items:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchLostItems();
+  }, []);
 
   // FILTER STATES
   const [search, setSearch] = useState("");
@@ -190,7 +148,7 @@ export default function LostItems() {
         matchesToDate
       );
     });
-  }, [debouncedSearch, categoryFilter, statusFilter, fromDate, toDate]);
+  }, [debouncedSearch, categoryFilter, statusFilter, fromDate, toDate, lostItems]);
 
   const handleViewItem = (item) => {
     setSelectedItem(item);
@@ -349,7 +307,11 @@ export default function LostItems() {
           </thead>
 
           <tbody>
-            {filteredItems.map((item, i) => (
+            {loading ? (
+              <tr><td colSpan="8" className="py-8 text-center text-gray-500">Loading items...</td></tr>
+            ) : filteredItems.length === 0 ? (
+              <tr><td colSpan="8" className="py-8 text-center text-gray-500">No items found.</td></tr>
+            ) : filteredItems.map((item, i) => (
               <tr key={i} className="border-t border-gray-300 hover:bg-gray-50">
                 <td className="px-4 py-3">
                   <input
@@ -390,14 +352,14 @@ export default function LostItems() {
                 <td className="px-4 py-3">
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      statusStyles[item.status]
+                      statusStyles[item.status] || "bg-gray-100 text-gray-600"
                     }`}
                   >
                     {item.status}
                   </span>
                 </td>
 
-                <td className="px-4 py-3 text-gray-600">{item.date}</td>
+                <td className="px-4 py-3 text-gray-600">{item.formattedDate}</td>
 
                 <td className="px-4 py-3">
                   <div className="flex justify-center gap-3">

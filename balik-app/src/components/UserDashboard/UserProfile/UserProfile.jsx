@@ -15,11 +15,17 @@ import {
 } from "lucide-react";
 import { GiStarsStack } from "react-icons/gi";
 import { FaPeopleGroup, FaHandsHoldingCircle } from "react-icons/fa6";
+import { useAuth } from "../../../shared/context/AuthContext";
 
 export default function UserProfile() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("achievements");
   const [achievementView, setAchievementView] = useState("challenges");
+  const [activeSection, setActiveSection] = useState("profile");
 
+  const avatarUrl = user?.user_metadata?.avatar_url || null;
+  const fullName = user?.user_metadata?.full_name || "Registered User";
+  const email = user?.email || "";
 
   return (
     <div className="p-6">
@@ -27,15 +33,21 @@ export default function UserProfile() {
       <div className="px-6 pt-6">
         <div className="flex justify-between items-start">
           <div className="flex gap-6">
-            <img
-              src="https://images.unsplash.com/photo-1527980965255-d3b416303d12"
-              alt="Profile"
-              className="w-28 h-28 rounded-full border border-gray-300 shadow-md object-cover"
-            />
+            <div className="w-28 h-28 flex-shrink-0 rounded-full border border-gray-300 shadow-md bg-slate-300 flex items-center justify-center overflow-hidden">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="Profile"
+                  className="w-full h-full object-cover bg-white"
+                />
+              ) : (
+                <UserRound size={64} className="text-gray-50" />
+              )}
+            </div>
 
             <div>
-              <h2 className="text-2xl font-bold">Mike Wazowski</h2>
-              <p className="text-sm text-gray-500">mike_wazowski@gmail.com</p>
+              <h2 className="text-2xl font-bold">{fullName}</h2>
+              <p className="text-sm text-gray-500">{email}</p>
 
               <p className="mt-2 text-sm italic text-gray-600">
                 “Always here to help the BALIK community”
@@ -99,7 +111,12 @@ export default function UserProfile() {
         />
       )}
 
-      {activeTab === "settings" && <AccountSettings />}
+      {activeTab === "settings" && (
+        <AccountSettings
+          activeSection={activeSection}
+          setActiveSection={setActiveSection}
+        />
+      )}
     </div>
   );
 }
@@ -220,9 +237,7 @@ function CertificatesSection() {
   );
 }
 
-function AccountSettings() {
-  const [activeSection, setActiveSection] = useState("profile");
-
+function AccountSettings({ activeSection, setActiveSection }) {
   return (
     <div className="p-6 flex gap-6">
       {/* LEFT SIDEBAR */}
@@ -348,10 +363,25 @@ function CertificateCard({ title }) {
 /* Account setting sections */
 
 function ProfileSettings() {
+  const { user } = useAuth();
   const fileInputRef = useRef(null);
-  const [avatar, setAvatar] = useState(
-    "https://images.unsplash.com/photo-1527980965255-d3b416303d12",
-  );
+  
+  const initialAvatar = user?.user_metadata?.avatar_url || null;
+  const [avatar, setAvatar] = useState(initialAvatar);
+  
+  // Extract user details
+  const fullNameStr = user?.user_metadata?.full_name || "";
+  const nameParts = fullNameStr.split(" ");
+  const initialFirstName = nameParts.length > 0 ? nameParts[0] : "";
+  const initialLastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
+  const initialEmail = user?.email || "";
+  const initialContact = user?.user_metadata?.mobile_number || "";
+
+  const [firstName, setFirstName] = useState(initialFirstName);
+  const [lastName, setLastName] = useState(initialLastName);
+  const [email, setEmail] = useState(initialEmail);
+  const [contact, setContact] = useState(initialContact);
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -367,7 +397,13 @@ function ProfileSettings() {
       </h2>
       <div className="flex justify-center">
         <div className="relative">
-          <img src={avatar} className="w-28 h-28 rounded-full object-cover" />
+          <div className="w-28 h-28 rounded-full border border-gray-300 shadow-md bg-slate-300 flex items-center justify-center overflow-hidden">
+            {avatar ? (
+              <img src={avatar} alt="Profile" className="w-full h-full object-cover bg-white" />
+            ) : (
+              <UserRound size={64} className="text-gray-50" />
+            )}
+          </div>
           <button
             onClick={() => fileInputRef.current.click()}
             className="cursor-pointer absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full shadow"
@@ -387,11 +423,11 @@ function ProfileSettings() {
 
       {/* FORM */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input label="First Name" placeholder="John" />
-        <Input label="Last Name" placeholder="Doe" />
+        <Input label="First Name" placeholder="John" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+        <Input label="Last Name" placeholder="Doe" value={lastName} onChange={(e) => setLastName(e.target.value)} />
 
-        <Input label="Email Address" placeholder="example@gmail.com" />
-        <Input label="Mobile Number" placeholder="09123456789" />
+        <Input label="Email Address" placeholder="example@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled />
+        <Input label="Mobile Number" placeholder="09123456789" value={contact} onChange={(e) => setContact(e.target.value)} />
       </div>
 
       {/* Gender */}
@@ -415,7 +451,7 @@ function ProfileSettings() {
 
 /* Profile setting helper functions */
 
-function Input({ label, placeholder }) {
+function Input({ label, placeholder, value, onChange, disabled }) {
   return (
     <div>
       <label className="text-sm font-medium">
@@ -423,7 +459,10 @@ function Input({ label, placeholder }) {
       </label>
       <input
         placeholder={placeholder}
-        className="mt-1 w-full placeholder:italic border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        className={`mt-1 w-full placeholder:italic border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300 ${disabled ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
       />
     </div>
   );

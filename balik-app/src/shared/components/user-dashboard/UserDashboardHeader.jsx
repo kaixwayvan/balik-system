@@ -84,7 +84,8 @@ export default function UserDashboardHeader() {
                 <MenuItem
                   icon={User}
                   label="View Profile"
-                  className="cursor-pointer"
+                  to="/dashboard/profile"
+                  onClick={() => setIsOpen(false)}
                 />
                 <MenuItem icon={Bell} label="Notification" />
                 <MenuItem icon={HelpCircle} label="Help Center" />
@@ -138,9 +139,17 @@ export default function UserDashboardHeader() {
   );
 }
 
-function MenuItem({ icon: Icon, label }) {
+function MenuItem({ icon: Icon, label, to, onClick }) {
+  if (to) {
+    return (
+      <Link to={to} onClick={onClick} className="cursor-pointer w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 text-gray-700">
+        <Icon size={18} />
+        {label}
+      </Link>
+    );
+  }
   return (
-    <button className="cursor-pointer w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100">
+    <button onClick={onClick} className="cursor-pointer w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 text-gray-700">
       <Icon size={18} />
       {label}
     </button>

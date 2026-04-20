@@ -1,60 +1,76 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
+import { supabase } from "../../../utils/supabaseClient";
 
 export default function RecentReports() {
   const [filter, setFilter] = useState("All");
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const items = [
-    {
-      date: "Nov 12, 2024",
-      time: "10:30 AM",
-      item: "Blue Water Bottle",
-      description: "Stainless steel, university logo sticker",
-      location: "University Library",
-      name: "Michael Chue",
-      email: "mchen@gluoglu.com",
-      contact: "(555) 123-4567",
-      status: "Verified",
-      qrStat: "Scanned",
-      aiMatch: "95% Match",
-      type: "Found",
-    },
-    {
-      date: "Nov 10, 2024",
-      time: "4:30 PM",
-      item: "Black Wallet",
-      description: "contains student ID and credit cards",
-      location: "Cafeteria",
-      name: "John Cruz",
-      email: "djmod@sophia.com",
-      contact: "(911) 123-4567",
-      status: "Pending",
-      qrStat: "Not Scanned",
-      aiMatch: "80% Match",
-      type: "Lost",
-    },
-  ];
+  useEffect(() => {
+    async function fetchReports() {
+      try {
+        const { data, error } = await supabase
+          .from("items")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(10);
+        
+        if (error) throw error;
+        
+        const formattedData = data.map(dbItem => {
+          const reporter = dbItem.metadata?.reporter || {};
+          return {
+            id: dbItem.id,
+            date: new Date(dbItem.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+            time: new Date(dbItem.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+            item: dbItem.title || dbItem.category || "Unknown Item",
+            description: dbItem.description,
+            location: dbItem.location,
+            name: reporter.name || "Unknown",
+            email: reporter.email || "No email",
+            contact: reporter.mobile || "No contact",
+            status: dbItem.status === 'pending' ? 'Pending' : dbItem.status === 'resolved' ? 'Resolved' : 'Verified',
+            qrStat: dbItem.metadata?.qr_code ? "Scanned" : "Not Scanned",
+            aiMatch: dbItem.description_embedding ? "AI Processed" : "No AI Match",
+            type: dbItem.type === 'lost' ? 'Lost' : 'Found',
+          }
+        });
+        
+        setItems(formattedData);
+      } catch (err) {
+        console.error("Error fetching admin reports:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchReports();
+  }, []);
 
   const typeStyles = (type) => {
     if (type === "Lost") return "bg-red-100 text-red-600";
     if (type === "Found") return "bg-green-100 text-green-600";
+    return "bg-gray-100 text-gray-600";
   };
 
   const statusStyles = (status) => {
     if (status === "Verified") return "bg-green-100 text-green-600";
     if (status === "Pending") return "bg-yellow-100 text-yellow-600";
     if (status === "Resolved") return "bg-blue-100 text-blue-600";
+    return "bg-gray-100 text-gray-600";
   };
 
   const qrStyles = (qr) => {
     if (qr === "Scanned") return "bg-green-100 text-green-600";
     if (qr === "Not Scanned") return "bg-gray-100 text-gray-600";
+    return "bg-gray-100 text-gray-600";
   };
 
   const aiStyles = (match) => {
-    if (match === "No Match") return "bg-red-100 text-red-600";
-    if (match === "Match") return "bg-green-100 text-green-600";
+    if (match === "No Match" || match === "No AI Match") return "bg-red-100 text-red-600";
+    if (match === "AI Processed") return "bg-green-100 text-green-600";
     if (match.includes("%")) return "bg-purple-100 text-purple-600";
+    return "bg-gray-100 text-gray-600";
   };
 
   const filteredItems = items.filter((item) => {
@@ -111,9 +127,13 @@ export default function RecentReports() {
         </thead>
 
         <tbody>
-          {filteredItems.map((item, index) => (
+          {loading ? (
+            <tr><td colSpan="10" className="py-8 text-center text-gray-500">Loading reports...</td></tr>
+          ) : filteredItems.length === 0 ? (
+            <tr><td colSpan="10" className="py-8 text-center text-gray-500">No reports found</td></tr>
+          ) : filteredItems.map((item, index) => (
             <tr
-              key={index}
+              key={item.id || index}
               className="border-b align-top hover:bg-gray-50 transition"
             >
               <td className="py-4 px-4">{item.date}</td>

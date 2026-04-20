@@ -90,19 +90,6 @@ export default function UserDashboardSidebar() {
         </div>
       </nav>
 
-      {/* User Profile at Bottom */}
-      <div className="mt-auto pt-6 border-t border-gray-200">
-        <div className="flex items-center gap-3 px-2">
-          <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden">
-            {user?.user_metadata?.avatar_url ? (
-              <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-            ) : (
-              <UserIcon size={20} className="text-gray-400" />
-            )}
-          </div>
-
-        </div>
-      </div>
     </aside>
   );
 }

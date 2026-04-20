@@ -5,6 +5,7 @@ export default function RunAIMatchingModal({
   onClose,
   onStart,
   isProcessing,
+  counts
 }) {
   if (!open) return null;
 
@@ -50,7 +51,7 @@ export default function RunAIMatchingModal({
                 </div>
               </div>
 
-              <span className="text-2xl font-bold">45</span>
+              <span className="text-2xl font-bold">{counts?.lost || 0}</span>
             </div>
 
             <div className="bg-gray-100 rounded-lg p-4 flex justify-between items-center">
@@ -64,7 +65,7 @@ export default function RunAIMatchingModal({
                 </div>
               </div>
 
-              <span className="text-2xl font-bold">38</span>
+              <span className="text-2xl font-bold">{counts?.found || 0}</span>
             </div>
 
             {/* START BUTTON */}

@@ -1,15 +1,51 @@
 import { Search, Waves, Clock, SquaresExclude, QrCode, UserSearch } from "lucide-react";
-
-const stats = [
-  { icon: Search, value: 248, label: "Total Lost Items", change: "+12%", css: "text-red-500 bg-red-200" },
-  { icon: Waves, value: 192, label: "Total Found Items", change: "+8%", css: "text-green-600 bg-green-200" },
-  { icon: Clock, value: 89, label: "Successful Claims", change: "+15%", css: "text-blue-700 bg-blue-200" },
-  { icon: SquaresExclude, value: 156, label: "AI Matches", change: "+22%", css: "text-purple-600 bg-purple-200" },
-  { icon: QrCode, value: 73, label: "QR Verified items", change: "+5%", css: "text-yellow-600 bg-yellow-200" },
-  { icon: UserSearch, value: 45, label: "Guest Found Reports", change: "-3%", css: "text-violet-600 bg-violet-200" },
-];
+import { useEffect, useState } from "react";
+import { supabase } from "../../../utils/supabaseClient";
 
 export default function StatCards() {
+  const [statsData, setStatsData] = useState({
+    lost: 0,
+    found: 0,
+    resolved: 0,
+    ai: 0,
+    qr: 0,
+    guest: 0
+  });
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const { data, error } = await supabase.from('items').select('type, status, metadata, description_embedding');
+        if (error) throw error;
+
+        let lost = 0, found = 0, resolved = 0, ai = 0, qr = 0, guest = 0;
+        data.forEach(item => {
+          if (item.type === 'lost') lost++;
+          if (item.type === 'found') {
+              found++;
+              if (item.metadata?.is_anonymous) guest++;
+          }
+          if (item.status === 'resolved') resolved++;
+          if (item.description_embedding) ai++;
+          if (item.metadata?.qr_code) qr++;
+        });
+        setStatsData({ lost, found, resolved, ai, qr, guest });
+      } catch (err) {
+        console.error("Error fetching stats:", err);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  const stats = [
+    { icon: Search, value: statsData.lost, label: "Total Lost Items", change: "+12%", css: "text-red-500 bg-red-200" },
+    { icon: Waves, value: statsData.found, label: "Total Found Items", change: "+8%", css: "text-green-600 bg-green-200" },
+    { icon: Clock, value: statsData.resolved, label: "Successful Claims", change: "+15%", css: "text-blue-700 bg-blue-200" },
+    { icon: SquaresExclude, value: statsData.ai, label: "AI Matches", change: "+22%", css: "text-purple-600 bg-purple-200" },
+    { icon: QrCode, value: statsData.qr, label: "QR Verified items", change: "+5%", css: "text-yellow-600 bg-yellow-200" },
+    { icon: UserSearch, value: statsData.guest, label: "Anonymous Reports", change: "-3%", css: "text-violet-600 bg-violet-200" },
+  ];
+
   return (
     <div className="grid grid-cols-6 gap-4">
       {stats.map((s, i) => {

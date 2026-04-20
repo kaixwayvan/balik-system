@@ -12,8 +12,17 @@ import DashboardtTrack from "./components/UserDashboard/TrackItems/TrackItems"
 import DashboardReport from "./components/UserDashboard/ActiveReports/ActiveReports"
 import DashboardFound from "./components/UserDashboard/FoundItems/FoundItems"
 import DashboardClaims from "./components/UserDashboard/MyClaims/MyClaims"
+import UserProfile from "./components/UserDashboard/UserProfile/UserProfile"
+
+import AdminDashboardHome from "./pages/admin-dashboard/AdminDashboardHome";
+import AdminLostItems from "./components/AdminDashboard/LostItems/LostItems";
+import AdminFoundItems from "./components/AdminDashboard/FoundItems/FoundItems";
+import AIMatches from "./components/AdminDashboard/AIMatches/AIMatches";
+import QRVerification from "./components/AdminDashboard/QRVerification/QRVerification";
+import AdminReport from "./components/AdminDashboard/AdminHome/AdminReport";
 
 import UserDashboardLayout from "./shared/components/layouts/UserDashboardLayout";
+import AdminDashboardLayout from "./shared/components/layouts/AdminDashboardLayout";
 import SubmitReport from "./components/UserDashboard/Home/SubmitReport";
 import ComingSoonPage from "./pages/ComingSoonPage";
 
@@ -32,6 +41,7 @@ function App() {
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/comingsoon" element={<ComingSoonPage />} />
         <Route path="/submitreport" element={<SubmitReport />} />
+        <Route path="/adminreport" element={<AdminReport />} />
 
         {/* Dashboard with its own layout */}
         <Route element={<UserDashboardLayout />}>
@@ -41,6 +51,15 @@ function App() {
           <Route path="/dashboard/reports" element={<DashboardReport />} />
           <Route path="/dashboard/found" element={<DashboardFound />} />
           <Route path="/dashboard/claims" element={<DashboardClaims />} />
+          <Route path="/dashboard/profile" element={<UserProfile />} />
+        </Route>
+
+        <Route path="/admin" element={<AdminDashboardLayout />}>
+          <Route index element={<AdminDashboardHome />} />
+          <Route path="/admin/lost-manage" element={<AdminLostItems />} />
+          <Route path="/admin/found-manage" element={<AdminFoundItems />} />
+          <Route path="/admin/matching" element={<AIMatches />} />
+          <Route path="/admin/qr-verify" element={<QRVerification />} />
         </Route>
       </Routes>
     </AuthProvider>

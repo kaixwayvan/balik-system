@@ -46,8 +46,8 @@ const defaultMatches = [
   },
 ];
 
-export default function AIMatchesTable({ matches }) {
-  const data = matches?.length ? matches : defaultMatches;
+export default function AIMatchesTable({ matches, loading, counts }) {
+  const data = loading ? [] : matches;
 
   /**
    * AI FLOW STATE
@@ -106,7 +106,11 @@ export default function AIMatchesTable({ matches }) {
         </thead>
 
         <tbody>
-          {data.map((match) => (
+          {loading ? (
+            <tr><td colSpan="5" className="px-6 py-6 text-center text-gray-500">Loading matches...</td></tr>
+          ) : data.length === 0 ? (
+            <tr><td colSpan="5" className="px-6 py-6 text-center text-gray-500">No AI matches found.</td></tr>
+          ) : data.map((match) => (
             <AIMatchRow key={match.id} match={match} onAction={handleAction} />
           ))}
         </tbody>
@@ -118,6 +122,7 @@ export default function AIMatchesTable({ matches }) {
         onClose={closeAllModals}
         onStart={startMatching}
         isProcessing={aiStage === "processing"}
+        counts={counts || { lost: 0, found: 0 }}
       />
 
       {/* LOADING + RESULT MODAL */}
@@ -129,6 +134,7 @@ export default function AIMatchesTable({ matches }) {
       <MatchingCompleteModal
         open={aiStage === "complete"}
         onViewMatches={handleViewMatches}
+        matches={matches}
       />
 
       <MatchDetailsModal

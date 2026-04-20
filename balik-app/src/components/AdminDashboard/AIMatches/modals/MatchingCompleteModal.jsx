@@ -4,8 +4,14 @@ export default function MatchingCompleteModal({
   open,
   onViewMatches,
   onClose,
+  matches = []
 }) {
   if (!open) return null;
+
+  const total = matches.length;
+  const high = matches.filter(m => m.confidence >= 90).length;
+  const med = matches.filter(m => m.confidence >= 70 && m.confidence < 90).length;
+  const low = matches.filter(m => m.confidence < 70).length;
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
@@ -34,7 +40,7 @@ export default function MatchingCompleteModal({
             <p className="text-green-700 font-medium">
               New Matches Found
             </p>
-            <p className="text-2xl font-bold">7</p>
+            <p className="text-2xl font-bold">{total}</p>
           </div>
 
           <div className="border border-blue-400 rounded-lg p-5 text-center bg-blue-50">
@@ -47,9 +53,9 @@ export default function MatchingCompleteModal({
 
         {/* CONFIDENCE SUMMARY */}
         <div className="space-y-3 text-sm">
-          <Row label="High Confidence (>90%)" value="4 matches" color="text-green-600" />
-          <Row label="Medium Confidence (70–90%)" value="2 matches" color="text-yellow-600" />
-          <Row label="Low Confidence (<70%)" value="1 match" color="text-red-600" />
+          <Row label="High Confidence (>90%)" value={`${high} ${high === 1 ? 'match' : 'matches'}`} color="text-green-600" />
+          <Row label="Medium Confidence (70–90%)" value={`${med} ${med === 1 ? 'match' : 'matches'}`} color="text-yellow-600" />
+          <Row label="Low Confidence (<70%)" value={`${low} ${low === 1 ? 'match' : 'matches'}`} color="text-red-600" />
         </div>
 
         {/* NEXT STEP */}

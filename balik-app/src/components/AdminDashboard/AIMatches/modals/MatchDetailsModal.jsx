@@ -37,7 +37,7 @@ export default function MatchDetailsModal({ match, open, onClose }) {
               title="Lost Item"
               data={{
                 item: match.lost,
-                category: "Bags",
+                category: match.category || "Not Specified",
                 email: match.lostEmail,
                 date: match.lostDate,
               }}
@@ -46,7 +46,7 @@ export default function MatchDetailsModal({ match, open, onClose }) {
               title="Found Item"
               data={{
                 item: match.found,
-                category: "Bags",
+                category: match.category || "Not Specified",
                 email: match.foundEmail,
                 date: match.foundDate,
               }}
