@@ -122,11 +122,7 @@ const lostItems = [
 function TooltipIcon({ icon: Icon, color, label, onClick }) {
   return (
     <div className="relative group">
-      <Icon
-        className={`${color} cursor-pointer`}
-        size={18}
-        onClick={onClick}
-      />
+      <Icon className={`${color} cursor-pointer`} size={18} onClick={onClick} />
       <span
         className="absolute -top-6 left-1/2 -translate-x-1/2 
                    whitespace-nowrap bg-gray-800 text-white 
@@ -349,75 +345,82 @@ export default function LostItems() {
           </thead>
 
           <tbody>
-            {filteredItems.map((item, i) => (
-              <tr key={i} className="border-t border-gray-300 hover:bg-gray-50">
-                <td className="px-4 py-3">
-                  <input
-                    type="checkbox"
-                    className="
-                      cursor-pointer
-                      appearance-none
-                      inline-block
-                      w-[20px] h-[20px]
-                      p-[2px]
-                      bg-clip-content
-                      border-[1.5px] border-[#bbbbbb]
-                      rounded-[2px]
-                      bg-none
-                      mx-[15px]
-                      checked:bg-blue-700
-                      focus:outline-none
-                    "
-                  />
-                </td>
-
-                <td className="px-4 py-5">
-                  <p className="font-medium">{item.name}</p>
-                  <p className="text-gray-500 text-xs">{item.description}</p>
-                </td>
-
-                <td className="px-4 py-3">{item.category}</td>
-
-                <td className="px-4 py-3 whitespace-pre-line">
-                  {item.location}
-                </td>
-
-                <td className="px-4 py-3">
-                  <p className="font-medium">{item.owner}</p>
-                  <p className="text-xs text-gray-500">{item.email}</p>
-                </td>
-
-                <td className="px-4 py-3">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      statusStyles[item.status]
-                    }`}
-                  >
-                    {item.status}
-                  </span>
-                </td>
-
-                <td className="px-4 py-3 text-gray-600">{item.date}</td>
-
-                <td className="px-4 py-3">
-                  <div className="flex justify-center gap-3">
-                    <TooltipIcon
-                      icon={Eye}
-                      color="text-green-600"
-                      label="View"
-                      onClick={() => handleViewItem(item)}
-                    />
-
-                    <TooltipIcon
-                      icon={QrCode}
-                      color="text-purple-600"
-                      label="QR Code"
-                      onClick={() => console.log("QR Code clicked")}
-                    />
-                  </div>
+            {filteredItems.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={tableHeaders.length}
+                  className="text-center py-10 text-gray-500"
+                >
+                  {search ||
+                  categoryFilter !== "All" ||
+                  statusFilter !== "All Status" ||
+                  fromDate ||
+                  toDate
+                    ? "No matching items found."
+                    : "No items available."}
                 </td>
               </tr>
-            ))}
+            ) : (
+              filteredItems.map((item, i) => (
+                <tr
+                  key={i}
+                  className="border-t border-gray-300 hover:bg-gray-50"
+                >
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      className="cursor-pointer appearance-none inline-block w-[20px] h-[20px] p-[2px] bg-clip-content border-[1.5px] border-[#bbbbbb] rounded-[2px] bg-none mx-[15px] checked:bg-blue-700 focus:outline-none"
+                    />
+                  </td>
+
+                  <td className="px-4 py-5">
+                    <p className="font-medium">{item.name}</p>
+                    <p className="text-gray-500 text-xs">{item.description}</p>
+                  </td>
+
+                  <td className="px-4 py-3">{item.category}</td>
+
+                  <td className="px-4 py-3 whitespace-pre-line">
+                    {item.location}
+                  </td>
+
+                  <td className="px-4 py-3">
+                    <p className="font-medium">{item.owner}</p>
+                    <p className="text-xs text-gray-500">{item.email}</p>
+                  </td>
+
+                  <td className="px-4 py-3">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        statusStyles[item.status]
+                      }`}
+                    >
+                      {item.status}
+                    </span>
+                  </td>
+
+                  <td className="px-4 py-3 text-gray-600">{item.date}</td>
+
+                  <td className="px-4 py-3">
+                    <div className="flex justify-center gap-3">
+                      <TooltipIcon
+                        icon={Eye}
+                        color="text-green-600"
+                        label="View"
+                        onClick={() => handleViewItem(item)}
+                      />
+
+                      <TooltipIcon
+                        icon={QrCode}
+                        color="text-purple-600"
+                        label="QR Code"
+                        onClick={() => console.log("QR Code clicked")}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

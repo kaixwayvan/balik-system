@@ -20,6 +20,8 @@ import AIMatches from "./components/AdminDashboard/AIMatches/AIMatches";
 
 import QRVerification from "./components/AdminDashboard/QRVerification/QRVerification";
 
+import TrackItems from "./components/AdminDashboard/TrackItems/ItemTrackingPage"
+
 import UserDashboardLayout from "./shared/components/layouts/UserDashboardLayout";
 import AdminDashboardLayout from "./shared/components/layouts/AdminDashboardLayout";
 
@@ -60,6 +62,7 @@ function App() {
         <Route path="/admin/found-manage" element={<FoundItems />} />
         <Route path="/admin/matching" element={<AIMatches />} />
         <Route path="/admin/qr-verify" element={<QRVerification />} />
+        <Route path="/admin/track-items" element={<TrackItems />} />
       </Route>
     </Routes>
   );

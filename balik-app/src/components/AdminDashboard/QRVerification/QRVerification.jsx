@@ -79,6 +79,17 @@ export default function QRVerification() {
 
   return (
     <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800 mb-1">
+            QR Verification
+          </h1>
+          <p className="text-gray-500 text-sm">
+            Scan and validate QR codes for item return verification
+          </p>
+        </div>
+      </div>
+
       <StatsCard stats={stats} />
 
       <div className="grid grid-cols-2 gap-6">
