@@ -25,27 +25,45 @@ export const AuthProvider = ({ children }) => {
 
     const fetchProfile = async (currentUser) => {
       try {
-        const profilePromise = supabase
+        // Try to fetch existing profile
+        const { data, error } = await supabase
           .from("profiles")
-          .select("full_name, role")
+          .select("*")
           .eq("id", currentUser.id)
           .single();
 
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Profile fetch timeout")), 5000)
-        );
+        let profileData = data;
 
-        const { data, error } = await Promise.race([profilePromise, timeoutPromise]);
+        // If profile doesn't exist or is missing critical info, sync it from metadata
+        if (error || !data) {
+          console.log("Profile missing or error, syncing from metadata...");
+          const { data: syncedData, error: syncError } = await supabase
+            .from("profiles")
+            .upsert({
+              id: currentUser.id,
+              full_name: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name,
+              mobile_number: currentUser.user_metadata?.mobile_number || currentUser.user_metadata?.contact,
+              email: currentUser.email,
+              role: currentUser.user_metadata?.role || 'user',
+              updated_at: new Date(),
+            })
+            .select()
+            .single();
 
-        if (!error && data) {
+          if (!syncError) {
+            profileData = syncedData;
+          }
+        }
+
+        if (profileData) {
           currentUser.user_metadata = {
             ...currentUser.user_metadata,
-            full_name: data.full_name,
-            role: data.role || currentUser.user_metadata?.role || 'user',
+            full_name: profileData.full_name,
+            role: profileData.role || currentUser.user_metadata?.role || 'user',
           };
         }
       } catch (err) {
-        console.error("Profile fetch error or timeout:", err);
+        console.error("Profile sync/fetch error:", err);
       } finally {
         setUser(currentUser);
         setLoading(false);

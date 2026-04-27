@@ -23,6 +23,7 @@ export const signupWithEmail = async (email, password, fullName, contact) => {
         full_name: fullName,
         mobile_number: contact,
         email: email,
+        role: 'user',
         updated_at: new Date(),
       });
     }

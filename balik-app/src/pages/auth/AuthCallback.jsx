@@ -30,6 +30,7 @@ export default function AuthCallback() {
             full_name: user.user_metadata?.full_name,
             mobile_number: user.user_metadata?.mobile_number,
             email: user.email,
+            role: user.user_metadata?.role || 'user',
             updated_at: new Date(),
           });
 
