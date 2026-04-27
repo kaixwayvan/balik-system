@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const profilePromise = supabase
           .from("profiles")
-          .select("full_name")
+          .select("full_name, role")
           .eq("id", currentUser.id)
           .single();
 
@@ -41,6 +41,7 @@ export const AuthProvider = ({ children }) => {
           currentUser.user_metadata = {
             ...currentUser.user_metadata,
             full_name: data.full_name,
+            role: data.role,
           };
         }
       } catch (err) {

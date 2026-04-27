@@ -31,6 +31,7 @@ import ActivityHistory from "./components/UserDashboard/ActivityHistory/Activity
 import ItemTrackingPage from "./components/AdminDashboard/TrackItems/ItemTrackingPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfUse from "./pages/TermsOfUse";
+import AdminRoute from "./shared/components/AdminRoute";
 
 function App() {
   return (
@@ -72,7 +73,11 @@ function App() {
           <Route path="/dashboard/history" element={<ActivityHistory />} />
         </Route>
 
-        <Route path="/admin" element={<AdminDashboardLayout />}>
+        <Route path="/admin" element={
+          <AdminRoute>
+            <AdminDashboardLayout />
+          </AdminRoute>
+        }>
           <Route index element={<AdminDashboardHome />} />
           <Route path="/admin/lost-manage" element={<AdminLostItems />} />
           <Route path="/admin/found-manage" element={<AdminFoundItems />} />
