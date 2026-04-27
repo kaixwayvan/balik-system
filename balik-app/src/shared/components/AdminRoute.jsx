@@ -12,8 +12,11 @@ export default function AdminRoute({ children }) {
     );
   }
 
-  // Check if they exist AND if their role is admin
-  if (!user || user.user_metadata?.role !== 'admin') {
+  // Check if they exist AND if their role is admin (case-insensitive)
+  const role = user?.user_metadata?.role?.toLowerCase();
+  
+  if (!user || role !== 'admin') {
+    console.log("Access denied: User is not an admin. Role:", role);
     return <Navigate to="/dashboard" replace />;
   }
 

@@ -33,8 +33,23 @@ export default function AuthCallback() {
             updated_at: new Date(),
           });
 
-          // Redirect to dashboard
-          setTimeout(() => navigate("/dashboard", { replace: true }), 2000);
+          // Fetch role from profiles table for immediate redirection
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+          const role = profile?.role || user.user_metadata?.role || 'user';
+          
+          // Redirect to appropriate dashboard based on role
+          setTimeout(() => {
+            if (role.toLowerCase() === 'admin') {
+              navigate("/admin", { replace: true });
+            } else {
+              navigate("/dashboard", { replace: true });
+            }
+          }, 2000);
         } else {
           setError("Session not found. Please log in.");
           setTimeout(() => navigate("/login"), 3000);

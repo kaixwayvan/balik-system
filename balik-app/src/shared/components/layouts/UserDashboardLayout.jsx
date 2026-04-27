@@ -9,7 +9,12 @@ export default function UserDashboardLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && user) {
+      const role = user.user_metadata?.role?.toLowerCase();
+      if (role === 'admin') {
+        navigate('/admin', { replace: true });
+      }
+    } else if (!loading && !user) {
       navigate('/login', { replace: true });
     }
   }, [user, loading, navigate]);

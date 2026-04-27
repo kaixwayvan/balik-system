@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
 import { loginWithPasswordSupabase, loginWithGoogleSupabase } from "./services/supabaseAuthService";
+import { supabase } from "../../utils/supabaseClient";
 import BALIKLogo from "../../assets/BALIK.png";
 import StudentSupportImg from "../../assets/auth-assets/studentsupport.png";
 
@@ -79,9 +80,22 @@ export default function Login() {
       const result = await loginWithPasswordSupabase(form.identifier, form.password);
 
       if (result.success) {
-        // Clear any previous error and navigate immediately
         setError("");
-        navigate('/dashboard', { replace: true });
+        
+        // Fetch role from profiles table for immediate redirection
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', result.user.id)
+          .single();
+
+        const role = profile?.role || result.user.user_metadata?.role || 'user';
+        
+        if (role.toLowerCase() === 'admin') {
+          navigate('/admin', { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
       } else {
         setError(result.error || 'Invalid credentials. Please try again.');
       }

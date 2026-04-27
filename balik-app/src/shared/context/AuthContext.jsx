@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
           currentUser.user_metadata = {
             ...currentUser.user_metadata,
             full_name: data.full_name,
-            role: data.role,
+            role: data.role || currentUser.user_metadata?.role || 'user',
           };
         }
       } catch (err) {
