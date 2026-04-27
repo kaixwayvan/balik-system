@@ -29,6 +29,8 @@ import ComingSoonPage from "./pages/ComingSoonPage";
 // New Components from admin-dashboard branch
 import ActivityHistory from "./components/UserDashboard/ActivityHistory/ActivityHistory";
 import ItemTrackingPage from "./components/AdminDashboard/TrackItems/ItemTrackingPage";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfUse from "./pages/TermsOfUse";
 
 function App() {
   return (
@@ -50,8 +52,8 @@ function App() {
         {/* Footer Routes */}
         <Route path="/about-us" element={<ComingSoonPage />} />
         <Route path="/contact" element={<ComingSoonPage />} />
-        <Route path="/privacy-policy" element={<ComingSoonPage />} />
-        <Route path="/terms-of-service" element={<ComingSoonPage />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-of-service" element={<TermsOfUse />} />
         <Route path="/cookie-policy" element={<ComingSoonPage />} />
         <Route path="/help-center" element={<ComingSoonPage />} />
         <Route path="/safety-tips" element={<ComingSoonPage />} />
