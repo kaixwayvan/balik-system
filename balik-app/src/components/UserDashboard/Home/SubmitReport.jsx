@@ -93,7 +93,8 @@ export default function SubmitReport() {
         title: itemLost || (reportType === "Found Item" ? `Found ${category}` : "Untitled Item"),
         description: `Brand: ${brand}\nColor: ${color}\n\n${additionalInfo}`,
         location,
-        date_reported: formattedDate,
+        date_found: formattedDate,
+        date_reported: new Date().toISOString(),
         status: 'pending',
         image_url: imageUrl,
         metadata: {
@@ -362,6 +363,8 @@ export default function SubmitReport() {
                   <DatePicker
                     selected={dateLost}
                     onChange={(date) => setDateLost(date)}
+                    minDate={new Date("2025-01-01")}
+                    maxDate={new Date()}
                     placeholderText="Select date"
                     required
                     className="w-full border rounded-md px-3 py-2"

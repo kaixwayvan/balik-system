@@ -4,59 +4,150 @@ import {
   Search,
   Medal,
   ArrowBigUpDash,
+  ArrowBigDownDash
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "../../../utils/supabaseClient";
 
 export default function OverviewCards() {
-  const badges = [
-    {
-      name: "Good Samaritan",
-      count: 24,
-      icon: HeartHandshake,
-      color: "text-rose-500 bg-rose-100",
-    },
-    {
-      name: "Super Finder",
-      count: 8,
-      icon: Search,
-      color: "text-blue-500 bg-blue-100",
-    },
-    {
-      name: "Campus Finder",
-      count: 3,
-      icon: Medal,
-      color: "text-purple-500 bg-purple-100",
-    },
-  ];
+  const [data, setData] = useState({
+    totalPoints: 0,
+    growth: 0,
+    topFinderName: "No Finders Yet",
+    topFinderPoints: 0,
+    badges: [
+      {
+        name: "Good Samaritan",
+        count: 0,
+        icon: HeartHandshake,
+        color: "text-rose-500 bg-rose-100",
+      },
+      {
+        name: "Super Finder",
+        count: 0,
+        icon: Search,
+        color: "text-blue-500 bg-blue-100",
+      },
+      {
+        name: "Campus Finder",
+        count: 0,
+        icon: Medal,
+        color: "text-purple-500 bg-purple-100",
+      },
+    ]
+  });
+
+  useEffect(() => {
+    async function fetchOverview() {
+      try {
+        const { data: items, error } = await supabase
+          .from('items')
+          .select('created_at, metadata')
+          .eq('type', 'found');
+
+        if (error) throw error;
+
+        let thisMonthCount = 0;
+        let lastMonthCount = 0;
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+
+        const userCounts = {};
+        let topFinder = { name: "No Finders Yet", count: 0 };
+
+        items.forEach(item => {
+          const d = new Date(item.created_at);
+          if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
+            thisMonthCount++;
+          } else if (
+            d.getMonth() === (currentMonth === 0 ? 11 : currentMonth - 1) &&
+            d.getFullYear() === (currentMonth === 0 ? currentYear - 1 : currentYear)
+          ) {
+            lastMonthCount++;
+          }
+
+          const reporterName = item.metadata?.reporter?.name || "Unknown";
+          if (reporterName !== "Anonymous" && !item.metadata?.is_anonymous) {
+            userCounts[reporterName] = (userCounts[reporterName] || 0) + 1;
+            if (userCounts[reporterName] > topFinder.count) {
+              topFinder = { name: reporterName, count: userCounts[reporterName] };
+            }
+          }
+        });
+
+        const POINTS_PER_ITEM = 50;
+        const totalPoints = items.length * POINTS_PER_ITEM;
+        const thisMonthPoints = thisMonthCount * POINTS_PER_ITEM;
+        const lastMonthPoints = lastMonthCount * POINTS_PER_ITEM;
+
+        let growth = 0;
+        if (lastMonthPoints > 0) {
+          growth = Math.round(((thisMonthPoints - lastMonthPoints) / lastMonthPoints) * 100);
+        } else if (thisMonthPoints > 0) {
+          growth = 100;
+        }
+
+        let goodSamaritan = 0;
+        let superFinder = 0;
+        let campusFinder = 0;
+
+        Object.values(userCounts).forEach(count => {
+          if (count >= 1) goodSamaritan++;
+          if (count >= 5) superFinder++;
+          if (count >= 10) campusFinder++;
+        });
+
+        setData({
+          totalPoints,
+          growth,
+          topFinderName: topFinder.name,
+          topFinderPoints: topFinder.count * POINTS_PER_ITEM,
+          badges: [
+            { name: "Good Samaritan", count: goodSamaritan, icon: HeartHandshake, color: "text-rose-500 bg-rose-100" },
+            { name: "Super Finder", count: superFinder, icon: Search, color: "text-blue-500 bg-blue-100" },
+            { name: "Campus Finder", count: campusFinder, icon: Medal, color: "text-purple-500 bg-purple-100" }
+          ]
+        });
+
+      } catch (err) {
+        console.error("Error fetching overview data:", err);
+      }
+    }
+    fetchOverview();
+  }, []);
 
   return (
     <div className="grid grid-cols-3 gap-6">
       {/* Points Card */}
-      <div className="bg-white rounded-xl p-6">
+      <div className="bg-white rounded-xl p-6 shadow-md">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-lg">Points This Month</h3>
+          <h3 className="font-semibold text-lg">Points Overview</h3>
           <button className="cursor-pointer font-semibold text-sm text-green-600 hover:underline">
             View All
           </button>
         </div>
 
         <div className="flex flex-col justify-center items-center gap-1">
-          <p className="text-3xl font-bold text-green-600">2,450</p>
+          <p className="text-3xl font-bold text-green-600">
+            {data.totalPoints.toLocaleString()}
+          </p>
           <p className="text-sm text-gray-500 mb-2">Total Points Awarded</p>
           <div className="flex justify-center items-center gap-1">
-            <ArrowBigUpDash
-              className="text-green-600"
-              size={18}
-              strokeWidth={2.4}
-            />
-            <p className="text-sm font-bold text-green-600">
-              +18% from last month
+            {data.growth >= 0 ? (
+              <ArrowBigUpDash className="text-green-600" size={18} strokeWidth={2.4} />
+            ) : (
+              <ArrowBigDownDash className="text-red-600" size={18} strokeWidth={2.4} />
+            )}
+            <p className={`text-sm font-bold ${data.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {data.growth >= 0 ? '+' : ''}{data.growth}% from last month
             </p>
           </div>
         </div>
       </div>
 
       {/* Top Finder */}
-      <div className="bg-white rounded-xl p-6 text-center">
+      <div className="bg-white rounded-xl p-6 text-center shadow-md">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-lg">Top Finder</h3>
           <button className="cursor-pointer font-semibold text-sm text-green-600 hover:underline">
@@ -70,12 +161,12 @@ export default function OverviewCards() {
           </div>
         </div>
 
-        <p className="mt-3 font-semibold">Rosmar Lamna</p>
-        <p className="text-sm text-gray-500">850 points</p>
+        <p className="mt-3 font-semibold">{data.topFinderName}</p>
+        <p className="text-sm text-gray-500">{data.topFinderPoints} points</p>
       </div>
 
       {/* Earned Badges */}
-      <div className="bg-white rounded-xl p-6">
+      <div className="bg-white rounded-xl p-6 shadow-md">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-lg">Most Earned Badge</h3>
           <button className="cursor-pointer font-semibold text-sm text-green-600 hover:underline">
@@ -84,7 +175,7 @@ export default function OverviewCards() {
         </div>
 
         <div className="space-y-3">
-          {badges.map((badge, index) => {
+          {data.badges.map((badge, index) => {
             const Icon = badge.icon;
 
             return (

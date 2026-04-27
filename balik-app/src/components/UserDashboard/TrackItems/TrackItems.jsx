@@ -92,7 +92,7 @@ export default function TrackItems() {
       title: item.title,
       category: item.category,
       location: item.location,
-      date: item.date_reported,
+      date: item.date_found || item.date_reported,
     });
   };
 
@@ -104,14 +104,14 @@ export default function TrackItems() {
           title: editFormData.title,
           category: editFormData.category,
           location: editFormData.location,
-          date_reported: editFormData.date
+          date_found: editFormData.date
         })
         .eq('id', editingId);
 
       if (updateError) throw updateError;
 
       setItems(items.map(item =>
-        item.id === editingId ? { ...item, ...editFormData, title: editFormData.title, date_reported: editFormData.date } : item
+        item.id === editingId ? { ...item, ...editFormData, title: editFormData.title, date_found: editFormData.date } : item
       ));
       setEditingId(null);
     } catch (err) {
@@ -248,7 +248,7 @@ export default function TrackItems() {
                     category={item.category}
                     title={item.title}
                     location={item.location}
-                    date={new Date(item.date_reported).toLocaleDateString()}
+                    date={new Date(item.date_found || item.date_reported).toLocaleDateString()}
                     time={new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     type={item.type}
                     status={item.status}

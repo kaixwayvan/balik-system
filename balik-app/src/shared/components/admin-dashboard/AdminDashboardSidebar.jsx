@@ -63,7 +63,7 @@ export default function AdminDashboardSidebar() {
               QR Verification
             </NavLink>
 
-            <NavLink to="/comingsoon" end className={linkClass}>
+            <NavLink to="/admin/track-items" end className={linkClass}>
               <MapPinPen size={18} />
               Track Items
             </NavLink>

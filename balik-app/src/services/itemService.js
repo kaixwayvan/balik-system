@@ -138,5 +138,32 @@ export const itemService = {
             found: data.filter(i => i.type === 'found').length,
             resolved: data.filter(i => i.status === 'resolved').length
         }
+    },
+
+    /**
+     * Fetch all items for admin tracking
+     */
+    async getAllItems() {
+        const { data, error } = await supabase
+            .from('items')
+            .select('*')
+            .order('created_at', { ascending: false })
+
+        if (error) throw error
+        return data
+    },
+
+    /**
+     * Fetch user's activity history
+     */
+    async getUserHistory(userId) {
+        const { data, error } = await supabase
+            .from('items')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+
+        if (error) throw error
+        return data
     }
 }

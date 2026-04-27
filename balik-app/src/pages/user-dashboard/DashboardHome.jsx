@@ -204,7 +204,8 @@ export default function DashboardHome() {
         title: lostFormData.whatWasLost,
         description: `Brand: ${lostFormData.brand}\nColor: ${lostFormData.color}\n\n${lostFormData.additionalInfo}`,
         location: lostFormData.location,
-        date_reported: lostFormData.dateLost,
+        date_found: lostFormData.dateLost,
+        date_reported: new Date().toISOString(),
         status: 'pending',
         image_url: imageUrl,
         metadata: {
@@ -325,7 +326,8 @@ export default function DashboardHome() {
         title: foundFormData.whatWasFound,
         description: `Brand: ${foundFormData.brand}\nColor: ${foundFormData.color}\n\n${foundFormData.additionalInfo}`,
         location: foundFormData.location,
-        date_reported: foundFormData.dateFound,
+        date_found: foundFormData.dateFound,
+        date_reported: new Date().toISOString(),
         status: 'pending',
         image_url: imageUrl,
         metadata: {

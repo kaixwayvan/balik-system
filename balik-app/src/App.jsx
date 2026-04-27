@@ -26,6 +26,10 @@ import AdminDashboardLayout from "./shared/components/layouts/AdminDashboardLayo
 import SubmitReport from "./components/UserDashboard/Home/SubmitReport";
 import ComingSoonPage from "./pages/ComingSoonPage";
 
+// New Components from admin-dashboard branch
+import ActivityHistory from "./components/UserDashboard/ActivityHistory/ActivityHistory";
+import ItemTrackingPage from "./components/AdminDashboard/TrackItems/ItemTrackingPage";
+
 function App() {
   return (
     <AuthProvider>
@@ -43,6 +47,17 @@ function App() {
         <Route path="/submitreport" element={<SubmitReport />} />
         <Route path="/adminreport" element={<AdminReport />} />
 
+        {/* Footer Routes */}
+        <Route path="/about-us" element={<ComingSoonPage />} />
+        <Route path="/contact" element={<ComingSoonPage />} />
+        <Route path="/privacy-policy" element={<ComingSoonPage />} />
+        <Route path="/terms-of-service" element={<ComingSoonPage />} />
+        <Route path="/cookie-policy" element={<ComingSoonPage />} />
+        <Route path="/help-center" element={<ComingSoonPage />} />
+        <Route path="/safety-tips" element={<ComingSoonPage />} />
+        <Route path="/community-guidelines" element={<ComingSoonPage />} />
+        <Route path="/report-abuse" element={<ComingSoonPage />} />
+
         {/* Dashboard with its own layout */}
         <Route element={<UserDashboardLayout />}>
           <Route path="/dashboard" element={<DashboardHome />} />
@@ -52,6 +67,7 @@ function App() {
           <Route path="/dashboard/found" element={<DashboardFound />} />
           <Route path="/dashboard/claims" element={<DashboardClaims />} />
           <Route path="/dashboard/profile" element={<UserProfile />} />
+          <Route path="/dashboard/history" element={<ActivityHistory />} />
         </Route>
 
         <Route path="/admin" element={<AdminDashboardLayout />}>
@@ -60,6 +76,7 @@ function App() {
           <Route path="/admin/found-manage" element={<AdminFoundItems />} />
           <Route path="/admin/matching" element={<AIMatches />} />
           <Route path="/admin/qr-verify" element={<QRVerification />} />
+          <Route path="/admin/track-items" element={<ItemTrackingPage />} />
         </Route>
       </Routes>
     </AuthProvider>

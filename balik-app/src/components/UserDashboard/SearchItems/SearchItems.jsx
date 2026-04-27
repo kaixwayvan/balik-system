@@ -192,7 +192,7 @@ export default function SubmitReport() {
                 <p className="mt-2 text-sm text-slate-600 line-clamp-2 min-h-[40px]">{item.description}</p>
                 <div className="mt-auto pt-3 flex justify-between text-[11px] text-slate-500 border-t">
                   <span className="flex items-center gap-1">📍 {item.location}</span>
-                  <span className="flex items-center gap-1">📅 {new Date(item.date_reported).toLocaleDateString()}</span>
+                  <span className="flex items-center gap-1">📅 {new Date(item.date_found || item.date_reported).toLocaleDateString()}</span>
                 </div>
                 <button
                   onClick={() => setSelectedItem(item)}
@@ -264,7 +264,7 @@ export default function SubmitReport() {
                     label="Location"
                     value={selectedItem.location}
                   />
-                  <Info icon={Calendar} label="Date Reported" value={new Date(selectedItem.date_reported).toLocaleDateString()} />
+                  <Info icon={Calendar} label="Date Reported" value={new Date(selectedItem.date_found || selectedItem.date_reported).toLocaleDateString()} />
                   <Info icon={User} label="Reporter" value={selectedItem.metadata?.reporter?.name || "Anonymous"} />
                 </div>
 
@@ -435,6 +435,7 @@ export default function SubmitReport() {
                                 lostDate: false,
                               }));
                             }}
+                            minDate={new Date("2025-01-01")}
                             maxDate={new Date()}
                             placeholderText="Select date"
                             dateFormat="MMMM d, yyyy"

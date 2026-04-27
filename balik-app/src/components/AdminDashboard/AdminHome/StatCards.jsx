@@ -4,6 +4,7 @@ import { supabase } from "../../../utils/supabaseClient";
 
 export default function StatCards() {
   const [statsData, setStatsData] = useState({
+    total: 0,
     lost: 0,
     found: 0,
     resolved: 0,
@@ -18,6 +19,7 @@ export default function StatCards() {
         const { data, error } = await supabase.from('items').select('type, status, metadata, description_embedding');
         if (error) throw error;
 
+        let total = data.length;
         let lost = 0, found = 0, resolved = 0, ai = 0, qr = 0, guest = 0;
         data.forEach(item => {
           if (item.type === 'lost') lost++;
@@ -29,7 +31,7 @@ export default function StatCards() {
           if (item.description_embedding) ai++;
           if (item.metadata?.qr_code) qr++;
         });
-        setStatsData({ lost, found, resolved, ai, qr, guest });
+        setStatsData({ total, lost, found, resolved, ai, qr, guest });
       } catch (err) {
         console.error("Error fetching stats:", err);
       }
@@ -37,13 +39,18 @@ export default function StatCards() {
     fetchStats();
   }, []);
 
+  const getPercentage = (val) => {
+    if (statsData.total === 0) return "0%";
+    return `+${Math.round((val / statsData.total) * 100)}%`;
+  };
+
   const stats = [
-    { icon: Search, value: statsData.lost, label: "Total Lost Items", change: "+12%", css: "text-red-500 bg-red-200" },
-    { icon: Waves, value: statsData.found, label: "Total Found Items", change: "+8%", css: "text-green-600 bg-green-200" },
-    { icon: Clock, value: statsData.resolved, label: "Successful Claims", change: "+15%", css: "text-blue-700 bg-blue-200" },
-    { icon: SquaresExclude, value: statsData.ai, label: "AI Matches", change: "+22%", css: "text-purple-600 bg-purple-200" },
-    { icon: QrCode, value: statsData.qr, label: "QR Verified items", change: "+5%", css: "text-yellow-600 bg-yellow-200" },
-    { icon: UserSearch, value: statsData.guest, label: "Anonymous Reports", change: "-3%", css: "text-violet-600 bg-violet-200" },
+    { icon: Search, value: statsData.lost, label: "Total Lost Items", change: getPercentage(statsData.lost), css: "text-red-500 bg-red-200" },
+    { icon: Waves, value: statsData.found, label: "Total Found Items", change: getPercentage(statsData.found), css: "text-green-600 bg-green-200" },
+    { icon: Clock, value: statsData.resolved, label: "Successful Claims", change: getPercentage(statsData.resolved), css: "text-blue-700 bg-blue-200" },
+    { icon: SquaresExclude, value: statsData.ai, label: "AI Matches", change: getPercentage(statsData.ai), css: "text-purple-600 bg-purple-200" },
+    { icon: QrCode, value: statsData.qr, label: "QR Verified items", change: getPercentage(statsData.qr), css: "text-yellow-600 bg-yellow-200" },
+    { icon: UserSearch, value: statsData.guest, label: "Anonymous Reports", change: getPercentage(statsData.guest), css: "text-violet-600 bg-violet-200" },
   ];
 
   return (

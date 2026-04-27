@@ -123,7 +123,7 @@ export default function ActiveReports() {
                 category: item.category,
                 color: item.metadata?.color,
                 location: item.location,
-                date: item.date_reported
+                date: item.date_found || item.date_reported
               }
             );
 
@@ -167,7 +167,7 @@ export default function ActiveReports() {
           title: item.title,
           description: item.description,
           location: item.location,
-          reportDate: new Date(item.date_reported).toLocaleDateString(),
+          reportDate: new Date(item.date_found || item.date_reported).toLocaleDateString(),
           timeAgo: new Date(item.created_at).toLocaleDateString(),
           status: uiStatus,
           progress: progress,

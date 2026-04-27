@@ -250,7 +250,8 @@ function Home() {
         title: formData.whatWasFound,
         description: `Brand: ${formData.brand}\nColor: ${formData.color}\n\n${formData.additionalInfo}`,
         location: formData.location,
-        date_reported: formData.dateFound,
+        date_found: formData.dateFound,
+        date_reported: new Date().toISOString(),
         status: 'pending',
         image_url: imageUrl,
         metadata: {
@@ -397,11 +398,11 @@ function Home() {
 
         {/* Right Content (Buttons) */}
         <div className="relative z-20 flex flex-col md:flex-row gap-4 items-center">
-          <button type="button" onClick={handleHeaderReportLost} className="cursor-pointer bg-[#E30000] text-white font-bold px-10 py-4 rounded-3xl shadow-lg border border-[#a11010] hover:bg-[#230000de] hover:shadow-2xl transition-all duration-300">
+          <button type="button" onClick={handleHeaderReportLost} className="cursor-pointer bg-[#E30000] text-white font-bold w-60 py-4 rounded-3xl shadow-lg border border-[#a11010] hover:bg-[#b00000] hover:shadow-2xl transition-all duration-300">
             Report Lost Item
           </button>
 
-          <button type="button" onClick={handleHeaderReportFound} className="cursor-pointer bg-[#02D44F] text-white font-bold px-10 py-4 rounded-3xl shadow-lg border border-[#2eb857] hover:bg-[#0e361a] hover:shadow-2xl transition-all duration-300">
+          <button type="button" onClick={handleHeaderReportFound} className="cursor-pointer bg-[#02D44F] text-white font-bold w-60 py-4 rounded-3xl shadow-lg border border-[#2eb857] hover:bg-[#02b844] hover:shadow-2xl transition-all duration-300">
             Report Found Item
           </button>
         </div>
@@ -548,7 +549,7 @@ function Home() {
                   <div className="mt-auto">
                     <div className="flex justify-between text-xs text-gray-500 mb-4">
                       <span className="truncate max-w-[150px]">{item.location}</span>
-                      <span>{new Date(item.date_reported).toLocaleDateString()}</span>
+                      <span>{new Date(item.date_found || item.date_reported).toLocaleDateString()}</span>
                     </div>
                     <button onClick={() => setSelectedItem(item)} className="cursor-pointer w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
                       View details
@@ -604,7 +605,7 @@ function Home() {
                     </div>
                     <div className="flex gap-2">
                       <span className="font-bold min-w-[80px]">Date:</span>
-                      <span>{new Date(selectedItem.date_reported).toLocaleDateString()}</span>
+                      <span>{new Date(selectedItem.date_found || selectedItem.date_reported).toLocaleDateString()}</span>
                     </div>
                     <div className="pt-4 border-t border-gray-100">
                       <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
@@ -669,17 +670,28 @@ function Home() {
                 <div className="flex flex-col gap-2">
                   <label className="font-bold text-[#7B1C1C] text-lg">Date Found <span className="text-red-500">*</span></label>
                   <p className="text-[11px] text-gray-400 -mt-1 font-medium">Approximate date of when the item was found.</p>
-                  <input type="date" name="dateFound" value={formData.dateFound} onChange={handleInputChange} max="9999-12-31" className="date-input-visible w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
+                  <input 
+                    type="date" 
+                    name="dateFound" 
+                    value={formData.dateFound} 
+                    onChange={handleInputChange} 
+                    min="2025-01-01"
+                    max={new Date().toISOString().split("T")[0]} 
+                    className="date-input-visible w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" 
+                    required 
+                  />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="flex flex-col gap-2">
                   <label className="font-bold text-[#7B1C1C] text-lg">Brand</label>
+                  <p className="text-[11px] text-gray-400 -mt-1 font-medium invisible">Placeholder</p>
                   <input type="text" name="brand" value={formData.brand} onChange={handleInputChange} placeholder="e.g. Samsung" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" />
                 </div>
                 <div className="flex flex-col gap-2">
                   <label className="font-bold text-[#7B1C1C] text-lg">Color</label>
+                  <p className="text-[11px] text-gray-400 -mt-1 font-medium invisible">Placeholder</p>
                   <select name="color" value={formData.color} onChange={handleInputChange} className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none">
                     <option value="">Select color</option>
                     <option value="Black">Black</option>
@@ -693,32 +705,35 @@ function Home() {
                     <option value="Other">Other</option>
                   </select>
                 </div>
-                <div className="flex flex-col gap-2">
-                  <label className="font-bold text-[#7B1C1C] text-lg">Location <span className="text-red-500">*</span></label>
-                  <input type="text" name="location" value={formData.location} onChange={handleInputChange} placeholder="e.g. Library" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
-                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="flex flex-col gap-2">
-                  <label className="font-bold text-[#7B1C1C] text-lg">Additional Information</label>
-                  <p className="text-[11px] text-gray-400 -mt-1 font-medium">Any identifying marks or features?</p>
-                  <textarea name="additionalInfo" value={formData.additionalInfo} onChange={handleInputChange} rows={3} className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none resize-none" placeholder="Provide more details..." />
+                  <label className="font-bold text-[#7B1C1C] text-lg">Location <span className="text-red-500">*</span></label>
+                  <p className="text-[11px] text-gray-400 -mt-1 font-medium">Specific area where the item was found.</p>
+                  <input type="text" name="location" value={formData.location} onChange={handleInputChange} placeholder="e.g. Library" className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none" required />
                 </div>
                 <div className="flex flex-col gap-2">
                   <label className="font-bold text-[#7B1C1C] text-lg">Photo (Optional)</label>
-                  <div className="flex items-center gap-4 mt-2">
-                    <label className="cursor-pointer bg-red-50 hover:bg-red-100 text-red-700 px-6 py-4 rounded-xl text-sm border-2 border-dashed border-red-200 transition-all flex-1 text-center font-bold">
+                  <p className="text-[11px] text-gray-400 -mt-1 font-medium">Upload a clear photo of the found item.</p>
+                  <div className="flex items-center gap-4">
+                    <label className="cursor-pointer bg-red-50 hover:bg-red-100 text-red-700 px-6 py-[0.9rem] rounded-xl text-sm border-2 border-dashed border-red-200 transition-all flex-1 text-center font-bold">
                       {formData.imageFile ? formData.imageFile.name : "Choose Image File"}
                       <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
                     </label>
                     {imagePreview && (
-                      <div className="w-16 h-16 rounded-xl overflow-hidden border-4 border-white shadow-lg flex-shrink-0">
+                      <div className="w-14 h-14 rounded-xl overflow-hidden border-2 border-white shadow-md flex-shrink-0">
                         <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                       </div>
                     )}
                   </div>
                 </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="font-bold text-[#7B1C1C] text-lg">Additional Information</label>
+                <p className="text-[11px] text-gray-400 -mt-1 font-medium">Any identifying marks or features?</p>
+                <textarea name="additionalInfo" value={formData.additionalInfo} onChange={handleInputChange} rows={3} className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all outline-none resize-none" placeholder="Provide more details..." />
               </div>
 
               <div className="pt-8 border-t border-slate-100 flex flex-col items-center">
@@ -747,7 +762,7 @@ function Home() {
                   <button
                     type="submit"
                     disabled={isSubmitting || isMatching}
-                    className={`w-full max-w-sm bg-[#00C853] hover:bg-[#00ad48] text-white font-black text-xl py-5 rounded-2xl shadow-xl shadow-green-200 transition-all active:scale-[0.98]
+                    className={`w-full max-w-xs bg-[#00C853] hover:bg-[#00ad48] text-white font-bold text-lg py-4 px-10 rounded-2xl shadow-xl shadow-green-100/50 transition-all active:scale-[0.98] flex items-center justify-center gap-3
                       ${(isSubmitting || isMatching) ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
                   >

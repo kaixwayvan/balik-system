@@ -102,16 +102,19 @@ export default function FoundItems() {
           .order("created_at", { ascending: false });
 
         if (error) throw error;
-        
-        let rCount = 0;
+
         let gCount = 0;
+        const uniqueUserIds = new Set();
 
         const formattedData = data.map(dbItem => {
           const reporter = dbItem.metadata?.reporter || {};
-          const isGuest = dbItem.metadata?.is_anonymous;
-          
-          if (isGuest) gCount++;
-          else rCount++;
+          const isGuest = !dbItem.user_id;
+
+          if (isGuest) {
+            gCount++;
+          } else {
+            uniqueUserIds.add(dbItem.user_id);
+          }
 
           return {
             id: dbItem.id,
@@ -127,7 +130,7 @@ export default function FoundItems() {
           }
         });
         setFoundItems(formattedData);
-        setRegisteredCount(rCount);
+        setRegisteredCount(uniqueUserIds.size);
         setGuestCount(gCount);
       } catch (err) {
         console.error("Error fetching found items:", err);
@@ -184,9 +187,8 @@ export default function FoundItems() {
               {tableHeaders.map((header, index) => (
                 <th
                   key={index}
-                  className={`px-6 py-5 uppercase ${
-                    header === "Actions" ? "text-center" : "text-left"
-                  }`}
+                  className={`px-6 py-5 uppercase ${header === "Actions" ? "text-center" : "text-left"
+                    }`}
                 >
                   {header}
                 </th>

@@ -211,7 +211,7 @@ export default function FoundItems() {
                     <MapPin size={14} className="text-gray-400" /> {item.location}
                   </span>
                   <span className="flex items-center gap-1">
-                    <Clock size={14} className="text-gray-400" /> {new Date(item.date_reported).toLocaleDateString()}
+                    <Clock size={14} className="text-gray-400" /> {new Date(item.date_found || item.date_reported).toLocaleDateString()}
                   </span>
                   <span className="flex items-center gap-1">
                     <Eye size={14} className="text-gray-400" /> 0 views
