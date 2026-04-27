@@ -68,7 +68,7 @@ export default function AdminDashboardSidebar() {
               Track Items
             </NavLink>
 
-            <NavLink to="/comingsoon" end className={linkClass}>
+            <NavLink to="/admin/users-manage" end className={linkClass}>
               <Users size={18} />
               User Management
             </NavLink>
