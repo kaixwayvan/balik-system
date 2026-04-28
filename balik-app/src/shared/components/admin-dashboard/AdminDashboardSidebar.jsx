@@ -73,7 +73,7 @@ export default function AdminDashboardSidebar() {
               User Management
             </NavLink>
 
-            <NavLink to="/comingsoon" end className={linkClass}>
+            <NavLink to="/admin/gamification" end className={linkClass}>
               <Trophy size={18} />
               Gamification
             </NavLink>
