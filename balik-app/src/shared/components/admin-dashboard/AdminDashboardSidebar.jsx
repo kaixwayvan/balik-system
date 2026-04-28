@@ -78,7 +78,7 @@ export default function AdminDashboardSidebar() {
               Gamification
             </NavLink>
 
-            <NavLink to="/comingsoon" end className={linkClass}>
+            <NavLink to="/admin/logs" end className={linkClass}>
               <ScrollText size={18} />
               Activity Logs
             </NavLink>

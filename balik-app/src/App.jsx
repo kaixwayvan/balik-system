@@ -21,6 +21,7 @@ import QRVerification from "./components/AdminDashboard/QRVerification/QRVerific
 import TrackItems from "./components/AdminDashboard/TrackItems/ItemTrackingPage";
 import UserManagement from "./components/AdminDashboard/UserManagement/UsersPage";
 import Gamification from "./components/AdminDashboard/Gamification/GamificationPage";
+import ActivityLogs from "./components/AdminDashboard/ActivityLogs/ActivityLogs";
 
 import UserDashboardLayout from "./shared/components/layouts/UserDashboardLayout";
 import AdminDashboardLayout from "./shared/components/layouts/AdminDashboardLayout";
@@ -65,6 +66,7 @@ function App() {
         <Route path="/admin/track-items" element={<TrackItems />} />
         <Route path="/admin/users-manage" element={<UserManagement />} />
         <Route path="/admin/gamification" element={<Gamification />} />
+        <Route path="/admin/logs" element={<ActivityLogs />} />
       </Route>
     </Routes>
   );
