@@ -55,6 +55,7 @@ export default function AIMatchesTable({ matches, loading, counts }) {
    */
   const [aiStage, setAiStage] = useState("idle");
   const [selectedMatch, setSelectedMatch] = useState(null);
+  const [processingTime, setProcessingTime] = useState("0.0");
 
   /* ---------------- AI FLOW ---------------- */
 
@@ -64,7 +65,10 @@ export default function AIMatchesTable({ matches, loading, counts }) {
 
   const startMatching = () => {
     setAiStage("processing");
+    const startTime = performance.now();
     setTimeout(() => {
+      const endTime = performance.now();
+      setProcessingTime(((endTime - startTime) / 1000).toFixed(1));
       setAiStage("complete");
     }, 2500);
   };
@@ -135,6 +139,7 @@ export default function AIMatchesTable({ matches, loading, counts }) {
         open={aiStage === "complete"}
         onViewMatches={handleViewMatches}
         matches={matches}
+        processingTime={processingTime}
       />
 
       <MatchDetailsModal
