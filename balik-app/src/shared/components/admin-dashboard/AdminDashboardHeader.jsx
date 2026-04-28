@@ -10,8 +10,10 @@ import {
   Moon,
   LogOut,
 } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 export default function AdminDashboardHeader() {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const dropdownRef = useRef(null);
@@ -45,9 +47,15 @@ export default function AdminDashboardHeader() {
             onClick={() => setIsOpen(!isOpen)}
             className="flex items-center gap-3 cursor-pointer"
           >
-            <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12" className="w-10 h-10 rounded-full object-cover" />
+            <div className="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center overflow-hidden">
+              {user?.user_metadata?.avatar_url ? (
+                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <User size={24} className="text-gray-50" />
+              )}
+            </div>
             <div className="text-left text-sm">
-              <p className="font-medium">Jack Sparrow</p>
+              <p className="font-medium">{user?.user_metadata?.full_name || "System Admin"}</p>
               <p className="text-xs text-gray-500">System Administrator</p>
             </div>
             <ChevronDown
@@ -61,9 +69,15 @@ export default function AdminDashboardHeader() {
             <div className="absolute right-0 mt-7 w-72 bg-white rounded-xl shadow-xl border border-gray-300 overflow-hidden z-50">
               {/* Profile Header */}
               <div className="flex items-center gap-3 p-4 border-b border-gray-300">
-                <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12" className="w-10 h-10 rounded-full object-cover" />
+                <div className="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center overflow-hidden">
+                  {user?.user_metadata?.avatar_url ? (
+                    <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <User size={24} className="text-gray-50" />
+                  )}
+                </div>
                 <div>
-                  <p className="font-semibold">Jack Sparrow</p>
+                  <p className="font-semibold">{user?.user_metadata?.full_name || "System Admin"}</p>
                   <p className="text-sm text-gray-500">System Administrator</p>
                 </div>
               </div>
@@ -107,12 +121,22 @@ export default function AdminDashboardHeader() {
               <div className="border-t border-gray-300" />
 
               {/* Logout */}
-              <Link to="/login">
-                <button className="cursor-pointer w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50">
-                  <LogOut size={18} />
-                  Log Out
-                </button>
-              </Link>
+              <button
+                onClick={async () => {
+                  try {
+                    const { logoutSupabase } = await import("../../../pages/auth/services/supabaseAuthService");
+                    await logoutSupabase();
+                    window.location.href = "/";
+                  } catch (err) {
+                    console.error("Logout error:", err);
+                    window.location.href = "/";
+                  }
+                }}
+                className="cursor-pointer w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50 text-red-600 font-medium"
+              >
+                <LogOut size={18} />
+                Log Out
+              </button>
             </div>
           )}
         </div>

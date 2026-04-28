@@ -355,7 +355,7 @@ export default function Signup() {
               </div>
 
               <h3 className="text-xl font-semibold text-gray-800">Account successfully Created</h3>
-              <p className="text-sm text-gray-600 mt-2">Thanks for Joining us!</p>
+              <p className="text-sm text-gray-600 mt-2">Please check your email to verify your account before logging in.</p>
 
               <button
                 onClick={() => navigate('/login')}

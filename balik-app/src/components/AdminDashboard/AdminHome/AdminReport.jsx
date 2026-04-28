@@ -3,9 +3,12 @@ import { Link } from "react-router-dom";
 import BALIKLogo from "../../../assets/BALIK.png";
 import DatePicker from "react-datepicker";
 import { IoNotifications } from "react-icons/io5";
+import { User } from "lucide-react";
 import "react-datepicker/dist/react-datepicker.css";
+import { useAuth } from "../../../shared/context/AuthContext";
 
 export default function AdminReport() {
+  const { user } = useAuth();
   const [reportType, setReportType] = useState("");
   const [category, setCategory] = useState("");
   const [brand, setBrand] = useState("");
@@ -62,9 +65,15 @@ export default function AdminReport() {
             <IoNotifications size={20} className="text-gray-500" />
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-slate-300" />
+            <div className="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center overflow-hidden">
+              {user?.user_metadata?.avatar_url ? (
+                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <User size={20} className="text-gray-50" />
+              )}
+            </div>
             <div className="text-sm">
-              <p className="font-medium">Jack Sparrow</p>
+              <p className="font-medium">{user?.user_metadata?.full_name || "System Admin"}</p>
               <p className="text-xs text-gray-500">System Administrator</p>
             </div>
           </div>
