@@ -10,6 +10,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         detectSessionInUrl: true,
         storage: window.localStorage,
         storageKey: 'balik-auth-token',
-        flowType: 'pkce'
+        flowType: 'pkce',
+        lock: async (_name, _acquireTimeout, fn) => fn(),
     }
 });
