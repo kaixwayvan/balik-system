@@ -79,28 +79,29 @@ export default function DashboardHome() {
   // Fetch stats and recent items from Supabase
   useEffect(() => {
     async function fetchDashboardData() {
-      if (user) {
-        try {
-          const userStats = await itemService.getUserStats(user.id);
-          setStats(userStats);
+      if (!user?.id) return;
+      
+      try {
+        console.log("Fetching dashboard data for:", user.id);
+        const userStats = await itemService.getUserStats(user.id);
+        setStats(userStats);
 
-          const { data: userItems, error: itemsError } = await supabase
-            .from('items')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(5);
+        const { data: userItems, error: itemsError } = await supabase
+          .from('items')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(5);
 
-          if (!itemsError && userItems) {
-            setRecentItems(userItems);
-          }
-        } catch (error) {
-          console.error("Error fetching dashboard data:", error);
+        if (!itemsError && userItems) {
+          setRecentItems(userItems);
         }
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
       }
     }
     fetchDashboardData();
-  }, [user]);
+  }, [user?.id]);
 
   // Connection test
   useEffect(() => {

@@ -9,15 +9,27 @@ export default function UserDashboardLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // 1. Handle Redirects
     if (!loading && user) {
       const role = user.user_metadata?.role?.toLowerCase();
-      if (role === 'admin') {
+      if (role === 'admin' && !window.location.pathname.startsWith('/admin')) {
         navigate('/admin', { replace: true });
       }
     } else if (!loading && !user) {
       navigate('/login', { replace: true });
     }
-  }, [user, loading, navigate]);
+
+    // 2. Handle Auto-Refresh on focus/tab switch
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && user && !loading) {
+        console.log("Tab visible - automatically refreshing...");
+        window.location.reload();
+      }
+    };
+    
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => window.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [user?.id, loading, navigate]);
 
   if (loading) {
     return (

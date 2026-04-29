@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { supabase } from "../../utils/supabaseClient";
 
 const AuthContext = createContext();
@@ -6,6 +6,12 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const userRef = useRef(null);
+
+  // Sync ref with state
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   useEffect(() => {
     // 1. Check current session immediately
@@ -73,16 +79,26 @@ export const AuthProvider = ({ children }) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log("Auth event:", event);
+        console.log(`Auth Event: ${event}`);
 
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
-          if (session?.user) {
+        if (session?.user) {
+          // Use userRef.current to avoid stale closure
+          const currentUser = userRef.current;
+          
+          // Only fetch profile if it's a new user or a SIGNED_IN event
+          // TOKEN_REFRESHED events for the same user are ignored to avoid redundant re-renders
+          if (!currentUser || currentUser.id !== session.user.id || event === 'SIGNED_IN') {
+            console.log("Performing full profile fetch/sync...");
             await fetchProfile(session.user);
           } else {
-            setUser(null);
-            setLoading(false);
+            // Keep the user object updated but avoid triggering a state change if ID is same
+            // This prevents focus-triggered "refreshing" loops
+            console.log("Skipping redundant profile fetch on token refresh/focus");
           }
         } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setLoading(false);
+        } else if (!session && event !== 'INITIAL_SESSION') {
           setUser(null);
           setLoading(false);
         }
