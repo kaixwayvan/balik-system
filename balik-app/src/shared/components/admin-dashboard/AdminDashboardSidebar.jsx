@@ -83,7 +83,7 @@ export default function AdminDashboardSidebar() {
               Activity Logs
             </NavLink>
 
-            <NavLink to="/comingsoon" end className={linkClass}>
+            <NavLink to="/admin/settings" end className={linkClass}>
               <Settings size={18} />
               Settings
             </NavLink>
