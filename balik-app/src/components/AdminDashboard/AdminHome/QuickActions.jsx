@@ -24,36 +24,42 @@ const actions = [
     title: "Scan QR Code",
     sub: "Verify items",
     color: "bg-blue-500",
+    to: "/admin/qr-verify",
   },
   {
     icon: SquaresExclude,
     title: "Run AI Matching",
     sub: "Find Matches",
     color: "bg-purple-500",
+    to: "/admin/matching",
   },
   {
     icon: Bell,
     title: "Send Notification",
     sub: "Alert Users",
     color: "bg-orange-500",
+    to: "/comingsoon",
   },
   {
     icon: Download,
     title: "Export Reports",
     sub: "Generate CSV",
     color: "bg-emerald-500",
+    to: "/comingsoon",
   },
   {
     icon: Coins,
     title: "Manage Points",
     sub: "Gamification",
     color: "bg-yellow-500",
+    to: "/comingsoon",
   },
   {
     icon: Trophy,
     title: "View Leaderboard",
     sub: "Top Users",
     color: "bg-red-500",
+    to: "/comingsoon",
   },
 ];
 
@@ -69,6 +75,30 @@ export default function QuickActions() {
           {actions.map((a, i) => {
             const Icon = a.icon;
 
+            const cardContent = (
+              <>
+                <div
+                  className={`w-10 h-10 mx-auto rounded-lg flex items-center justify-center text-white ${a.color}`}
+                >
+                  <Icon size={18} />
+                </div>
+                <p className="text-sm font-bold mt-2 text-gray-800">{a.title}</p>
+                <p className="text-xs font-medium text-gray-500">{a.sub}</p>
+              </>
+            );
+
+            if (a.to) {
+              return (
+                <Link
+                  key={i}
+                  to={a.to}
+                  className="border border-gray-300 rounded-lg p-4 text-center hover:shadow-md transition-shadow block"
+                >
+                  {cardContent}
+                </Link>
+              );
+            }
+
             return (
               <div
                 key={i}
@@ -77,16 +107,9 @@ export default function QuickActions() {
                     setShowReportModal(true);
                   }
                 }}
-                className="border border-gray-300 rounded-lg p-4 text-center hover:shadow-md cursor-pointer"
+                className="border border-gray-300 rounded-lg p-4 text-center hover:shadow-md cursor-pointer transition-shadow"
               >
-                <div
-                  className={`w-10 h-10 mx-auto rounded-lg flex items-center justify-center text-white ${a.color}`}
-                >
-                  <Icon size={18} />
-                </div>
-
-                <p className="text-sm font-bold mt-2">{a.title}</p>
-                <p className="text-xs font-medium text-gray-500">{a.sub}</p>
+                {cardContent}
               </div>
             );
           })}

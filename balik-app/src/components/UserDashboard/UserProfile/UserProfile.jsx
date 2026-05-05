@@ -16,6 +16,9 @@ import {
 import { GiStarsStack } from "react-icons/gi";
 import { FaPeopleGroup, FaHandsHoldingCircle } from "react-icons/fa6";
 import { useAuth } from "../../../shared/context/AuthContext";
+import { updateUserProfile, uploadAvatar } from "../../../pages/auth/services/supabaseAuthService";
+import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+
 
 export default function UserProfile() {
   const { user } = useAuth();
@@ -363,38 +366,124 @@ function CertificateCard({ title }) {
 /* Account setting sections */
 
 function ProfileSettings() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const fileInputRef = useRef(null);
   
   const initialAvatar = user?.user_metadata?.avatar_url || null;
   const [avatar, setAvatar] = useState(initialAvatar);
+  const [selectedFile, setSelectedFile] = useState(null);
   
   // Extract user details
   const fullNameStr = user?.user_metadata?.full_name || "";
   const nameParts = fullNameStr.split(" ");
-  const initialFirstName = nameParts.length > 0 ? nameParts[0] : "";
-  const initialLastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
+  const initialFirstName = nameParts[0] || "";
+  const initialLastName = nameParts.slice(1).join(" ") || "";
   const initialEmail = user?.email || "";
   const initialContact = user?.user_metadata?.mobile_number || "";
+  const initialGender = user?.user_metadata?.gender || "";
 
   const [firstName, setFirstName] = useState(initialFirstName);
   const [lastName, setLastName] = useState(initialLastName);
   const [email, setEmail] = useState(initialEmail);
   const [contact, setContact] = useState(initialContact);
+  const [gender, setGender] = useState(initialGender);
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [status, setStatus] = useState({ type: "", message: "" });
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setSelectedFile(file);
       setAvatar(URL.createObjectURL(file));
     }
   };
 
+  const [saveStep, setSaveStep] = useState("");
+
+  const handleSave = async () => {
+    if (!firstName || !lastName) {
+      setStatus({ type: "error", message: "First and last names are required." });
+      return;
+    }
+
+    setIsSaving(true);
+    setStatus({ type: "", message: "" });
+    setSaveStep("Starting...");
+
+    // Safety timeout: Guaranteed to stop the spinner after 10 seconds
+    const timeoutId = setTimeout(() => {
+      setIsSaving(false);
+      setSaveStep("");
+      setStatus({ type: "error", message: "Save timed out. Please check your internet and refresh." });
+    }, 10000);
+
+    try {
+      let finalAvatarUrl = avatar;
+
+      if (selectedFile) {
+        setSaveStep("Uploading Image...");
+        const uploadResult = await uploadAvatar(user.id, selectedFile);
+        if (uploadResult.success) {
+          finalAvatarUrl = uploadResult.url;
+        } else {
+          throw new Error("Upload failed: " + uploadResult.error);
+        }
+      }
+
+      const updates = {
+        full_name: `${firstName} ${lastName}`.trim(),
+        mobile_number: contact,
+        avatar_url: finalAvatarUrl,
+        gender: gender,
+      };
+
+      setSaveStep("Updating Account...");
+      // Add a wrapper timeout for the entire service call just in case the Supabase client itself locks up
+      const serviceTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Supabase client hung completely")), 8000));
+      
+      const result = await Promise.race([
+        updateUserProfile(user.id, updates),
+        serviceTimeout
+      ]);
+
+      if (result.success) {
+        setSaveStep("Success!");
+        setStatus({ type: "success", message: "Profile updated successfully!" });
+      } else {
+        setStatus({ type: "error", message: "Partial success: Database sync failed." });
+      }
+    } catch (err) {
+      console.error("Save Error:", err);
+      setStatus({ type: "error", message: err.message || "Failed to update profile." });
+    } finally {
+      clearTimeout(timeoutId);
+      setIsSaving(false);
+      setSaveStep("");
+    }
+  };
+
+
+
+
+
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-bold flex items-center gap-2">
-        <UserPen size={20} />
-        Edit your Profile
-      </h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold flex items-center gap-2">
+          <UserPen size={20} />
+          Edit your Profile
+        </h2>
+        {status.message && (
+          <div className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm animate-in fade-in slide-in-from-top-2 duration-300 ${
+            status.type === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+          }`}>
+            {status.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+            {status.message}
+          </div>
+        )}
+      </div>
+
       <div className="flex justify-center">
         <div className="relative">
           <div className="w-28 h-28 rounded-full border border-gray-300 shadow-md bg-slate-300 flex items-center justify-center overflow-hidden">
@@ -406,7 +495,7 @@ function ProfileSettings() {
           </div>
           <button
             onClick={() => fileInputRef.current.click()}
-            className="cursor-pointer absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full shadow"
+            className="cursor-pointer absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full shadow hover:bg-indigo-700 transition-colors"
           >
             <ImagePlus size={15} />
           </button>
@@ -434,20 +523,41 @@ function ProfileSettings() {
       <div>
         <p className="text-sm font-medium mb-2">Gender (Optional)</p>
         <div className="flex gap-4">
-          <GenderOption label="Male" />
-          <GenderOption label="Female" />
+          <GenderOption 
+            label="Male" 
+            checked={gender === "Male"} 
+            onChange={() => setGender("Male")} 
+          />
+          <GenderOption 
+            label="Female" 
+            checked={gender === "Female"} 
+            onChange={() => setGender("Female")} 
+          />
         </div>
       </div>
 
       {/* Save */}
-      <div className="flex justify-end">
-        <button className="cursor-pointer px-6 py-2 bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600">
-          Save Changes
+      <div className="flex justify-end pt-4">
+        <button 
+          onClick={handleSave}
+          disabled={isSaving}
+          className="cursor-pointer px-8 py-2.5 bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-md active:scale-95"
+        >
+          {isSaving ? (
+            <>
+              <Loader2 size={18} className="animate-spin" />
+              {saveStep}
+            </>
+          ) : (
+            "Save Changes"
+          )}
+
         </button>
       </div>
     </div>
   );
 }
+
 
 /* Profile setting helper functions */
 
@@ -468,14 +578,23 @@ function Input({ label, placeholder, value, onChange, disabled }) {
   );
 }
 
-function GenderOption({ label }) {
+function GenderOption({ label, checked, onChange }) {
   return (
-    <label className="flex items-center gap-2 border rounded-lg px-4 py-2 cursor-pointer">
-      <input type="radio" name="gender" />
-      <span className="text-sm">{label}</span>
+    <label className={`flex items-center gap-2 border rounded-lg px-4 py-2 cursor-pointer transition-all ${
+      checked ? "border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500" : "hover:bg-gray-50"
+    }`}>
+      <input 
+        type="radio" 
+        name="gender" 
+        checked={checked} 
+        onChange={onChange}
+        className="cursor-pointer accent-indigo-600"
+      />
+      <span className={`text-sm ${checked ? "text-indigo-700 font-medium" : "text-gray-600"}`}>{label}</span>
     </label>
   );
 }
+
 
 /* Account setting sections */
 

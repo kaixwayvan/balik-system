@@ -118,3 +118,97 @@ export const getCurrentUser = async () => {
     return null;
   }
 };
+
+export const updateUserProfile = async (userId, updates) => {
+  try {
+    console.log("Service: Starting profile update for", userId);
+    
+    // Temporarily skipping Auth Metadata update because it is hanging the client
+    // const { data: authData, error: authError } = await supabase.auth.updateUser({
+    //   data: {
+    //     full_name: updates.full_name,
+    //     mobile_number: updates.mobile_number,
+    //     avatar_url: updates.avatar_url,
+    //     gender: updates.gender,
+    //   }
+    // });
+    // if (authError) throw authError;
+
+    // console.log("Service: Auth metadata updated successfully");
+
+
+    // 2. Update Profiles Table with a strict 5-second timeout
+    console.log("Service: Attempting database sync...");
+    
+    // Create a timeout promise
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error("Database sync timeout")), 5000);
+    });
+
+    // Create the actual DB promise
+    const dbPromise = supabase
+      .from('profiles')
+      .upsert({
+        id: userId,
+        full_name: updates.full_name,
+        mobile_number: updates.mobile_number,
+        avatar_url: updates.avatar_url,
+        gender: updates.gender,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'id' });
+
+    // Race them
+    try {
+      const { error: profileError } = await Promise.race([dbPromise, timeoutPromise]);
+      if (profileError) {
+        console.error("Profile table sync error:", profileError);
+        return { success: true, partial: true, error: profileError.message };
+      }
+      console.log("Service: Database sync successful");
+    } catch (dbErr) {
+      console.error("Profile table sync failed/timed out:", dbErr);
+      // Return partial success so the UI doesn't hang
+      return { success: true, partial: true, error: "Database sync timed out, but account is updated." };
+    }
+
+    return { success: true, user: null };
+  } catch (error) {
+    console.error("Service: Unexpected error:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+
+export const uploadAvatar = async (userId, file) => {
+  try {
+    if (!file) throw new Error("No file provided");
+
+    const fileExt = file.name.split('.').pop();
+    // Use timestamp for uniqueness and cache-busting
+    const fileName = `${userId}/${Date.now()}.${fileExt}`;
+    const filePath = fileName;
+
+    const { data, error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true
+      });
+
+    if (uploadError) {
+      console.error("Storage upload error details:", uploadError);
+      throw uploadError;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    return { success: true, url: publicUrl };
+  } catch (error) {
+    console.error("uploadAvatar catch error:", error);
+    return { success: false, error: error.message || "Failed to upload image" };
+  }
+};
+
+

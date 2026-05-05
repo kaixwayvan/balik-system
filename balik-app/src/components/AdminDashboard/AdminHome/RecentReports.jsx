@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../../../utils/supabaseClient";
 
 export default function RecentReports() {
   const [filter, setFilter] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchReports() {
@@ -25,8 +28,8 @@ export default function RecentReports() {
             date: new Date(dbItem.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
             time: new Date(dbItem.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
             item: dbItem.title || dbItem.category || "Unknown Item",
-            description: dbItem.description,
-            location: dbItem.location,
+            description: dbItem.description || "",
+            location: dbItem.location || "",
             name: reporter.name || "Unknown",
             email: reporter.email || "No email",
             contact: reporter.mobile || "No contact",
@@ -74,8 +77,17 @@ export default function RecentReports() {
   };
 
   const filteredItems = items.filter((item) => {
-    if (filter === "All") return true;
-    return item.status === filter;
+    const matchesStatus = filter === "All" || item.status === filter;
+    
+    const searchLower = searchQuery.toLowerCase();
+    const matchesSearch = 
+      item.item.toLowerCase().includes(searchLower) ||
+      item.description.toLowerCase().includes(searchLower) ||
+      item.name.toLowerCase().includes(searchLower) ||
+      item.location.toLowerCase().includes(searchLower) ||
+      item.type.toLowerCase().includes(searchLower);
+
+    return matchesStatus && matchesSearch;
   });
 
   return (
@@ -89,6 +101,8 @@ export default function RecentReports() {
             <input
               type="text"
               placeholder="Search items..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full border-none bg-transparent text-sm outline-none"
             />
           </div>
@@ -96,7 +110,7 @@ export default function RecentReports() {
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="w-32 border border-slate-500 rounded-xl bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+            className="w-32 border border-slate-500 rounded-xl bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
           >
             <option value="All">All Status</option>
             <option value="Verified">Verified</option>
@@ -104,7 +118,10 @@ export default function RecentReports() {
             <option value="Resolved">Resolved</option>
           </select>
 
-          <button className="cursor-pointer bg-blue-600 hover:bg-blue-800 text-white px-6 rounded-xl text-sm">
+          <button 
+            onClick={() => navigate('/admin/matching')}
+            className="cursor-pointer bg-blue-600 hover:bg-blue-800 text-white px-6 rounded-xl text-sm transition-colors"
+          >
             NLP Match
           </button>
         </div>

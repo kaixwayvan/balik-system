@@ -397,15 +397,26 @@ function Home() {
         </div>
 
         {/* Right Content (Buttons) */}
-        <div className="relative z-20 flex flex-col md:flex-row gap-4 items-center">
-          <button type="button" onClick={handleHeaderReportLost} className="cursor-pointer bg-[#E30000] text-white font-bold w-60 py-4 rounded-3xl shadow-lg border border-[#a11010] hover:bg-[#b00000] hover:shadow-2xl transition-all duration-300">
+        <div className="relative z-20 flex flex-col md:flex-row gap-8 items-center">
+          <button 
+            type="button" 
+            onClick={handleHeaderReportLost} 
+            className="cursor-pointer bg-[#E50000] text-white font-bold h-16 w-72 rounded-full shadow-lg hover:bg-[#c40000] hover:-translate-y-1 transition-all duration-300 active:scale-95 text-xl flex items-center justify-center border border-[#b00000]/20"
+          >
             Report Lost Item
           </button>
 
-          <button type="button" onClick={handleHeaderReportFound} className="cursor-pointer bg-[#02D44F] text-white font-bold w-60 py-4 rounded-3xl shadow-lg border border-[#2eb857] hover:bg-[#02b844] hover:shadow-2xl transition-all duration-300">
+          <button 
+            type="button" 
+            onClick={handleHeaderReportFound} 
+            className="cursor-pointer bg-[#02D44F] text-white font-bold h-16 w-72 rounded-full shadow-lg hover:bg-[#02b844] hover:-translate-y-1 transition-all duration-300 active:scale-95 text-xl flex items-center justify-center border border-[#2eb857]/20"
+          >
             Report Found Item
           </button>
         </div>
+
+
+
       </div>
 
       {/* SECTION 1*/}
@@ -505,16 +516,19 @@ function Home() {
             <button
               key={index}
               onClick={() => setActiveCategory(cat)}
-              className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-medium transition-all
+              className={`cursor-pointer px-8 py-3 rounded-full text-sm font-bold transition-all active:scale-95 border-2
               ${cat === activeCategory
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "bg-[#7B1C1C] text-white border-[#7B1C1C] shadow-lg shadow-[#7B1C1C]/20"
+                  : "bg-white text-gray-600 hover:bg-gray-50 border-gray-100"
                 }`}
             >
               {cat}
             </button>
           ))}
         </div>
+
+
+
 
         {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -551,9 +565,15 @@ function Home() {
                       <span className="truncate max-w-[150px]">{item.location}</span>
                       <span>{new Date(item.date_found || item.date_reported).toLocaleDateString()}</span>
                     </div>
-                    <button onClick={() => setSelectedItem(item)} className="cursor-pointer w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                    <button 
+                      onClick={() => setSelectedItem(item)} 
+                      className="cursor-pointer w-full bg-[#7B1C1C] text-white py-4 rounded-full text-sm font-bold shadow-lg shadow-[#7B1C1C]/10 hover:bg-[#5a1414] transition-all active:scale-95 uppercase tracking-wide"
+                    >
                       View details
                     </button>
+
+
+
                   </div>
                 </div>
               </div>
@@ -618,10 +638,13 @@ function Home() {
                 <div className="mt-auto flex flex-col gap-3">
                   <button
                     onClick={() => { setSelectedItem(null); navigate("/login"); }}
-                    className="cursor-pointer w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-all"
+                    className="cursor-pointer w-full py-5 bg-[#7B1C1C] hover:bg-[#5a1414] text-white font-bold rounded-full shadow-xl shadow-[#7B1C1C]/20 transition-all active:scale-95 uppercase tracking-wider"
                   >
                     Login to Claim Item
                   </button>
+
+
+
                   <p className="text-xs text-center text-gray-400">
                     You must be a registered member to claim items
                   </p>
@@ -762,7 +785,7 @@ function Home() {
                   <button
                     type="submit"
                     disabled={isSubmitting || isMatching}
-                    className={`w-full max-w-xs bg-[#00C853] hover:bg-[#00ad48] text-white font-bold text-lg py-4 px-10 rounded-2xl shadow-xl shadow-green-100/50 transition-all active:scale-[0.98] flex items-center justify-center gap-3
+                    className={`w-full max-w-sm bg-[#7B1C1C] hover:bg-[#5a1414] text-white font-bold text-lg py-5 px-12 rounded-full shadow-2xl shadow-[#7B1C1C]/20 transition-all active:scale-95 flex items-center justify-center gap-4 uppercase tracking-widest
                       ${(isSubmitting || isMatching) ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
                   >
@@ -780,6 +803,9 @@ function Home() {
                       "Submit Report"
                     )}
                   </button>
+
+
+
                 </div>
               </div>
             </div>
@@ -836,22 +862,25 @@ function Home() {
                 )}
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+              <div className="flex flex-col sm:flex-row gap-6 w-full justify-center mt-4">
                 <button
                   onClick={() => setSubmitted({ show: false, mode: formMode })}
-                  className="cursor-pointer flex-1 max-w-[200px] bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-600 py-4 rounded-2xl font-black transition-all active:scale-[0.98] text-lg"
+                  className="cursor-pointer flex-1 max-w-[220px] bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-600 py-4 rounded-full font-bold transition-all active:scale-95 text-lg shadow-sm uppercase"
                 >
                   {submitted.isError ? 'TRY AGAIN' : 'OK'}
                 </button>
                 {user && (
                   <button
                     onClick={() => navigate("/dashboard/found")}
-                    className="cursor-pointer flex-1 max-w-[200px] bg-[#1D4ED8] hover:bg-[#1E40AF] text-white py-4 rounded-2xl font-black shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98] text-lg"
+                    className="cursor-pointer flex-1 max-w-[220px] bg-[#7B1C1C] hover:bg-[#5a1414] text-white py-4 rounded-full font-bold shadow-xl shadow-[#7B1C1C]/20 transition-all active:scale-95 text-lg uppercase"
                   >
-                    GO TO DASHBOARD
+                    DASHBOARD
                   </button>
                 )}
               </div>
+
+
+
             </div>
           </div>
         </div>
@@ -912,10 +941,13 @@ function Home() {
                       </p>
                       <button
                         onClick={() => { setShowMatchModal(false); setSelectedItem(item); }}
-                        className="cursor-pointer w-full py-3 bg-slate-900 text-white rounded-xl font-black text-sm hover:bg-blue-600 transition-all active:scale-[0.98]"
+                        className="cursor-pointer w-full py-4 bg-[#7B1C1C] text-white rounded-full font-bold text-sm hover:bg-[#5a1414] transition-all active:scale-95 shadow-lg shadow-[#7B1C1C]/10 uppercase tracking-widest"
                       >
-                        VIEW DETAILS
+                        VIEW MATCH
                       </button>
+
+
+
                     </div>
                   </div>
                 ))}
@@ -1022,18 +1054,19 @@ function Home() {
               </div>
 
               <div className="flex justify-between items-center max-w-lg mx-auto">
-                <button onClick={prevStory} className="cursor-pointer w-16 h-16 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-400 hover:bg-blue-600 hover:text-white transition-all text-2xl font-black">‹</button>
+                <button onClick={prevStory} className="cursor-pointer w-14 h-14 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-blue-600 hover:text-white transition-all text-2xl font-black active:scale-90">‹</button>
                 <div className="flex gap-3">
                   {successStories.map((_, i) => (
                     <div
                       key={i}
-                      className={`h-3 rounded-full transition-all cursor-pointer ${i === index ? "w-10 bg-blue-600" : "w-3 bg-slate-200 hover:bg-slate-300"}`}
+                      className={`h-2.5 rounded-full transition-all cursor-pointer ${i === index ? "w-10 bg-blue-600" : "w-2.5 bg-slate-200 hover:bg-slate-300"}`}
                       onClick={() => setIndex(i)}
                     />
                   ))}
                 </div>
-                <button onClick={nextStory} className="cursor-pointer w-16 h-16 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-400 hover:bg-blue-600 hover:text-white transition-all text-2xl font-black">›</button>
+                <button onClick={nextStory} className="cursor-pointer w-14 h-14 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-blue-600 hover:text-white transition-all text-2xl font-black active:scale-90">›</button>
               </div>
+
             </div>
           ) : (
             <div className="py-20 bg-white rounded-[3rem] border-4 border-dashed border-slate-100">
@@ -1134,19 +1167,22 @@ function Home() {
             Join our growing community today.
           </p>
 
-          <div className="flex flex-col sm:flex-row justify-center gap-6">
-            <Link to="/signup" className="group relative inline-flex items-center justify-center gap-3 bg-blue-600 text-white px-12 py-6 rounded-[2rem] font-black text-xl hover:bg-blue-700 hover:shadow-2xl hover:shadow-blue-200 transition-all active:scale-95 overflow-hidden">
+          <div className="flex flex-col sm:flex-row justify-center gap-8">
+            <Link to="/signup" className="group relative inline-flex items-center justify-center gap-4 bg-[#7B1C1C] text-white px-16 py-6 rounded-full font-bold text-xl shadow-2xl shadow-[#7B1C1C]/30 hover:bg-[#5a1414] hover:-translate-y-1 transition-all active:scale-95 overflow-hidden uppercase tracking-widest text-center">
               <span className="relative z-10 flex items-center gap-3">
-                <UserPlus size={24} />
-                Get Started Now
+                <UserPlus size={26} />
+                Get Started
               </span>
             </Link>
 
-            <Link to="/login" className="inline-flex items-center justify-center gap-3 border-4 border-slate-100 text-slate-900 px-12 py-6 rounded-[2rem] font-black text-xl hover:bg-slate-50 hover:border-slate-200 transition-all active:scale-95">
-              <LogIn size={24} />
+            <Link to="/login" className="inline-flex items-center justify-center gap-4 border-2 border-[#7B1C1C] text-[#7B1C1C] px-16 py-6 rounded-full font-bold text-xl hover:bg-red-50 hover:border-[#5a1414] transition-all active:scale-95 uppercase tracking-widest text-center">
+              <LogIn size={26} />
               Sign In
             </Link>
           </div>
+
+
+
         </div>
       </section>
 

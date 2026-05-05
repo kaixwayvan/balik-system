@@ -16,7 +16,7 @@ export default function FilterBar({ status, setStatus, search, setSearch }) {
 
           <button
             onClick={clearFilters}
-            className="font-semibold text-sm text-green-600 hover:underline"
+            className="cursor-pointer font-semibold text-sm text-green-600 hover:underline"
           >
             Clear All Filters
           </button>

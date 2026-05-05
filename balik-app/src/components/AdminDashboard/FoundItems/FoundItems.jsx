@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Eye, Check, X, SquaresExclude, Coins, Plus } from "lucide-react";
 import { FaUserCircle } from "react-icons/fa";
 import FoundItemDetailsModal from "./FoundItemDetailsModal";
@@ -154,10 +155,13 @@ export default function FoundItems() {
           </p>
         </div>
 
-        <button className="cursor-pointer flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg">
+        <Link 
+          to="/adminreport"
+          className="cursor-pointer flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg transition-colors"
+        >
           <Plus size={18} />
           Encode Found Item
-        </button>
+        </Link>
       </div>
 
       <div className="max-w-[320px] flex items-center p-3 rounded-lg gap-4 bg-white border border-gray-300 hover:shadow-sm">

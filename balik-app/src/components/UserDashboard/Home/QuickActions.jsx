@@ -16,6 +16,7 @@ export default function QuickActions({ onReportClick }) {
       text: "Edit Profile",
       color: "bg-red-700",
       icon: User,
+      to: "/dashboard/profile",
     },
   ];
 
@@ -27,15 +28,31 @@ export default function QuickActions({ onReportClick }) {
         <div className="flex flex-col items-center justify-center space-y-3">
           {actions.map((a, i) => {
             const Icon = a.icon;
+            
+            const buttonContent = (
+              <>
+                <Icon size={18} />
+                <span>{a.text}</span>
+              </>
+            );
+            
+            const className = `${a.color} cursor-pointer text-white w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-3 hover:opacity-80 transition`;
+
+            if (a.to) {
+              return (
+                <Link key={i} to={a.to} className={className}>
+                  {buttonContent}
+                </Link>
+              );
+            }
 
             return (
               <button
                 key={i}
                 onClick={a.onClick}
-                className={`${a.color} cursor-pointer text-white w-full py-3 px-4 rounded-lg font-medium flex items-left justify-center gap-3 hover:opacity-80 transition`}
+                className={className}
               >
-                <Icon size={18} />
-                <span>{a.text}</span>
+                {buttonContent}
               </button>
             );
           })}

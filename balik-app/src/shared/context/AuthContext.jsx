@@ -13,8 +13,67 @@ export const AuthProvider = ({ children }) => {
     userRef.current = user;
   }, [user]);
 
+  const fetchProfile = async (currentUser) => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", currentUser.id)
+        .single();
+
+      let profileData = data;
+
+      if (error || !data) {
+        console.log("Profile missing or error, syncing from metadata...");
+        const { data: syncedData, error: syncError } = await supabase
+          .from("profiles")
+          .upsert({
+            id: currentUser.id,
+            full_name: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name,
+            mobile_number: currentUser.user_metadata?.mobile_number || currentUser.user_metadata?.contact,
+            avatar_url: currentUser.user_metadata?.avatar_url,
+            email: currentUser.email,
+            role: currentUser.user_metadata?.role || 'user',
+            updated_at: new Date(),
+          })
+
+          .select()
+          .single();
+
+        if (!syncError) {
+          profileData = syncedData;
+        }
+      }
+
+      if (profileData) {
+        currentUser.user_metadata = {
+          ...currentUser.user_metadata,
+          full_name: profileData.full_name,
+          avatar_url: profileData.avatar_url,
+          role: profileData.role || currentUser.user_metadata?.role || 'user',
+        };
+
+      }
+    } catch (err) {
+      console.error("Profile sync/fetch error:", err);
+    } finally {
+      setUser(currentUser);
+      setLoading(false);
+    }
+  };
+
+  const refreshUser = async () => {
+    try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (currentUser) {
+        await fetchProfile(currentUser);
+      }
+    } catch (err) {
+      console.error("Refresh user error:", err);
+    }
+  };
+
   useEffect(() => {
-    // 1. Check current session immediately
     const initAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -29,53 +88,6 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
-    const fetchProfile = async (currentUser) => {
-      try {
-        // Try to fetch existing profile
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", currentUser.id)
-          .single();
-
-        let profileData = data;
-
-        // If profile doesn't exist or is missing critical info, sync it from metadata
-        if (error || !data) {
-          console.log("Profile missing or error, syncing from metadata...");
-          const { data: syncedData, error: syncError } = await supabase
-            .from("profiles")
-            .upsert({
-              id: currentUser.id,
-              full_name: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name,
-              mobile_number: currentUser.user_metadata?.mobile_number || currentUser.user_metadata?.contact,
-              email: currentUser.email,
-              role: currentUser.user_metadata?.role || 'user',
-              updated_at: new Date(),
-            })
-            .select()
-            .single();
-
-          if (!syncError) {
-            profileData = syncedData;
-          }
-        }
-
-        if (profileData) {
-          currentUser.user_metadata = {
-            ...currentUser.user_metadata,
-            full_name: profileData.full_name,
-            role: profileData.role || currentUser.user_metadata?.role || 'user',
-          };
-        }
-      } catch (err) {
-        console.error("Profile sync/fetch error:", err);
-      } finally {
-        setUser(currentUser);
-        setLoading(false);
-      }
-    };
-
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -85,9 +97,10 @@ export const AuthProvider = ({ children }) => {
           // Use userRef.current to avoid stale closure
           const currentUser = userRef.current;
           
-          // Only fetch profile if it's a new user or a SIGNED_IN event
+          // Only fetch profile if it's a new user or a SIGNED_IN/USER_UPDATED event
           // TOKEN_REFRESHED events for the same user are ignored to avoid redundant re-renders
-          if (!currentUser || currentUser.id !== session.user.id || event === 'SIGNED_IN') {
+          if (!currentUser || currentUser.id !== session.user.id || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+
             console.log("Performing full profile fetch/sync...");
             await fetchProfile(session.user);
           } else {
@@ -113,7 +126,8 @@ export const AuthProvider = ({ children }) => {
   }, []); // Run only once on mount
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, refreshUser }}>
+
       {children}
     </AuthContext.Provider>
   );

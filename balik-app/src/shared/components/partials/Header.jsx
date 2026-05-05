@@ -30,10 +30,13 @@ function Header() {
           </Link>
           <Link
             to="/login"
-            className="font-extrabold text-[#cb7300ff] border-[1.5px] border-[#cb7300ff] px-6 py-2 rounded-3xl hover:bg-[#cb7300ff] hover:text-white transition-colors duration-300"
+            className="font-bold text-[#7B1C1C] border-2 border-[#7B1C1C] px-8 py-2.5 rounded-full hover:bg-[#7B1C1C] hover:text-white hover:shadow-lg hover:shadow-[#7B1C1C]/20 transition-all active:scale-95 duration-300 uppercase tracking-wide text-sm"
           >
             LOG IN
           </Link>
+
+
+
         </div>
       </nav>
     </header>

@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Search, Calendar, Eye, QrCode, Plus } from "lucide-react";
 import LostItemDetailsModal from "./LostItemDetailsModal";
 
@@ -176,10 +177,13 @@ export default function LostItems() {
           </p>
         </div>
 
-        <button className="cursor-pointer flex items-center gap-2 bg-red-700 hover:bg-red-800 text-white px-5 py-2 rounded-lg">
+        <Link 
+          to="/adminreport"
+          className="cursor-pointer flex items-center gap-2 bg-red-700 hover:bg-red-800 text-white px-5 py-2 rounded-lg transition-colors"
+        >
           <Plus size={18} />
           Encode Lost Item
-        </button>
+        </Link>
       </div>
 
       {/* FILTER CARD */}
@@ -189,7 +193,7 @@ export default function LostItems() {
 
           <button
             onClick={clearFilters}
-            className="font-semibold text-sm text-green-600 hover:underline"
+            className="cursor-pointer font-semibold text-sm text-green-600 hover:underline"
           >
             Clear All Filters
           </button>

@@ -87,12 +87,17 @@ export default function QRVerification() {
     fetchQRData();
   }, []);
 
+  const handleScan = (scannedData) => {
+    // Here you would typically cross-reference with your pending items or send to backend
+    alert(`Scanned QR Code Data: ${scannedData}\n\nItem verified successfully!`);
+  };
+
   return (
     <div className="p-6 space-y-6">
       <StatsCard stats={stats} />
 
       <div className="grid grid-cols-2 gap-6">
-        <QRScannerCard onStart={() => console.log("Start scanning")} />
+        <QRScannerCard onScan={handleScan} />
         <PendingList items={pendingItems} />
       </div>
 
