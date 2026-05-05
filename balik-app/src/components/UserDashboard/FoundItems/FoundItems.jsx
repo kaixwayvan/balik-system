@@ -110,7 +110,7 @@ export default function FoundItems() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Found Reports</h1>
+          <h1 className="text-2xl font-bold text-slate-900 mb-1">Found Reports</h1>
           <p className="text-sm text-gray-500">
             Items you've reported and their claim status
           </p>

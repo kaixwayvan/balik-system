@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useEffect, useState } from "react";
 import AIMatchesStats from "./AIMatchesStats";
 import AIMatchesTable from "./AIMatchesTable";
@@ -54,6 +55,12 @@ export default function AIMatches() {
     fetchMatches();
   }, [])
 
+=======
+import AIMatchesStats from "./AIMatchesStats";
+import AIMatchesTable from "./AIMatchesTable";
+
+export default function AIMatches() {
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
   return (
     <div className="p-6 space-y-6 bg-[#EEF1F8]">
       <div>
@@ -63,8 +70,13 @@ export default function AIMatches() {
         </p>
       </div>
 
+<<<<<<< HEAD
       <AIMatchesStats matches={matches} />
       <AIMatchesTable matches={matches} loading={loading} counts={counts} />
+=======
+      <AIMatchesStats />
+      <AIMatchesTable />
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
     </div>
   );
 }

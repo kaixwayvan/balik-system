@@ -5,7 +5,10 @@ export default function RunAIMatchingModal({
   onClose,
   onStart,
   isProcessing,
+<<<<<<< HEAD
   counts
+=======
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
 }) {
   if (!open) return null;
 
@@ -51,7 +54,11 @@ export default function RunAIMatchingModal({
                 </div>
               </div>
 
+<<<<<<< HEAD
               <span className="text-2xl font-bold">{counts?.lost || 0}</span>
+=======
+              <span className="text-2xl font-bold">45</span>
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
             </div>
 
             <div className="bg-gray-100 rounded-lg p-4 flex justify-between items-center">
@@ -65,7 +72,11 @@ export default function RunAIMatchingModal({
                 </div>
               </div>
 
+<<<<<<< HEAD
               <span className="text-2xl font-bold">{counts?.found || 0}</span>
+=======
+              <span className="text-2xl font-bold">38</span>
+>>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
             </div>
 
             {/* START BUTTON */}
