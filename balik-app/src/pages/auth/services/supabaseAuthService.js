@@ -69,6 +69,11 @@ export const loginWithPasswordSupabase = async (identifier, password) => {
 
     if (error) throw error;
 
+    // Update last active timestamp
+    if (data?.user) {
+      await supabase.from("profiles").update({ last_sign_in_at: new Date().toISOString() }).eq("id", data.user.id);
+    }
+
     return {
       success: true,
       user: data.user,

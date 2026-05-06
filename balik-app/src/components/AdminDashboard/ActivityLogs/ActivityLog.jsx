@@ -19,7 +19,7 @@ function buildActivities(items, claims) {
       role: isAdmin ? "Admin" : "User",
       activity: item.type === "found" ? "Reported found item" : "Reported lost item",
       target: item.type === "found" ? "Found Item" : "Lost Item",
-      ip: `192.168.1.${Math.floor(Math.random() * 200) + 10}`,
+
       detail: item,
     });
 
@@ -31,7 +31,7 @@ function buildActivities(items, claims) {
         role: "Admin",
         activity: "Marked item resolved",
         target: "Report",
-        ip: `192.168.1.${Math.floor(Math.random() * 200) + 10}`,
+
         detail: item,
       });
     }
@@ -48,7 +48,7 @@ function buildActivities(items, claims) {
       role: "User",
       activity: "Submitted claim",
       target: "Claim",
-      ip: `192.168.1.${Math.floor(Math.random() * 200) + 10}`,
+
       detail: claim,
     });
 
@@ -60,7 +60,7 @@ function buildActivities(items, claims) {
         role: "Admin",
         activity: "Approved found item",
         target: "Claim",
-        ip: `192.168.1.${Math.floor(Math.random() * 200) + 10}`,
+
         detail: claim,
       });
     } else if (claim.status === "rejected") {
@@ -71,7 +71,7 @@ function buildActivities(items, claims) {
         role: "Admin",
         activity: "Rejected claim",
         target: "Claim",
-        ip: `192.168.1.${Math.floor(Math.random() * 200) + 10}`,
+
         detail: claim,
       });
     }
@@ -114,10 +114,7 @@ function DetailModal({ activity, onClose }) {
               {new Date(activity.date).toLocaleString()}
             </span>
           </div>
-          <div className="flex justify-between border-b pb-2">
-            <span className="text-gray-500 font-medium">IP Address</span>
-            <span className="text-gray-800 font-semibold">{activity.ip}</span>
-          </div>
+
           {d?.title && (
             <div className="flex justify-between border-b pb-2">
               <span className="text-gray-500 font-medium">Item</span>
@@ -274,7 +271,7 @@ export default function ActivityLog() {
                   <th className="pb-3 pr-4">Actor</th>
                   <th className="pb-3 pr-4">Activity</th>
                   <th className="pb-3 pr-4">Target</th>
-                  <th className="pb-3 pr-4">IP Address</th>
+
                   <th className="pb-3 text-center">View</th>
                 </tr>
               </thead>
@@ -290,7 +287,7 @@ export default function ActivityLog() {
                       <td className="py-3.5 pr-4 text-gray-700 font-medium">{a.actor}</td>
                       <td className="py-3.5 pr-4 text-gray-700">{a.activity}</td>
                       <td className="py-3.5 pr-4 text-gray-600">{a.target}</td>
-                      <td className="py-3.5 pr-4 text-gray-600 font-mono text-xs">{a.ip}</td>
+
                       <td className="py-3.5 text-center">
                         <button
                           onClick={() => setSelected(a)}

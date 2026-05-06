@@ -26,6 +26,7 @@ import QRVerification from "./components/AdminDashboard/QRVerification/QRVerific
 import ItemTrackingPage from "./components/AdminDashboard/TrackItems/ItemTrackingPage";
 import AdminReport from "./components/AdminDashboard/AdminHome/AdminReport";
 import ActivityLog from "./components/AdminDashboard/ActivityLogs/ActivityLog";
+import UserManagement from "./components/AdminDashboard/UserManagement/UserManagement";
 
 import SubmitReport from "./components/UserDashboard/Home/SubmitReport";
 import ComingSoonPage from "./pages/ComingSoonPage";
@@ -90,6 +91,7 @@ function App() {
           <Route path="qr-verify" element={<QRVerification />} />
           <Route path="track-items" element={<ItemTrackingPage />} />
           <Route path="activity-logs" element={<ActivityLog />} />
+          <Route path="user-manage" element={<UserManagement />} />
         </Route>
       </Routes>
     </AuthProvider>

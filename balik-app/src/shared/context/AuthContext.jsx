@@ -101,6 +101,11 @@ export const AuthProvider = ({ children }) => {
           // TOKEN_REFRESHED events for the same user are ignored to avoid redundant re-renders
           if (!currentUser || currentUser.id !== session.user.id || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
 
+            if (event === 'SIGNED_IN') {
+              // Update last active timestamp on login
+              await supabase.from("profiles").update({ last_sign_in_at: new Date().toISOString() }).eq("id", session.user.id);
+            }
+
             console.log("Performing full profile fetch/sync...");
             await fetchProfile(session.user);
           } else {
