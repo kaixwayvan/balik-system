@@ -10,6 +10,8 @@ import {
   Trophy,
   AlertTriangle,
 } from "lucide-react";
+import ExportReportsModal from "./ExportReportsModal";
+import LeaderboardModal from "./LeaderboardModal";
 
 const actions = [
   {
@@ -45,7 +47,7 @@ const actions = [
     title: "Export Reports",
     sub: "Generate CSV",
     color: "bg-emerald-500",
-    to: "/comingsoon",
+    action: "export",
   },
   {
     icon: Coins,
@@ -59,12 +61,14 @@ const actions = [
     title: "View Leaderboard",
     sub: "Top Users",
     color: "bg-red-500",
-    to: "/comingsoon",
+    action: "leaderboard",
   },
 ];
 
 export default function QuickActions() {
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   return (
     <>
@@ -105,6 +109,10 @@ export default function QuickActions() {
                 onClick={() => {
                   if (a.action === "report") {
                     setShowReportModal(true);
+                  } else if (a.action === "export") {
+                    setShowExportModal(true);
+                  } else if (a.action === "leaderboard") {
+                    setShowLeaderboard(true);
                   }
                 }}
                 className="border border-gray-300 rounded-lg p-4 text-center hover:shadow-md cursor-pointer transition-shadow"
@@ -157,6 +165,12 @@ export default function QuickActions() {
             </div>
           </div>
         </div>
+      )}
+      {showExportModal && (
+        <ExportReportsModal onClose={() => setShowExportModal(false)} />
+      )}
+      {showLeaderboard && (
+        <LeaderboardModal onClose={() => setShowLeaderboard(false)} />
       )}
     </>
   );

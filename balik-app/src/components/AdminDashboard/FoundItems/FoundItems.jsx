@@ -1,15 +1,9 @@
-<<<<<<< HEAD
 import { useState, useEffect } from "react";
-<<<<<<< HEAD
 import { Link } from "react-router-dom";
-=======
-=======
-import { useState } from "react";
->>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
->>>>>>> e16ed2d33fdfd83570f24336ac19ca068d0f6410
 import { Eye, Check, X, SquaresExclude, Coins, Plus } from "lucide-react";
 import { FaUserCircle } from "react-icons/fa";
 import FoundItemDetailsModal from "./FoundItemDetailsModal";
+import { supabase } from "../../../utils/supabaseClient";
 
 const tableHeaders = [
   "Item",
@@ -39,49 +33,6 @@ const statusActions = {
   Claimed: ["view", "coin"],
 };
 
-<<<<<<< HEAD
-import { supabase } from "../../../utils/supabaseClient";
-=======
-const foundItems = [
-  {
-    name: "Red Wallet",
-    category: "Personal Items",
-    location: "Cafeteria, Table 15",
-    submittedType: "Registered User",
-    submittedBy: "Emma Wilson",
-    time: "2025-01-26 15:20",
-    status: "Pending",
-  },
-  {
-    name: "Red Wallet",
-    category: "Personal Items",
-    location: "Cafeteria, Table 15",
-    submittedType: "Guest",
-    submittedBy: "Anonymous Guest",
-    time: "2025-01-26 15:20",
-    status: "Approved",
-  },
-  {
-    name: "Red Wallet",
-    category: "Personal Items",
-    location: "Cafeteria, Table 15",
-    submittedType: "Registered User",
-    submittedBy: "Emma Wilson",
-    time: "2025-01-26 15:20",
-    status: "Matched",
-  },
-  {
-    name: "Red Wallet",
-    category: "Personal Items",
-    location: "Cafeteria, Table 15",
-    submittedType: "Registered User",
-    submittedBy: "Emma Wilson",
-    time: "2025-01-26 15:20",
-    status: "Claimed",
-  },
-];
->>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
-
 function ActionIcons({ status, onView }) {
   const actions = statusActions[status];
 
@@ -100,7 +51,7 @@ function ActionIcons({ status, onView }) {
 
   return (
     <div className="flex justify-left items-center gap-3">
-      {actions.map((action) => {
+      {actions?.map((action) => {
         const { icon: Icon, color, label, onClick } = actionMap[action];
         return (
           <div key={action} className="relative group">
@@ -127,24 +78,16 @@ function ActionIcons({ status, onView }) {
 export default function FoundItems() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-<<<<<<< HEAD
   const [foundItems, setFoundItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [registeredCount, setRegisteredCount] = useState(0);
   const [guestCount, setGuestCount] = useState(0);
-
-  import("react").then(({ useEffect }) => {
-    // dynamically imported inside or we can just import at top. Let's rely on standard imports.
-  });
-=======
->>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
 
   const openModal = (item) => {
     setSelectedItem(item);
     setIsModalOpen(true);
   };
 
-<<<<<<< HEAD
   useEffect(() => {
     async function fetchFoundItems() {
       try {
@@ -194,8 +137,6 @@ export default function FoundItems() {
     fetchFoundItems();
   }, []);
 
-=======
->>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
   return (
     <div className="p-6 space-y-6 bg-[#EEF1F8]">
       {/* HEADER */}
@@ -222,21 +163,13 @@ export default function FoundItems() {
         <div className="flex items-center gap-2">
           <FaUserCircle size={15} className="text-green-600" />
           <p className="text-sm font-semibold text-gray-600">
-<<<<<<< HEAD
             Registered Users: {registeredCount}
-=======
-            Registered Users: 147
->>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
           </p>
         </div>
         <div className="flex items-center gap-2">
           <FaUserCircle size={15} className="text-orange-500" />
           <p className="text-sm font-semibold text-gray-600">
-<<<<<<< HEAD
             Guest Submissions: {guestCount}
-=======
-            Guest Submissions: 45
->>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
           </p>
         </div>
       </div>
@@ -253,14 +186,8 @@ export default function FoundItems() {
               {tableHeaders.map((header, index) => (
                 <th
                   key={index}
-<<<<<<< HEAD
                   className={`px-6 py-5 uppercase ${header === "Actions" ? "text-center" : "text-left"
                     }`}
-=======
-                  className={`px-6 py-5 uppercase ${
-                    header === "Actions" ? "text-center" : "text-left"
-                  }`}
->>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
                 >
                   {header}
                 </th>
@@ -269,7 +196,6 @@ export default function FoundItems() {
           </thead>
 
           <tbody>
-<<<<<<< HEAD
             {loading ? (
               <tr><td colSpan="6" className="py-8 text-center text-gray-500">Loading items...</td></tr>
             ) : foundItems.length === 0 ? (
@@ -277,22 +203,13 @@ export default function FoundItems() {
             ) : foundItems.map((item, i) => (
               <tr
                 key={item.id || i}
-=======
-            {foundItems.map((item, i) => (
-              <tr
-                key={i}
->>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
                 className="border-t border-gray-300 hover:bg-gray-50 align-middle"
               >
                 {/* ITEM */}
                 <td className="px-6 py-6">
                   <div className="flex items-center gap-4">
                     <img
-<<<<<<< HEAD
                       src={item.imageUrl}
-=======
-                      src="https://images.unsplash.com/photo-1580910051074-3eb694886505"
->>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
                       className="w-14 h-14 rounded-lg object-cover"
                     />
 
@@ -325,11 +242,7 @@ export default function FoundItems() {
                 {/* STATUS */}
                 <td className="px-6 py-4">
                   <span
-<<<<<<< HEAD
                     className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[item.status] || "bg-gray-100"}`}
-=======
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[item.status]}`}
->>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
                   >
                     {item.status}
                   </span>

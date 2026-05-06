@@ -25,6 +25,7 @@ import AIMatches from "./components/AdminDashboard/AIMatches/AIMatches";
 import QRVerification from "./components/AdminDashboard/QRVerification/QRVerification";
 import ItemTrackingPage from "./components/AdminDashboard/TrackItems/ItemTrackingPage";
 import AdminReport from "./components/AdminDashboard/AdminHome/AdminReport";
+import ActivityLog from "./components/AdminDashboard/ActivityLogs/ActivityLog";
 
 import SubmitReport from "./components/UserDashboard/Home/SubmitReport";
 import ComingSoonPage from "./pages/ComingSoonPage";
@@ -88,6 +89,7 @@ function App() {
           <Route path="matching" element={<AIMatches />} />
           <Route path="qr-verify" element={<QRVerification />} />
           <Route path="track-items" element={<ItemTrackingPage />} />
+          <Route path="activity-logs" element={<ActivityLog />} />
         </Route>
       </Routes>
     </AuthProvider>

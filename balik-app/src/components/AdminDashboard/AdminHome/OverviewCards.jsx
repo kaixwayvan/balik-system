@@ -4,11 +4,11 @@ import {
   Search,
   Medal,
   ArrowBigUpDash,
-<<<<<<< HEAD
   ArrowBigDownDash
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "../../../utils/supabaseClient";
+import LeaderboardModal from "./LeaderboardModal";
 
 export default function OverviewCards() {
   const [data, setData] = useState({
@@ -37,6 +37,7 @@ export default function OverviewCards() {
       },
     ]
   });
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   useEffect(() => {
     async function fetchOverview() {
@@ -117,51 +118,19 @@ export default function OverviewCards() {
     }
     fetchOverview();
   }, []);
-=======
-} from "lucide-react";
-
-export default function OverviewCards() {
-  const badges = [
-    {
-      name: "Good Samaritan",
-      count: 24,
-      icon: HeartHandshake,
-      color: "text-rose-500 bg-rose-100",
-    },
-    {
-      name: "Super Finder",
-      count: 8,
-      icon: Search,
-      color: "text-blue-500 bg-blue-100",
-    },
-    {
-      name: "Campus Finder",
-      count: 3,
-      icon: Medal,
-      color: "text-purple-500 bg-purple-100",
-    },
-  ];
->>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
 
   return (
     <div className="grid grid-cols-3 gap-6">
       {/* Points Card */}
-<<<<<<< HEAD
       <div className="bg-white rounded-xl p-6 shadow-md">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-lg">Points Overview</h3>
-=======
-      <div className="bg-white rounded-xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-lg">Points This Month</h3>
->>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
           <button className="cursor-pointer font-semibold text-sm text-green-600 hover:underline">
             View All
           </button>
         </div>
 
         <div className="flex flex-col justify-center items-center gap-1">
-<<<<<<< HEAD
           <p className="text-3xl font-bold text-green-600">
             {data.totalPoints.toLocaleString()}
           </p>
@@ -174,32 +143,19 @@ export default function OverviewCards() {
             )}
             <p className={`text-sm font-bold ${data.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {data.growth >= 0 ? '+' : ''}{data.growth}% from last month
-=======
-          <p className="text-3xl font-bold text-green-600">2,450</p>
-          <p className="text-sm text-gray-500 mb-2">Total Points Awarded</p>
-          <div className="flex justify-center items-center gap-1">
-            <ArrowBigUpDash
-              className="text-green-600"
-              size={18}
-              strokeWidth={2.4}
-            />
-            <p className="text-sm font-bold text-green-600">
-              +18% from last month
->>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
             </p>
           </div>
         </div>
       </div>
 
       {/* Top Finder */}
-<<<<<<< HEAD
       <div className="bg-white rounded-xl p-6 text-center shadow-md">
-=======
-      <div className="bg-white rounded-xl p-6 text-center">
->>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-lg">Top Finder</h3>
-          <button className="cursor-pointer font-semibold text-sm text-green-600 hover:underline">
+          <button 
+            onClick={() => setShowLeaderboard(true)}
+            className="cursor-pointer font-semibold text-sm text-green-600 hover:underline"
+          >
             View Leaderboard
           </button>
         </div>
@@ -210,21 +166,12 @@ export default function OverviewCards() {
           </div>
         </div>
 
-<<<<<<< HEAD
         <p className="mt-3 font-semibold">{data.topFinderName}</p>
         <p className="text-sm text-gray-500">{data.topFinderPoints} points</p>
       </div>
 
       {/* Earned Badges */}
       <div className="bg-white rounded-xl p-6 shadow-md">
-=======
-        <p className="mt-3 font-semibold">Rosmar Lamna</p>
-        <p className="text-sm text-gray-500">850 points</p>
-      </div>
-
-      {/* Earned Badges */}
-      <div className="bg-white rounded-xl p-6">
->>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-lg">Most Earned Badge</h3>
           <button className="cursor-pointer font-semibold text-sm text-green-600 hover:underline">
@@ -233,11 +180,7 @@ export default function OverviewCards() {
         </div>
 
         <div className="space-y-3">
-<<<<<<< HEAD
           {data.badges.map((badge, index) => {
-=======
-          {badges.map((badge, index) => {
->>>>>>> a5afc5cb (ADMIN to QR. QR not yet finished)
             const Icon = badge.icon;
 
             return (
@@ -258,6 +201,7 @@ export default function OverviewCards() {
           })}
         </div>
       </div>
+      {showLeaderboard && <LeaderboardModal onClose={() => setShowLeaderboard(false)} />}
     </div>
   );
 }
