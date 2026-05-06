@@ -11,7 +11,7 @@ function Header() {
         {/* Links + Button */}
         <div className="flex items-center gap-15 font-['Zalando_Sans_Expanded']">
           <Link
-            to="/comingsoon"
+            to="/about-us"
             className="font-extrabold text-[#230000de] hover:text-[#cb7300ff] transition-colors duration-300"
           >
             ABOUT

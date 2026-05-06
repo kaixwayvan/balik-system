@@ -32,6 +32,7 @@ import SubmitReport from "./components/UserDashboard/Home/SubmitReport";
 import ComingSoonPage from "./pages/ComingSoonPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfUse from "./pages/TermsOfUse";
+import AboutUs from "./pages/AboutUs";
 
 import AdminRoute from "./shared/components/AdminRoute";
 
@@ -53,7 +54,7 @@ function App() {
         <Route path="/adminreport" element={<AdminReport />} />
 
         {/* Footer Routes */}
-        <Route path="/about-us" element={<ComingSoonPage />} />
+        <Route path="/about-us" element={<AboutUs />} />
         <Route path="/contact" element={<ComingSoonPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-service" element={<TermsOfUse />} />
