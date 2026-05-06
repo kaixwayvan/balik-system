@@ -253,11 +253,17 @@ export default function UserManagement() {
 
   // ── Action handlers (stubs) ──────────────────────────────────────────────
   async function handleRestrict(userId, currentlyRestricted) {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .update({ is_restricted: !currentlyRestricted })
-      .eq("id", userId);
-    if (!error) {
+      .eq("id", userId)
+      .select();
+      
+    if (error) {
+      alert("Error updating user restriction.");
+    } else if (!data || data.length === 0) {
+      alert("Failed to restrict user: Permission denied. Your Supabase RLS policy might be preventing admins from updating profiles. Please run the SQL command provided to fix the RLS policy.");
+    } else {
       setUsers((prev) =>
         prev.map((u) =>
           u.id === userId ? { ...u, is_restricted: !currentlyRestricted } : u

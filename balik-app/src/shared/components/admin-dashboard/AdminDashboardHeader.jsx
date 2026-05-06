@@ -216,16 +216,32 @@ export default function AdminDashboardHeader() {
 
               {/* Menu */}
               <div className="p-2">
-                <Link to="/dashboard/profile">
-                  <MenuItem
-                    icon={User}
-                    label="View Profile"
-                    className="cursor-pointer"
-                  />
-                </Link>
-                <MenuItem icon={Bell} label="Notification" />
-                <MenuItem icon={HelpCircle} label="Help Center" />
-                <MenuItem icon={Settings} label="Settings" />
+                <MenuItem
+                  icon={User}
+                  label="View Profile"
+                  to="/dashboard/profile"
+                  onClick={() => setIsOpen(false)}
+                />
+                <MenuItem 
+                  icon={Bell} 
+                  label="Notification" 
+                  onClick={() => {
+                    setIsOpen(false);
+                    setIsNotifOpen(true);
+                  }}
+                />
+                <MenuItem 
+                  icon={HelpCircle} 
+                  label="Help Center" 
+                  to="/help-center"
+                  onClick={() => setIsOpen(false)}
+                />
+                <MenuItem 
+                  icon={Settings} 
+                  label="Settings" 
+                  to="/dashboard/profile"
+                  onClick={() => setIsOpen(false)}
+                />
               </div>
 
               <div className="border-t border-gray-300" />
@@ -277,9 +293,17 @@ export default function AdminDashboardHeader() {
   );
 }
 
-function MenuItem({ icon: Icon, label }) {
+function MenuItem({ icon: Icon, label, to, onClick }) {
+  if (to) {
+    return (
+      <Link to={to} onClick={onClick} className="cursor-pointer w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 text-gray-700">
+        <Icon size={18} />
+        {label}
+      </Link>
+    );
+  }
   return (
-    <button className="cursor-pointer w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100">
+    <button onClick={onClick} className="cursor-pointer w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 text-gray-700">
       <Icon size={18} />
       {label}
     </button>

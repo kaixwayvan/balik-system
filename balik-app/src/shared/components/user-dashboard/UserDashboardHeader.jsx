@@ -215,7 +215,6 @@ export default function UserDashboardHeader() {
                 </div>
               </div>
 
-              {/* Menu */}
               <div className="p-2">
                 <MenuItem
                   icon={User}
@@ -223,9 +222,26 @@ export default function UserDashboardHeader() {
                   to="/dashboard/profile"
                   onClick={() => setIsOpen(false)}
                 />
-                <MenuItem icon={Bell} label="Notification" />
-                <MenuItem icon={HelpCircle} label="Help Center" />
-                <MenuItem icon={Settings} label="Settings" />
+                <MenuItem 
+                  icon={Bell} 
+                  label="Notification" 
+                  onClick={() => {
+                    setIsOpen(false);
+                    setIsNotifOpen(true);
+                  }}
+                />
+                <MenuItem 
+                  icon={HelpCircle} 
+                  label="Help Center" 
+                  to="/help-center"
+                  onClick={() => setIsOpen(false)}
+                />
+                <MenuItem 
+                  icon={Settings} 
+                  label="Settings" 
+                  to="/dashboard/profile"
+                  onClick={() => setIsOpen(false)}
+                />
               </div>
 
               <div className="border-t border-gray-300" />

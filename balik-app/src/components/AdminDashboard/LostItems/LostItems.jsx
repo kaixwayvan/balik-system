@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Search, Calendar, Eye, QrCode, Plus } from "lucide-react";
 import LostItemDetailsModal from "./LostItemDetailsModal";
+import QRModal from "./QRModal";
 import { supabase } from "../../../utils/supabaseClient";
 
 const categories = [
@@ -28,7 +29,6 @@ const statusStyles = {
 };
 
 const tableHeaders = [
-  { label: "", align: "text-left" },
   { label: "Item", align: "text-left" },
   { label: "Category", align: "text-left" },
   { label: "Location", align: "text-left" },
@@ -60,6 +60,7 @@ function TooltipIcon({ icon: Icon, color, label, onClick }) {
 
 export default function LostItems() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [lostItems, setLostItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -153,6 +154,11 @@ export default function LostItems() {
   const handleViewItem = (item) => {
     setSelectedItem(item);
     setIsModalOpen(true);
+  };
+
+  const handleQRClick = (item) => {
+    setSelectedItem(item);
+    setIsQRModalOpen(true);
   };
 
   const clearFilters = () => {
@@ -311,31 +317,11 @@ export default function LostItems() {
 
           <tbody>
             {loading ? (
-              <tr><td colSpan="8" className="py-8 text-center text-gray-500">Loading items...</td></tr>
+              <tr><td colSpan="7" className="py-8 text-center text-gray-500">Loading items...</td></tr>
             ) : filteredItems.length === 0 ? (
-              <tr><td colSpan="8" className="py-8 text-center text-gray-500">No items found.</td></tr>
+              <tr><td colSpan="7" className="py-8 text-center text-gray-500">No items found.</td></tr>
             ) : filteredItems.map((item, i) => (
               <tr key={i} className="border-t border-gray-300 hover:bg-gray-50">
-                <td className="px-4 py-3">
-                  <input
-                    type="checkbox"
-                    className="
-                      cursor-pointer
-                      appearance-none
-                      inline-block
-                      w-[20px] h-[20px]
-                      p-[2px]
-                      bg-clip-content
-                      border-[1.5px] border-[#bbbbbb]
-                      rounded-[2px]
-                      bg-none
-                      mx-[15px]
-                      checked:bg-blue-700
-                      focus:outline-none
-                    "
-                  />
-                </td>
-
                 <td className="px-4 py-5">
                   <p className="font-medium">{item.name}</p>
                   <p className="text-gray-500 text-xs">{item.description}</p>
@@ -377,7 +363,7 @@ export default function LostItems() {
                       icon={QrCode}
                       color="text-purple-600"
                       label="QR Code"
-                      onClick={() => console.log("QR Code clicked")}
+                      onClick={() => handleQRClick(item)}
                     />
                   </div>
                 </td>
@@ -391,6 +377,13 @@ export default function LostItems() {
         <LostItemDetailsModal
           item={selectedItem}
           onClose={() => setIsModalOpen(false)}
+        />
+      )}
+
+      {isQRModalOpen && (
+        <QRModal
+          item={selectedItem}
+          onClose={() => setIsQRModalOpen(false)}
         />
       )}
     </div>

@@ -88,11 +88,17 @@ export default function UserProfileModal({ user, onClose, onRestrictToggle }) {
   async function handleRestrictToggle() {
     setRestricting(true);
     const next = !isRestricted;
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .update({ is_restricted: next })
-      .eq("id", user.id);
-    if (!error) {
+      .eq("id", user.id)
+      .select();
+
+    if (error) {
+      alert("Error updating user restriction.");
+    } else if (!data || data.length === 0) {
+      alert("Failed to restrict user: Permission denied. Your Supabase RLS policy might be preventing admins from updating profiles. Please run the SQL command provided to fix the RLS policy.");
+    } else {
       setIsRestricted(next);
       onRestrictToggle?.(user.id, next);
     }
