@@ -21,7 +21,7 @@ export default function UserDashboardSidebar() {
     }`;
 
   return (
-    <aside className="w-72 bg-white border-r border-gray-200 p-4 flex flex-col h-full">
+    <aside className="w-72 bg-white border-r border-gray-200 p-4 flex flex-col h-screen">
       {/* Logo */}
       <NavLink to="/" end>
         <img src={BALIKLogo} className="cursor-alias h-30 mb-6 mx-auto -translate-y-3 translate-y-3" alt="BALIK Logo" />
