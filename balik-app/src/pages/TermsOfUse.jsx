@@ -64,6 +64,12 @@ export default function TermsOfUse() {
 
       {/* CUSTOM HEADER FOR TERMS OF USE */}
       <header className="absolute top-0 left-0 w-full z-50">
+        {/* Top Header Background Elements */}
+        <div className="absolute top-0 left-0 w-full h-56 overflow-hidden pointer-events-none z-0">
+          <div className="absolute -top-20 left-[10%] w-[400px] h-[400px] bg-[#F2E4DC] rounded-full blur-3xl opacity-60"></div>
+          <div className="absolute top-[-50px] right-[20%] w-[300px] h-[300px] bg-[#520000]/5 rounded-full blur-3xl opacity-80"></div>
+          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#520000 1.5px, transparent 1.5px)', backgroundSize: '32px 32px' }}></div>
+        </div>
         <nav className="w-full flex items-center justify-between px-10 py-5 border-b border-gray-400 bg-transparent">
           {/* Logo */}
           <Link to="/">
@@ -79,7 +85,7 @@ export default function TermsOfUse() {
               HOME
             </Link>
             <Link
-              to="/comingsoon"
+              to="/about-us"
               className="text-[14px] font-black text-[#2a2a2a] hover:text-[#b89060] transition-colors tracking-[0.1em]"
             >
               ABOUT
@@ -143,6 +149,38 @@ export default function TermsOfUse() {
 
       <div className="container mx-auto px-6 py-12 relative z-10">
         <div className="flex flex-col lg:flex-row gap-16 relative">
+
+          {/* FULL HEIGHT SIDEBAR (LEFT SIDE) */}
+          <aside className="lg:w-80 flex-shrink-0 relative bg-[#F2E4DC]/40 backdrop-blur-md rounded-[2rem] border border-[#F2E4DC] shadow-xl shadow-slate-200/30 overflow-hidden">
+            <div className="sticky top-32 p-2 h-fit">
+              <div className="p-6 pb-2">
+                <p className="text-[10px] font-black text-[#520000]/40 uppercase tracking-[0.2em] mb-4">On this page</p>
+              </div>
+              <nav className="space-y-1">
+                {sections.map((section) => (
+                  <button
+                    key={section.id}
+                    onClick={() => scrollToSection(section.id)}
+                    className={`w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl text-sm font-bold transition-all duration-300 ${activeSection === section.id
+                      ? 'bg-[#520000] text-white shadow-lg shadow-[#520000]/20 translate-x-1'
+                      : 'text-gray-600 hover:text-[#520000] hover:bg-white/50'
+                      }`}
+                  >
+                    <section.icon size={16} className={`${activeSection === section.id ? 'opacity-100' : 'opacity-40'}`} />
+                    <div className="text-left leading-tight">{section.title}</div>
+                  </button>
+                ))}
+              </nav>
+              <div className="mt-6 p-6 pt-4 border-t border-[#F2E4DC]">
+                <div className="bg-white/50 p-4 rounded-2xl border border-[#DBC9C0]/30">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Protocol Status</p>
+                  <div className="flex items-center gap-2 text-green-700 font-bold text-xs uppercase">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> Live & Enforced
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
 
           {/* MAIN CONTENT AREA */}
           <article className="flex-1 max-w-4xl space-y-24 pb-32">
@@ -401,37 +439,6 @@ export default function TermsOfUse() {
 
           </article>
 
-          {/* STICKY SIDEBAR */}
-          <aside className="lg:w-80 flex-shrink-0 lg:sticky lg:top-32 h-fit order-first lg:order-last">
-            <div className="bg-[#F2E4DC]/40 backdrop-blur-md rounded-[2rem] border border-[#F2E4DC] p-2 shadow-xl shadow-slate-200/30">
-              <div className="p-6 pb-2">
-                <p className="text-[10px] font-black text-[#520000]/40 uppercase tracking-[0.2em] mb-4">On this page</p>
-              </div>
-              <nav className="space-y-1">
-                {sections.map((section) => (
-                  <button
-                    key={section.id}
-                    onClick={() => scrollToSection(section.id)}
-                    className={`w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl text-sm font-bold transition-all duration-300 ${activeSection === section.id
-                      ? 'bg-[#520000] text-white shadow-lg shadow-[#520000]/20 translate-x-1'
-                      : 'text-gray-600 hover:text-[#520000] hover:bg-white/50'
-                      }`}
-                  >
-                    <section.icon size={16} className={`${activeSection === section.id ? 'opacity-100' : 'opacity-40'}`} />
-                    {section.title}
-                  </button>
-                ))}
-              </nav>
-              <div className="mt-6 p-6 pt-4 border-t border-[#F2E4DC]">
-                <div className="bg-white/50 p-4 rounded-2xl border border-[#DBC9C0]/30">
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Protocol Status</p>
-                  <div className="flex items-center gap-2 text-green-700 font-bold text-xs uppercase">
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> Live & Enforced
-                  </div>
-                </div>
-              </div>
-            </div>
-          </aside>
         </div>
       </div>
 

@@ -10,7 +10,7 @@ function Footer() {
     },
     {
       title: "Company",
-      links: ["About Us", "Contact"],
+      links: ["About Us"],
     },
     {
       title: "Legal",
