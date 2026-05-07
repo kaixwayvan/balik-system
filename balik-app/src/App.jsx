@@ -24,9 +24,10 @@ import FoundItems from "./components/AdminDashboard/FoundItems/FoundItems";
 import AIMatches from "./components/AdminDashboard/AIMatches/AIMatches";
 import QRVerification from "./components/AdminDashboard/QRVerification/QRVerification";
 import ItemTrackingPage from "./components/AdminDashboard/TrackItems/ItemTrackingPage";
-import AdminReport from "./components/AdminDashboard/AdminHome/AdminReport";
 import ActivityLog from "./components/AdminDashboard/ActivityLogs/ActivityLog";
 import UserManagement from "./components/AdminDashboard/UserManagement/UserManagement";
+import Gamification from "./components/AdminDashboard/Gamification/Gamification";
+import AdminProfile from "./components/AdminDashboard/AdminProfile/AdminProfile";
 
 import SubmitReport from "./components/UserDashboard/Home/SubmitReport";
 import ComingSoonPage from "./pages/ComingSoonPage";
@@ -51,7 +52,7 @@ function App() {
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/comingsoon" element={<ComingSoonPage />} />
         <Route path="/submitreport" element={<SubmitReport />} />
-        <Route path="/adminreport" element={<AdminReport />} />
+
 
         {/* Footer Routes */}
         <Route path="/about-us" element={<AboutUs />} />
@@ -93,6 +94,8 @@ function App() {
           <Route path="track-items" element={<ItemTrackingPage />} />
           <Route path="activity-logs" element={<ActivityLog />} />
           <Route path="user-manage" element={<UserManagement />} />
+          <Route path="gamification" element={<Gamification />} />
+          <Route path="profile" element={<AdminProfile />} />
         </Route>
       </Routes>
     </AuthProvider>

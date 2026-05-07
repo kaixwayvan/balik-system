@@ -11,7 +11,11 @@ export default function ReportsList({ reports }) {
         </div>
       ) : (
         reports.map((r) => (
-          <ReportCard key={r.id} report={r} />
+          <ReportCard 
+            key={r.id} 
+            report={r} 
+            onView={() => onView(r)}
+          />
         ))
       )}
     </div>

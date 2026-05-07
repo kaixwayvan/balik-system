@@ -1,14 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Plus,
-  X,
-  AlertCircle,
-  Brain,
-  MapPin,
-  MapPinned,
-  CheckCircle,
-} from "lucide-react";
+import { MapPinned, LogOut, X, AlertCircle, Plus, Info, Search } from "lucide-react";
+import ColorPicker from "../../shared/components/ColorPicker";
 import MapPicker from "../../shared/components/MapPicker";
 import { useAuth } from "../../shared/context/AuthContext";
 import { itemService } from "../../services/itemService";
@@ -535,22 +528,10 @@ export default function DashboardHome() {
                   <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
                   <input type="text" name="brand" value={lostFormData.brand} onChange={handleLostFormChange} placeholder="Aquaflask / Lenovo" className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
                 </div>
-                <div>
-                  <label className="block font-semibold mb-1 text-[#7B1C1C]">Color</label>
-                  <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
-                  <select name="color" value={lostFormData.color} onChange={handleLostFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500">
-                    <option value="">Select color</option>
-                    <option value="Black">Black</option>
-                    <option value="White">White</option>
-                    <option value="Red">Red</option>
-                    <option value="Blue">Blue</option>
-                    <option value="Green">Green</option>
-                    <option value="Yellow">Yellow</option>
-                    <option value="Brown">Brown</option>
-                    <option value="Gray">Gray</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
+                  <ColorPicker 
+                    value={lostFormData.color} 
+                    onChange={handleLostFormChange} 
+                  />
                 <div>
                   <label className="block font-semibold mb-1 text-[#7B1C1C]">Location <span className="text-red-500">*</span></label>
                   <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
@@ -662,22 +643,10 @@ export default function DashboardHome() {
                   <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
                   <input type="text" name="brand" value={foundFormData.brand} onChange={handleFoundFormChange} placeholder="Aquaflask / Lenovo" className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
                 </div>
-                <div>
-                  <label className="block font-semibold mb-1 text-[#7B1C1C]">Color</label>
-                  <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
-                  <select name="color" value={foundFormData.color} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500">
-                    <option value="">Select color</option>
-                    <option value="Black">Black</option>
-                    <option value="White">White</option>
-                    <option value="Red">Red</option>
-                    <option value="Blue">Blue</option>
-                    <option value="Green">Green</option>
-                    <option value="Yellow">Yellow</option>
-                    <option value="Brown">Brown</option>
-                    <option value="Gray">Gray</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
+                  <ColorPicker 
+                    value={foundFormData.color} 
+                    onChange={handleFoundFormChange} 
+                  />
                 <div>
                   <label className="block font-semibold mb-1 text-[#7B1C1C]">Location <span className="text-red-500">*</span></label>
                   <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>

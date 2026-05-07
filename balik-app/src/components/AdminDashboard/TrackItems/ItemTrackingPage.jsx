@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import StatsCards from "./StatsCards";
 import FilterBar from "./FilterBar";
 import ReportsList from "./ReportsList";
+import LostItemDetailsModal from "../LostItems/LostItemDetailsModal";
+import FoundItemDetailsModal from "../FoundItems/FoundItemDetailsModal";
 import { itemService } from "../../../services/itemService";
 
 export default function ItemTrackingPage() {
@@ -9,6 +11,7 @@ export default function ItemTrackingPage() {
   const [search, setSearch] = useState("");
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedReport, setSelectedReport] = useState(null);
 
   useEffect(() => {
     async function fetchReports() {
@@ -23,11 +26,14 @@ export default function ItemTrackingPage() {
           user: item.metadata?.reporter?.name || "Unknown",
           location: item.location || "No location provided",
           activity: item.type === 'found' ? "Item found and reported" : "Lost item report submitted",
+          description: item.description,
+          email: item.metadata?.reporter?.email || "No email",
           // Map database status to UI status (Capitalized)
           status: item.status.charAt(0).toUpperCase() + item.status.slice(1),
           time: new Date(item.created_at).toLocaleString(),
           image: item.image_url || "/camera.jpg", // Fallback image
-          type: item.type // Keep for stats calculation
+          type: item.type, // Keep for stats calculation
+          raw: item
         }));
 
         setReports(mappedData);
@@ -40,6 +46,10 @@ export default function ItemTrackingPage() {
 
     fetchReports();
   }, []);
+
+  const handleViewReport = (report) => {
+    setSelectedReport(report);
+  };
 
   const filteredReports = reports.filter((report) => {
     const matchesStatus =
@@ -90,7 +100,24 @@ export default function ItemTrackingPage() {
         setSearch={setSearch}
       />
 
-      <ReportsList reports={filteredReports} />
+      <ReportsList 
+        reports={filteredReports} 
+        onView={handleViewReport}
+      />
+
+      {selectedReport && selectedReport.type === 'lost' && (
+        <LostItemDetailsModal 
+          item={selectedReport} 
+          onClose={() => setSelectedReport(null)} 
+        />
+      )}
+
+      {selectedReport && selectedReport.type === 'found' && (
+        <FoundItemDetailsModal 
+          item={selectedReport} 
+          onClose={() => setSelectedReport(null)} 
+        />
+      )}
     </div>
   );
 }

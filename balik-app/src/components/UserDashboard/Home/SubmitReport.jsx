@@ -4,6 +4,7 @@ import BALIKLogo from "../../../assets/BALIK.png";
 import DatePicker from "react-datepicker";
 import { IoNotifications } from "react-icons/io5";
 import { X, CheckCircle, Search, Brain, MapPin, MapPinned } from "lucide-react";
+import ColorPicker from "../../../shared/components/ColorPicker";
 import MapPicker from "../../../shared/components/MapPicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useAuth } from "../../../shared/context/AuthContext";
@@ -291,23 +292,16 @@ export default function SubmitReport() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      Color
-                    </label>
-                    <select
-                      value={color}
-                      onChange={(e) => setColor(e.target.value)}
-                      className="w-full border rounded-md px-3 py-2"
-                    >
-                      <option value="" disabled>
-                        Select color
-                      </option>
-                      <option value="Black">Black</option>
-                      <option value="White">White</option>
-                      <option value="Red">Red</option>
-                      <option value="Blue">Blue</option>
-                    </select>
+                  <div className="admin-color-picker">
+                    <ColorPicker 
+                      value={color} 
+                      onChange={(e) => setColor(e.target.value)} 
+                      label="Color"
+                    />
+                    <style dangerouslySetInnerHTML={{ __html: `
+                      .admin-color-picker label { color: inherit !important; font-size: 0.875rem !important; line-height: 1.25rem !important; font-weight: 500 !important; }
+                      .admin-color-picker .text-xs { display: none !important; }
+                    `}} />
                   </div>
 
                   <div>

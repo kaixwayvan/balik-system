@@ -9,7 +9,7 @@ import {
   Calendar,
 } from "lucide-react";
 
-export default function ReportCard({ report }) {
+export default function ReportCard({ report, onView }) {
   const statusConfig = {
     Flagged: {
       badge: "bg-yellow-100 text-yellow-700",
@@ -106,6 +106,7 @@ export default function ReportCard({ report }) {
           {config.actions.map((action) => (
             <button
               key={action}
+              onClick={() => action === "View Report" && onView()}
               className={`cursor-pointer flex items-center mb-2 gap-2 px-3 py-1 text-sm rounded ${
                 actionConfig[action].style
               }`}

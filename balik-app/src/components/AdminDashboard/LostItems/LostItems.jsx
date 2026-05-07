@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { Search, Calendar, Eye, QrCode, Plus } from "lucide-react";
 import LostItemDetailsModal from "./LostItemDetailsModal";
 import QRModal from "./QRModal";
+import AdminReportLost from "../AdminHome/AdminReportLost";
 import { supabase } from "../../../utils/supabaseClient";
 
 const categories = [
@@ -61,44 +61,47 @@ function TooltipIcon({ icon: Icon, color, label, onClick }) {
 export default function LostItems() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
+  const [showAdminReport, setShowAdminReport] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [lostItems, setLostItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchLostItems() {
-      try {
-        const { data, error } = await supabase
-          .from("items")
-          .select("*")
-          .eq("type", "lost")
-          .order("created_at", { ascending: false });
+  const fetchLostItems = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("items")
+        .select("*")
+        .eq("type", "lost")
+        .order("created_at", { ascending: false });
 
-        if (error) throw error;
+      if (error) throw error;
 
-        const formattedData = data.map(dbItem => {
-          const reporter = dbItem.metadata?.reporter || {};
-          return {
-            id: dbItem.id,
-            name: dbItem.title || dbItem.category || "Unknown Item",
-            description: dbItem.description,
-            category: dbItem.category || "Other",
-            location: dbItem.location,
-            owner: reporter.name || "Unknown",
-            email: reporter.email || "No email",
-            status: dbItem.status === 'pending' ? 'Active' : dbItem.status === 'resolved' ? 'Claimed' : 'Active',
-            date: dbItem.created_at,
-            formattedDate: new Date(dbItem.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
-            raw: dbItem
-          }
-        });
-        setLostItems(formattedData);
-      } catch (err) {
-        console.error("Error fetching lost items:", err);
-      } finally {
-        setLoading(false);
-      }
+      const formattedData = data.map(dbItem => {
+        const reporter = dbItem.metadata?.reporter || {};
+        return {
+          id: dbItem.id,
+          name: dbItem.title || dbItem.category || "Unknown Item",
+          description: dbItem.description,
+          category: dbItem.category || "Other",
+          location: dbItem.location,
+          owner: reporter.name || "Unknown",
+          email: reporter.email || "No email",
+          status: dbItem.status === 'pending' ? 'Active' : dbItem.status === 'resolved' ? 'Claimed' : 'Active',
+          date: dbItem.created_at,
+          formattedDate: new Date(dbItem.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
+          raw: dbItem
+        }
+      });
+      setLostItems(formattedData);
+    } catch (err) {
+      console.error("Error fetching lost items:", err);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchLostItems();
   }, []);
 
@@ -182,13 +185,13 @@ export default function LostItems() {
           </p>
         </div>
 
-        <Link 
-          to="/adminreport"
-          className="cursor-pointer flex items-center gap-2 bg-red-700 hover:bg-red-800 text-white px-5 py-2 rounded-lg transition-colors"
+        <button 
+          onClick={() => setShowAdminReport(true)}
+          className="cursor-pointer flex items-center gap-2 bg-[#7B1C1C] hover:bg-red-800 text-white px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-red-900/10"
         >
           <Plus size={18} />
           Encode Lost Item
-        </Link>
+        </button>
       </div>
 
       {/* FILTER CARD */}
@@ -299,70 +302,74 @@ export default function LostItems() {
       </div>
 
       {/* TABLE */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="p-5 font-bold text-lg border-b border-gray-400">
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200">
+        <div className="p-5 font-bold text-lg border-b border-slate-200 bg-slate-50/50">
           Filter Lost Items ({filteredItems.length})
         </div>
 
         <table className="w-full text-sm border-collapse">
-          <thead className="bg-gray-50 text-gray-500">
-            <tr className="border-b border-gray-300">
+          <thead className="bg-slate-50 text-slate-500">
+            <tr className="border-b border-slate-200">
               {tableHeaders.map((header, i) => (
-                <th key={i} className={`px-4 py-5 uppercase ${header.align}`}>
+                <th key={i} className={`px-6 py-4 uppercase text-[11px] font-black tracking-widest ${header.align}`}>
                   {header.label}
                 </th>
               ))}
             </tr>
           </thead>
 
-          <tbody>
+          <tbody className="divide-y divide-slate-100">
             {loading ? (
-              <tr><td colSpan="7" className="py-8 text-center text-gray-500">Loading items...</td></tr>
+              <tr><td colSpan="7" className="py-20 text-center text-slate-400 font-medium">Loading items...</td></tr>
             ) : filteredItems.length === 0 ? (
-              <tr><td colSpan="7" className="py-8 text-center text-gray-500">No items found.</td></tr>
+              <tr><td colSpan="7" className="py-20 text-center text-slate-400 font-medium">No items found matching your criteria.</td></tr>
             ) : filteredItems.map((item, i) => (
-              <tr key={i} className="border-t border-gray-300 hover:bg-gray-50">
-                <td className="px-4 py-5">
-                  <p className="font-medium">{item.name}</p>
-                  <p className="text-gray-500 text-xs">{item.description}</p>
+              <tr key={item.id || i} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-6 py-5">
+                  <p className="font-bold text-slate-900">{item.name}</p>
+                  <p className="text-slate-500 text-xs line-clamp-1">{item.description}</p>
                 </td>
 
-                <td className="px-4 py-3">{item.category}</td>
+                <td className="px-6 py-5">
+                  <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-black uppercase tracking-wider">
+                    {item.category}
+                  </span>
+                </td>
 
-                <td className="px-4 py-3 whitespace-pre-line">
+                <td className="px-6 py-5 text-slate-600 font-medium max-w-[200px] truncate">
                   {item.location}
                 </td>
 
-                <td className="px-4 py-3">
-                  <p className="font-medium">{item.owner}</p>
-                  <p className="text-xs text-gray-500">{item.email}</p>
+                <td className="px-6 py-5">
+                  <p className="font-bold text-slate-900">{item.owner}</p>
+                  <p className="text-[10px] text-slate-400 font-medium">{item.email}</p>
                 </td>
 
-                <td className="px-4 py-3">
+                <td className="px-6 py-5">
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      statusStyles[item.status] || "bg-gray-100 text-gray-600"
+                    className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                      statusStyles[item.status] || "bg-slate-100 text-slate-600"
                     }`}
                   >
                     {item.status}
                   </span>
                 </td>
 
-                <td className="px-4 py-3 text-gray-600">{item.formattedDate}</td>
+                <td className="px-6 py-5 text-slate-500 font-medium">{item.formattedDate}</td>
 
-                <td className="px-4 py-3">
+                <td className="px-6 py-5">
                   <div className="flex justify-center gap-3">
                     <TooltipIcon
                       icon={Eye}
-                      color="text-green-600"
-                      label="View"
+                      color="text-slate-400 hover:text-green-600"
+                      label="View Details"
                       onClick={() => handleViewItem(item)}
                     />
 
                     <TooltipIcon
                       icon={QrCode}
-                      color="text-purple-600"
-                      label="QR Code"
+                      color="text-slate-400 hover:text-purple-600"
+                      label="Generate QR"
                       onClick={() => handleQRClick(item)}
                     />
                   </div>
@@ -386,6 +393,14 @@ export default function LostItems() {
           onClose={() => setIsQRModalOpen(false)}
         />
       )}
+
+      <AdminReportLost 
+        isOpen={showAdminReport} 
+        onClose={() => {
+          setShowAdminReport(false);
+          fetchLostItems(); // Refresh list after report
+        }} 
+      />
     </div>
   );
 }

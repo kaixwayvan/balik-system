@@ -220,7 +220,7 @@ export default function AdminDashboardHeader() {
                 <MenuItem
                   icon={User}
                   label="View Profile"
-                  to="/dashboard/profile"
+                  to="/admin/profile"
                   onClick={() => setIsOpen(false)}
                 />
                 <MenuItem 
@@ -240,7 +240,7 @@ export default function AdminDashboardHeader() {
                 <MenuItem 
                   icon={Settings} 
                   label="Settings" 
-                  to="/dashboard/profile"
+                  to="/admin/profile"
                   onClick={() => setIsOpen(false)}
                 />
               </div>
