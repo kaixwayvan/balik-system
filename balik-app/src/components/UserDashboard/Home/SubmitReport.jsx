@@ -4,6 +4,7 @@ import BALIKLogo from "../../../assets/BALIK.png";
 import DatePicker from "react-datepicker";
 import { IoNotifications } from "react-icons/io5";
 import { X, CheckCircle, Search, Brain, MapPin, MapPinned } from "lucide-react";
+import MapPicker from "../../../shared/components/MapPicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useAuth } from "../../../shared/context/AuthContext";
 import { itemService } from "../../../services/itemService";
@@ -32,6 +33,7 @@ export default function SubmitReport() {
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [createdItemId, setCreatedItemId] = useState(null);
   const [matchType, setMatchType] = useState(""); // 'lost' or 'found'
+  const [showMapModal, setShowMapModal] = useState(false);
 
   // Auto-fill reporter info
   useEffect(() => {
@@ -53,6 +55,11 @@ export default function SubmitReport() {
     } else {
       navigate('/dashboard/track');
     }
+  };
+
+  const handleLocationSelect = (address) => {
+    setLocation(address);
+    setShowMapModal(false);
   };
 
   const handleSubmit = async (e) => {
@@ -276,7 +283,7 @@ export default function SubmitReport() {
                   </label>
                   <input
                     type="text"
-                    placeholder="Gucci / Louis Vuitton"
+                    placeholder="Aquaflask / Lenovo"
                     value={brand}
                     onChange={(e) => setBrand(e.target.value)}
                     className="w-full border rounded-md px-3 py-2"
@@ -307,13 +314,24 @@ export default function SubmitReport() {
                     <label className="block text-sm font-medium mb-1">
                       Location <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      required
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      className="w-full border rounded-md px-3 py-2"
-                    />
+                    <div className="relative group">
+                      <input
+                        type="text"
+                        required
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        className="w-full border rounded-md pl-3 pr-10 py-2 focus:outline-none focus:border-blue-500 transition-all"
+                        placeholder="Enter location or use map"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowMapModal(true)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all"
+                        title="Select from Map"
+                      >
+                        <MapPinned size={18} />
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -594,6 +612,31 @@ export default function SubmitReport() {
               >
                 None of these match my report
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showMapModal && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-[2.5rem] max-w-3xl w-full h-[650px] overflow-hidden relative shadow-2xl border border-slate-100 animate-in zoom-in-95 duration-300 flex flex-col">
+            <div className="p-8 pb-4 flex items-center justify-between border-b border-slate-50">
+              <div>
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight">Select Location</h3>
+                <p className="text-sm text-slate-500 font-medium">Pinpoint exactly where it happened</p>
+              </div>
+              <button 
+                onClick={() => setShowMapModal(false)}
+                className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-all"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className="flex-1 p-8 pt-4">
+              <MapPicker 
+                onSelect={handleLocationSelect} 
+                onClose={() => setShowMapModal(false)} 
+              />
             </div>
           </div>
         </div>

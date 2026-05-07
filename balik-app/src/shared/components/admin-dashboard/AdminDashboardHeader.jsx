@@ -14,6 +14,7 @@ import { useAuth } from "../../context/AuthContext";
 import { getNotifications, markAsRead, markAllAsRead } from "../../services/notificationService";
 import { formatDistanceToNow } from "date-fns";
 import { Check } from "lucide-react";
+import { logoutSupabase } from "../../../pages/auth/services/supabaseAuthService";
 
 export default function AdminDashboardHeader() {
   const { user } = useAuth();
@@ -272,7 +273,6 @@ export default function AdminDashboardHeader() {
               <button
                 onClick={async () => {
                   try {
-                    const { logoutSupabase } = await import("../../../pages/auth/services/supabaseAuthService");
                     await logoutSupabase();
                     window.location.href = "/";
                   } catch (err) {
@@ -294,18 +294,20 @@ export default function AdminDashboardHeader() {
 }
 
 function MenuItem({ icon: Icon, label, to, onClick }) {
-  if (to) {
-    return (
-      <Link to={to} onClick={onClick} className="cursor-pointer w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 text-gray-700">
-        <Icon size={18} />
-        {label}
-      </Link>
-    );
-  }
-  return (
-    <button onClick={onClick} className="cursor-pointer w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 text-gray-700">
+  const content = (
+    <>
       <Icon size={18} />
       {label}
+    </>
+  );
+
+  return to ? (
+    <Link to={to} onClick={onClick} className="cursor-pointer w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 text-gray-700">
+      {content}
+    </Link>
+  ) : (
+    <button onClick={onClick} className="cursor-pointer w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 text-gray-700">
+      {content}
     </button>
   );
 }

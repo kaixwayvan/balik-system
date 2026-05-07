@@ -10,44 +10,48 @@ export default function RecentReports() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    async function fetchReports() {
-      try {
-        const { data, error } = await supabase
-          .from("items")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(10);
-        
-        if (error) throw error;
-        
-        const formattedData = data.map(dbItem => {
-          const reporter = dbItem.metadata?.reporter || {};
-          return {
-            id: dbItem.id,
-            date: new Date(dbItem.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-            time: new Date(dbItem.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
-            item: dbItem.title || dbItem.category || "Unknown Item",
-            description: dbItem.description || "",
-            location: dbItem.location || "",
-            name: reporter.name || "Unknown",
-            email: reporter.email || "No email",
-            contact: reporter.mobile || "No contact",
-            status: dbItem.status === 'pending' ? 'Pending' : dbItem.status === 'resolved' ? 'Resolved' : 'Verified',
-            qrStat: dbItem.metadata?.qr_code ? "Scanned" : "Not Scanned",
-            aiMatch: dbItem.description_embedding ? "AI Processed" : "No AI Match",
-            type: dbItem.type === 'lost' ? 'Lost' : 'Found',
-          }
-        });
-        
-        setItems(formattedData);
-      } catch (err) {
-        console.error("Error fetching admin reports:", err);
-      } finally {
-        setLoading(false);
-      }
+  const fetchReports = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("items")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      
+      const formattedData = data.map(dbItem => {
+        const reporter = dbItem.metadata?.reporter || {};
+        return {
+          id: dbItem.id,
+          date: new Date(dbItem.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+          time: new Date(dbItem.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+          item: dbItem.title || dbItem.category || "Unknown Item",
+          description: dbItem.description || "",
+          location: dbItem.location || "",
+          name: reporter.name || "Unknown",
+          email: reporter.email || "No email",
+          contact: reporter.mobile || "No contact",
+          status: dbItem.status === 'pending' ? 'Pending' : dbItem.status === 'resolved' ? 'Resolved' : 'Verified',
+          qrStat: dbItem.metadata?.qr_code ? "Scanned" : "Not Scanned",
+          aiMatch: dbItem.description_embedding ? "AI Processed" : "No AI Match",
+          type: dbItem.type === 'lost' ? 'Lost' : 'Found',
+        }
+      });
+      
+      setItems(formattedData);
+    } catch (err) {
+      console.error("Error fetching admin reports:", err);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchReports();
+
+    window.addEventListener('silent-refresh', fetchReports);
+    return () => window.removeEventListener('silent-refresh', fetchReports);
   }, []);
 
   const typeStyles = (type) => {

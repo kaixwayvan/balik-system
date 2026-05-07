@@ -6,8 +6,10 @@ import {
   AlertCircle,
   Brain,
   MapPin,
+  MapPinned,
   CheckCircle,
 } from "lucide-react";
+import MapPicker from "../../shared/components/MapPicker";
 import { useAuth } from "../../shared/context/AuthContext";
 import { itemService } from "../../services/itemService";
 import { nlpService } from "../../services/nlpService";
@@ -72,35 +74,42 @@ export default function DashboardHome() {
   const [matchedItems, setMatchedItems] = useState([]);
   const [createdItemId, setCreatedItemId] = useState(null);
   const [matchType, setMatchType] = useState("");
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [mapTarget, setMapTarget] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
 
 
 
   // Fetch stats and recent items from Supabase
-  useEffect(() => {
-    async function fetchDashboardData() {
-      if (!user?.id) return;
-      
-      try {
-        console.log("Fetching dashboard data for:", user.id);
-        const userStats = await itemService.getUserStats(user.id);
-        setStats(userStats);
+  const fetchDashboardData = async () => {
+    if (!user?.id) return;
+    
+    try {
+      console.log("Fetching dashboard data silently for:", user.id);
+      const userStats = await itemService.getUserStats(user.id);
+      setStats(userStats);
 
-        const { data: userItems, error: itemsError } = await supabase
-          .from('items')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(5);
+      const { data: userItems, error: itemsError } = await supabase
+        .from('items')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
 
-        if (!itemsError && userItems) {
-          setRecentItems(userItems);
-        }
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+      if (!itemsError && userItems) {
+        setRecentItems(userItems);
       }
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
     }
+  };
+
+  useEffect(() => {
     fetchDashboardData();
+
+    // Listen for silent refreshes from the layout
+    window.addEventListener('silent-refresh', fetchDashboardData);
+    return () => window.removeEventListener('silent-refresh', fetchDashboardData);
   }, [user?.id]);
 
   // Connection test
@@ -181,6 +190,15 @@ export default function DashboardHome() {
       }
     }
   }, [user, showLostItemForm, showFoundItemForm]);
+
+  const handleLocationSelect = (address) => {
+    if (mapTarget === "lost") {
+      setLostFormData((prev) => ({ ...prev, location: address }));
+    } else if (mapTarget === "found") {
+      setFoundFormData((prev) => ({ ...prev, location: address }));
+    }
+    setShowMapModal(false);
+  };
 
   const handleLostFormSubmit = async (e) => {
     e.preventDefault();
@@ -305,9 +323,9 @@ export default function DashboardHome() {
     e.preventDefault();
     if (!user) return alert("You must be logged in to submit a report.");
 
-    const { whatWasFound, itemCategory, dateFound, location, reporterName, mobileNumber, email, anonymous } = foundFormData;
+    const { whatWasFound, itemCategory, dateFound, location, reporterName, mobileNumber, email } = foundFormData;
     const baseFields = whatWasFound && itemCategory && dateFound && location;
-    const contactFields = anonymous || (reporterName && mobileNumber && email);
+    const contactFields = reporterName && mobileNumber && email;
 
     if (!baseFields || !contactFields) {
       return alert("Please fill in all required fields.");
@@ -335,11 +353,11 @@ export default function DashboardHome() {
           brand: foundFormData.brand,
           color: foundFormData.color,
           reporter: {
-            name: foundFormData.anonymous ? "Anonymous" : foundFormData.reporterName,
-            mobile: foundFormData.anonymous ? "N/A" : foundFormData.mobileNumber,
-            email: foundFormData.anonymous ? "N/A" : foundFormData.email
+            name: foundFormData.reporterName,
+            mobile: foundFormData.mobileNumber,
+            email: foundFormData.email
           },
-          is_anonymous: foundFormData.anonymous
+          is_anonymous: false
         }
       };
 
@@ -480,7 +498,8 @@ export default function DashboardHome() {
             <form onSubmit={handleLostFormSubmit}>
               <div className="grid grid-cols-2 gap-6 mb-4">
                 <div>
-                  <label className="block font-semibold mb-1">Report Type <span className="text-red-500">*</span></label>
+                  <label className="block font-semibold mb-1 text-[#7B1C1C]">Report Type <span className="text-red-500">*</span></label>
+                  <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
                   <select name="reportType" value={lostFormData.reportType} onChange={handleLostFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500">
                     <option value="Missing Item">Missing Item</option>
                     <option value="Stolen Item">Stolen Item</option>
@@ -488,14 +507,15 @@ export default function DashboardHome() {
                   </select>
                 </div>
                 <div>
-                  <label className="block font-semibold mb-1">What was Lost<span className="text-red-500">*</span></label>
+                  <label className="block font-semibold mb-1 text-[#7B1C1C]">What was Lost <span className="text-red-500">*</span></label>
                   <p className="text-xs text-gray-500 mb-1">(Pen, Jacket, Smartphone, Wallet, etc.)</p>
                   <input type="text" name="whatWasLost" value={lostFormData.whatWasLost} onChange={handleLostFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-6 mb-4">
                 <div>
-                  <label className="block font-semibold mb-1">Item Category <span className="text-red-500">*</span></label>
+                  <label className="block font-semibold mb-1 text-[#7B1C1C]">Item Category <span className="text-red-500">*</span></label>
+                  <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
                   <select name="itemCategory" value={lostFormData.itemCategory} onChange={handleLostFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500">
                     <option value="">Select category</option>
                     {CATEGORIES.map(cat => (
@@ -504,18 +524,20 @@ export default function DashboardHome() {
                   </select>
                 </div>
                 <div>
-                  <label className="block font-semibold mb-1">Date Lost<span className="text-red-500">*</span></label>
+                  <label className="block font-semibold mb-1 text-[#7B1C1C]">Date Lost <span className="text-red-500">*</span></label>
                   <p className="text-xs text-gray-500 mb-1">Approximate date of when the item was lost /found.</p>
                   <input type="date" name="dateLost" value={lostFormData.dateLost} onChange={handleLostFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 cursor-pointer" />
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-6 mb-4">
                 <div>
-                  <label className="block font-semibold mb-1">Brand</label>
-                  <input type="text" name="brand" value={lostFormData.brand} onChange={handleLostFormChange} placeholder="Guss/louivutin" className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
+                  <label className="block font-semibold mb-1 text-[#7B1C1C]">Brand</label>
+                  <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
+                  <input type="text" name="brand" value={lostFormData.brand} onChange={handleLostFormChange} placeholder="Aquaflask / Lenovo" className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
                 </div>
                 <div>
-                  <label className="block font-semibold mb-1">Color</label>
+                  <label className="block font-semibold mb-1 text-[#7B1C1C]">Color</label>
+                  <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
                   <select name="color" value={lostFormData.color} onChange={handleLostFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500">
                     <option value="">Select color</option>
                     <option value="Black">Black</option>
@@ -530,35 +552,59 @@ export default function DashboardHome() {
                   </select>
                 </div>
                 <div>
-                  <label className="block font-semibold mb-1">Location <span className="text-red-500">*</span></label>
-                  <input type="text" name="location" value={lostFormData.location} onChange={handleLostFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
+                  <label className="block font-semibold mb-1 text-[#7B1C1C]">Location <span className="text-red-500">*</span></label>
+                  <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
+                  <div className="relative group">
+                    <input 
+                      type="text" 
+                      name="location" 
+                      value={lostFormData.location} 
+                      onChange={handleLostFormChange} 
+                      className="w-full border border-gray-300 rounded-lg pl-4 pr-12 py-3 focus:outline-none focus:border-blue-500 transition-all" 
+                      placeholder="Enter location or use map"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMapTarget("lost");
+                        setShowMapModal(true);
+                      }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all"
+                      title="Select from Map"
+                    >
+                      <MapPinned size={20} />
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-6 mb-6">
                 <div>
-                  <label className="block font-semibold mb-1">Additional Information</label>
+                  <label className="block font-semibold mb-1 text-[#7B1C1C]">Additional Information</label>
                   <p className="text-xs text-gray-500 mb-1">Please provide any additional details/description of your item.</p>
                   <textarea name="additionalInfo" value={lostFormData.additionalInfo} onChange={handleLostFormChange} rows={3} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 resize-none" />
                 </div>
                 <div>
-                  <label className="block font-semibold mb-1">Photo (Optional)</label>
+                  <label className="block font-semibold mb-1 text-[#7B1C1C]">Photo (Optional)</label>
+                  <p className="text-xs text-gray-500 mb-1">Supported formats: JPG, PNG, GIF (Max 5MB)</p>
                   <input type="file" accept="image/jpeg,image/png,image/gif" onChange={handlePhotoChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500" />
-                  <p className="text-xs text-gray-500 mt-1">Supported formats: JPG, PNG, GIF (Max 5MB)</p>
                   {photoPreview && <img src={photoPreview} alt="Preview" className="mt-2 w-20 h-20 object-cover rounded" />}
                 </div>
               </div>
               <h3 className="text-xl font-bold text-[#7B1C1C] mb-4">Reporters Information</h3>
               <div className="grid grid-cols-3 gap-6 mb-6">
                 <div>
-                  <label className="block font-semibold mb-1">Name <span className="text-red-500">*</span></label>
+                  <label className="block font-semibold mb-1 text-[#7B1C1C]">Name <span className="text-red-500">*</span></label>
+                  <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
                   <input type="text" name="reporterName" value={lostFormData.reporterName} onChange={handleLostFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
                 </div>
                 <div>
-                  <label className="block font-semibold mb-1">Mobile Number <span className="text-red-500">*</span></label>
+                  <label className="block font-semibold mb-1 text-[#7B1C1C]">Mobile Number <span className="text-red-500">*</span></label>
+                  <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
                   <input type="tel" name="mobileNumber" value={lostFormData.mobileNumber} onChange={handleLostFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
                 </div>
                 <div>
-                  <label className="block font-semibold mb-1">Email <span className="text-red-500">*</span></label>
+                  <label className="block font-semibold mb-1 text-[#7B1C1C]">Email <span className="text-red-500">*</span></label>
+                  <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
                   <input type="email" name="email" value={lostFormData.email} onChange={handleLostFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
                 </div>
               </div>
@@ -582,6 +628,7 @@ export default function DashboardHome() {
               <div className="grid grid-cols-2 gap-6 mb-4">
                 <div>
                   <label className="block font-semibold mb-1 text-[#7B1C1C]">Report Type <span className="text-red-500">*</span></label>
+                  <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
                   <select name="reportType" value={foundFormData.reportType} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500">
                     <option value="Found Item">Found Item</option>
                   </select>
@@ -595,6 +642,7 @@ export default function DashboardHome() {
               <div className="grid grid-cols-2 gap-6 mb-4">
                 <div>
                   <label className="block font-semibold mb-1 text-[#7B1C1C]">Item Category <span className="text-red-500">*</span></label>
+                  <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
                   <select name="itemCategory" value={foundFormData.itemCategory} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500">
                     <option value="">Select category</option>
                     {CATEGORIES.map(cat => (
@@ -611,10 +659,12 @@ export default function DashboardHome() {
               <div className="grid grid-cols-3 gap-6 mb-4">
                 <div>
                   <label className="block font-semibold mb-1 text-[#7B1C1C]">Brand</label>
-                  <input type="text" name="brand" value={foundFormData.brand} onChange={handleFoundFormChange} placeholder="Guss/louivutin" className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
+                  <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
+                  <input type="text" name="brand" value={foundFormData.brand} onChange={handleFoundFormChange} placeholder="Aquaflask / Lenovo" className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
                 </div>
                 <div>
                   <label className="block font-semibold mb-1 text-[#7B1C1C]">Color</label>
+                  <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
                   <select name="color" value={foundFormData.color} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500">
                     <option value="">Select color</option>
                     <option value="Black">Black</option>
@@ -630,7 +680,28 @@ export default function DashboardHome() {
                 </div>
                 <div>
                   <label className="block font-semibold mb-1 text-[#7B1C1C]">Location <span className="text-red-500">*</span></label>
-                  <input type="text" name="location" value={foundFormData.location} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
+                  <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
+                  <div className="relative group">
+                    <input 
+                      type="text" 
+                      name="location" 
+                      value={foundFormData.location} 
+                      onChange={handleFoundFormChange} 
+                      className="w-full border border-gray-300 rounded-lg pl-4 pr-12 py-3 focus:outline-none focus:border-blue-500 transition-all" 
+                      placeholder="Enter location or use map"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMapTarget("found");
+                        setShowMapModal(true);
+                      }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all"
+                      title="Select from Map"
+                    >
+                      <MapPinned size={20} />
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-6 mb-6">
@@ -641,46 +712,32 @@ export default function DashboardHome() {
                 </div>
                 <div>
                   <label className="block font-semibold mb-1 text-[#7B1C1C]">Photo (Optional)</label>
+                  <p className="text-xs text-gray-500 mb-1">Supported formats: JPG, PNG, GIF (Max 5MB)</p>
                   <input type="file" accept="image/jpeg,image/png,image/gif" onChange={handlePhotoChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500" />
-                  <p className="text-xs text-gray-500 mt-1">Supported formats: JPG, PNG, GIF (Max 5MB)</p>
                   {photoPreview && <img src={photoPreview} alt="Preview" className="mt-2 w-20 h-20 object-cover rounded" />}
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 mb-6 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                <input
-                  type="checkbox"
-                  name="anonymous"
-                  id="dashboard-anonymous"
-                  checked={foundFormData.anonymous}
-                  onChange={handleFoundFormChange}
-                  className="w-5 h-5 cursor-pointer accent-blue-600"
-                />
-                <label htmlFor="dashboard-anonymous" className="font-bold text-blue-900 cursor-pointer select-none">
-                  Submit Anonymously
-                  <span className="block text-xs text-blue-500 font-normal">Hide your identity from claimants</span>
-                </label>
-              </div>
-
-              {!foundFormData.anonymous && (
-                <div className="animate-in slide-in-from-top duration-300">
-                  <h3 className="text-xl font-bold text-[#7B1C1C] mb-4">Reporters Information</h3>
-                  <div className="grid grid-cols-3 gap-6 mb-6">
-                    <div>
-                      <label className="block font-semibold mb-1 text-[#7B1C1C]">Name <span className="text-red-500">*</span></label>
-                      <input type="text" name="reporterName" value={foundFormData.reporterName} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
-                    </div>
-                    <div>
-                      <label className="block font-semibold mb-1 text-[#7B1C1C]">Mobile Number <span className="text-red-500">*</span></label>
-                      <input type="tel" name="mobileNumber" value={foundFormData.mobileNumber} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
-                    </div>
-                    <div>
-                      <label className="block font-semibold mb-1 text-[#7B1C1C]">Email <span className="text-red-500">*</span></label>
-                      <input type="email" name="email" value={foundFormData.email} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
-                    </div>
+              <div className="mt-6">
+                <h3 className="text-xl font-bold text-[#7B1C1C] mb-4">Reporters Information</h3>
+                <div className="grid grid-cols-3 gap-6 mb-6">
+                  <div>
+                    <label className="block font-semibold mb-1 text-[#7B1C1C]">Name <span className="text-red-500">*</span></label>
+                    <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
+                    <input type="text" name="reporterName" value={foundFormData.reporterName} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-1 text-[#7B1C1C]">Mobile Number <span className="text-red-500">*</span></label>
+                    <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
+                    <input type="tel" name="mobileNumber" value={foundFormData.mobileNumber} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-1 text-[#7B1C1C]">Email <span className="text-red-500">*</span></label>
+                    <p className="text-xs text-transparent mb-1 select-none">&nbsp;</p>
+                    <input type="email" name="email" value={foundFormData.email} onChange={handleFoundFormChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500" />
                   </div>
                 </div>
-              )}
+              </div>
 
               <div className="flex justify-center gap-4 mt-8">
                 <button type="button" onClick={handleFoundFormCancel} className="px-12 py-3 border border-gray-400 rounded-lg font-semibold hover:bg-gray-100 transition">Cancel</button>
@@ -828,6 +885,32 @@ export default function DashboardHome() {
           </div>
         )
       }
+
+      {showMapModal && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-[2.5rem] max-w-3xl w-full h-[650px] overflow-hidden relative shadow-2xl border border-slate-100 animate-in zoom-in-95 duration-300 flex flex-col">
+            <div className="p-8 pb-4 flex items-center justify-between border-b border-slate-50">
+              <div>
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight">Select Location</h3>
+                <p className="text-sm text-slate-500 font-medium">Pinpoint exactly where it happened</p>
+              </div>
+              <button 
+                onClick={() => setShowMapModal(false)}
+                className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-all"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className="flex-1 p-8 pt-4">
+              <MapPicker 
+                onSelect={handleLocationSelect} 
+                onClose={() => setShowMapModal(false)} 
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

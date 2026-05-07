@@ -19,17 +19,27 @@ export default function UserDashboardLayout() {
       navigate('/login', { replace: true });
     }
 
-    // 2. Handle Auto-Refresh on focus/tab switch
+    // 2. Handle Silent Refresh on focus/tab switch
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && user && !loading) {
-        console.log("Tab visible - automatically refreshing...");
-        window.location.reload();
+        const lastRefresh = sessionStorage.getItem('last_dashboard_refresh');
+        const now = Date.now();
+        const fiveMinutes = 5 * 60 * 1000;
+
+        if (!lastRefresh || (now - parseInt(lastRefresh)) > fiveMinutes) {
+          console.log("Tab visible & 5m passed - refreshing session...");
+          sessionStorage.setItem('last_dashboard_refresh', now.toString());
+          window.location.reload();
+        } else {
+          console.log("Tab visible - performing silent data update...");
+          window.dispatchEvent(new CustomEvent('silent-refresh'));
+        }
       }
     };
     
     window.addEventListener('visibilitychange', handleVisibilityChange);
     return () => window.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [user?.id, loading, navigate]);
+  }, [user, loading, navigate]);
 
   if (loading) {
     return (

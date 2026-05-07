@@ -13,30 +13,34 @@ export default function StatCards() {
     guest: 0
   });
 
-  useEffect(() => {
-    async function fetchStats() {
-      try {
-        const { data, error } = await supabase.from('items').select('type, status, metadata, description_embedding');
-        if (error) throw error;
+  const fetchStats = async () => {
+    try {
+      const { data, error } = await supabase.from('items').select('type, status, metadata, description_embedding');
+      if (error) throw error;
 
-        let total = data.length;
-        let lost = 0, found = 0, resolved = 0, ai = 0, qr = 0, guest = 0;
-        data.forEach(item => {
-          if (item.type === 'lost') lost++;
-          if (item.type === 'found') {
-              found++;
-              if (item.metadata?.is_anonymous) guest++;
-          }
-          if (item.status === 'resolved') resolved++;
-          if (item.description_embedding) ai++;
-          if (item.metadata?.qr_code) qr++;
-        });
-        setStatsData({ total, lost, found, resolved, ai, qr, guest });
-      } catch (err) {
-        console.error("Error fetching stats:", err);
-      }
+      let total = data.length;
+      let lost = 0, found = 0, resolved = 0, ai = 0, qr = 0, guest = 0;
+      data.forEach(item => {
+        if (item.type === 'lost') lost++;
+        if (item.type === 'found') {
+            found++;
+            if (item.metadata?.is_anonymous) guest++;
+        }
+        if (item.status === 'resolved') resolved++;
+        if (item.description_embedding) ai++;
+        if (item.metadata?.qr_code) qr++;
+      });
+      setStatsData({ total, lost, found, resolved, ai, qr, guest });
+    } catch (err) {
+      console.error("Error fetching stats:", err);
     }
+  };
+
+  useEffect(() => {
     fetchStats();
+    
+    window.addEventListener('silent-refresh', fetchStats);
+    return () => window.removeEventListener('silent-refresh', fetchStats);
   }, []);
 
   const getPercentage = (val) => {

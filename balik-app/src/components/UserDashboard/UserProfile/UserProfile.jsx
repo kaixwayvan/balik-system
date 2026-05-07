@@ -18,6 +18,8 @@ import { FaPeopleGroup, FaHandsHoldingCircle } from "react-icons/fa6";
 import { useAuth } from "../../../shared/context/AuthContext";
 import { updateUserProfile, uploadAvatar } from "../../../pages/auth/services/supabaseAuthService";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { itemService } from "../../../services/itemService";
+import { useEffect } from "react";
 
 
 export default function UserProfile() {
@@ -29,6 +31,43 @@ export default function UserProfile() {
   const avatarUrl = user?.user_metadata?.avatar_url || null;
   const fullName = user?.user_metadata?.full_name || "Registered User";
   const email = user?.email || "";
+
+  const [stats, setStats] = useState({
+    total: 0,
+    lost: 0,
+    found: 0,
+    resolved: 0,
+    points: user?.user_metadata?.points || 0,
+    badges: user?.user_metadata?.badges || [],
+    certificates: user?.user_metadata?.certificates || []
+  });
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchUserStats();
+    }
+  }, [user?.id]);
+
+  const fetchUserStats = async () => {
+    try {
+      setLoadingStats(true);
+      const data = await itemService.getUserStats(user.id);
+      setStats(prev => ({
+        ...prev,
+        ...data,
+        // In a real app, points/badges would come from a dedicated table or profile metadata
+        // For now, we'll use metadata if available or mock some based on resolved count
+        points: user?.user_metadata?.points || (data.resolved * 100) || 0,
+        badges: user?.user_metadata?.badges || (data.resolved > 0 ? ['First Report'] : []),
+        certificates: user?.user_metadata?.certificates || (data.resolved > 5 ? ['Community Helper'] : [])
+      }));
+    } catch (err) {
+      console.error("Failed to fetch user stats:", err);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
 
   return (
     <div className="p-6">
@@ -59,12 +98,12 @@ export default function UserProfile() {
               <div className="flex gap-4 mt-4">
                 <StatCard
                   icon={<Award size={18} />}
-                  title="5 Certificates"
+                  title={`${stats.certificates.length || 0} Certificates`}
                   subtitle="Achieved"
                 />
                 <StatCard
                   icon={<Trophy size={18} />}
-                  title="Top Contributor"
+                  title={stats.resolved > 10 ? "Elite Finder" : stats.resolved > 0 ? "Active Member" : "New Member"}
                   subtitle="Ranked"
                 />
               </div>
@@ -111,6 +150,7 @@ export default function UserProfile() {
         <Achievements
           achievementView={achievementView}
           setAchievementView={setAchievementView}
+          stats={stats}
         />
       )}
 
@@ -125,8 +165,7 @@ export default function UserProfile() {
 }
 
 /* Achievement tab */
-
-function Achievements({ achievementView, setAchievementView }) {
+function Achievements({ achievementView, setAchievementView, stats }) {
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -135,20 +174,22 @@ function Achievements({ achievementView, setAchievementView }) {
           Your accomplishments and milestones in BALIK
         </p>
       </div>
-
+      
       {/* Points + Tasks */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white shadow-md border border-gray-300 rounded-lg p-4">
           <p className="text-sm text-gray-500">Total Points</p>
-          <h2 className="text-2xl font-semibold">950</h2>
-          <ProgressBar value={70} dark />
+          <h2 className="text-2xl font-semibold">{stats.points}</h2>
+          <ProgressBar value={Math.min((stats.points / 2000) * 100, 100)} dark />
         </div>
 
         <div className="bg-white shadow-md border border-gray-300 rounded-lg p-4 flex gap-4 items-center">
           <Trophy className="text-yellow-500" />
           <div>
-            <p className="text-sm text-gray-500">Task Completed</p>
-            <h2 className="text-xl font-semibold">45%</h2>
+            <p className="text-sm text-gray-500">Resolution Rate</p>
+            <h2 className="text-xl font-semibold">
+              {stats.total > 0 ? Math.round((stats.resolved / stats.total) * 100) : 0}%
+            </h2>
           </div>
         </div>
       </div>
@@ -156,15 +197,18 @@ function Achievements({ achievementView, setAchievementView }) {
       {/* Badges */}
       <div className="bg-white p-5 border border-gray-300 rounded-lg shadow-md">
         <p className="font-bold mb-4">Badges Earned</p>
-        <div className="flex gap-3">
-          <Badge
-            label="First Report"
-            icon={<Award size={17} className="text-indigo-600" />}
-          />
-          <Badge
-            label="Trusted User"
-            icon={<CircleStar size={17} className="text-yellow-600" />}
-          />
+        <div className="flex flex-wrap gap-3">
+          {stats.badges.length > 0 ? (
+            stats.badges.map((badge, idx) => (
+              <Badge
+                key={idx}
+                label={badge}
+                icon={<Award size={17} className="text-indigo-600" />}
+              />
+            ))
+          ) : (
+            <p className="text-sm text-gray-400 italic">No badges earned yet. Keep reporting!</p>
+          )}
         </div>
       </div>
 
@@ -195,47 +239,53 @@ function Achievements({ achievementView, setAchievementView }) {
         </span>
       </div>
 
-      {achievementView === "challenges" && <ChallengesSection />}
-      {achievementView === "certificates" && <CertificatesSection />}
+      {achievementView === "challenges" && <ChallengesSection stats={stats} />}
+      {achievementView === "certificates" && <CertificatesSection certificates={stats.certificates} />}
     </div>
   );
 }
 
 /* Achievements sections */
 
-function ChallengesSection() {
+function ChallengesSection({ stats }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <ChallengeCard
         icon={<GiStarsStack className="w-10 h-10 text-yellow-500" />}
         title="Community Helper"
-        desc="Verified 20 claimed items"
-        progress={75}
+        desc={`Resolve 5 items (${stats.resolved}/5)`}
+        progress={Math.min((stats.resolved / 5) * 100, 100)}
       />
 
       <ChallengeCard
         icon={<FaPeopleGroup className="w-10 h-10 text-cyan-400" />}
-        title="Community Hero"
-        desc="Helped recover 75 items"
-        progress={40}
+        title="First Report"
+        desc={stats.total > 0 ? "Challenge completed!" : "Report your first item"}
+        progress={stats.total > 0 ? 100 : 0}
       />
 
       <ChallengeCard
         icon={<FaHandsHoldingCircle className="w-10 h-10 text-green-500" />}
-        title="Volunteer"
-        desc="Joined 5 community events"
-        progress={25}
+        title="Reliable Finder"
+        desc="Return 10 found items"
+        progress={Math.min((stats.found / 10) * 100, 100)}
       />
     </div>
   );
 }
 
-function CertificatesSection() {
+function CertificatesSection({ certificates }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <CertificateCard title="First Finder" />
-      <CertificateCard title="Trusted User" />
-      <CertificateCard title="Community Helper" />
+      {certificates.length > 0 ? (
+        certificates.map((cert, idx) => (
+          <CertificateCard key={idx} title={cert} />
+        ))
+      ) : (
+        <div className="col-span-full py-10 text-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+          <p className="text-gray-400 italic">No certificates achieved yet.</p>
+        </div>
+      )}
     </div>
   );
 }
