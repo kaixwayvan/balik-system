@@ -2,6 +2,7 @@ import { useState } from "react";
 import { X, Calendar } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { itemService } from "../../../services/itemService";
 
 export default function ClaimModal({
   showClaim,
@@ -15,6 +16,7 @@ export default function ClaimModal({
   categories,
 }) {
   const [file, setFile] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!showClaim) return null;
 
@@ -42,6 +44,33 @@ export default function ClaimModal({
 
     setErrors(newErrors);
     return !Object.values(newErrors).some(Boolean);
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      const user = await itemService.getCurrentUser();
+      if (!user) throw new Error("User not authenticated");
+
+      const claimData = {
+        item_id: form.itemId || "pending_manual_verification", // Use the correct item ID if available
+        claimer_id: user.id,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      };
+
+      const { error } = await itemService.submitClaim(claimData);
+      if (error) throw error;
+
+      alert("Claim request submitted successfully!");
+      setShowClaim(false);
+      setStep(1);
+    } catch (err) {
+      console.error("Claim submission error:", err);
+      alert("Failed to submit claim: " + err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -477,24 +506,26 @@ export default function ClaimModal({
         {/* FOOTER */}
         <div className="sticky bottom-0 z-10 flex gap-4 border-t px-6 py-4">
           <button
+            disabled={isSubmitting}
             onClick={() => (step === 1 ? setShowClaim(false) : setStep(1))}
-            className="cursor-pointer flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white"
+            className="cursor-pointer flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white disabled:opacity-50"
           >
             Back
           </button>
           <button
+            disabled={isSubmitting}
             onClick={() => {
               if (step === 1) {
                 if (validateStep1()) {
                   setStep(2);
                 }
               } else {
-                console.log("Submit", form);
+                handleSubmit();
               }
             }}
-            className="cursor-pointer flex-1 rounded-lg bg-green-500 py-2 text-sm font-medium text-white"
+            className="cursor-pointer flex-1 rounded-lg bg-green-500 py-2 text-sm font-medium text-white disabled:opacity-50"
           >
-            {step === 1 ? "Next" : "Submit"}
+            {isSubmitting ? "Submitting..." : step === 1 ? "Next" : "Submit"}
           </button>
         </div>
       </div>

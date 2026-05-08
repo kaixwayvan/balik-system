@@ -1,6 +1,7 @@
 import { Search, Waves, Clock, SquaresExclude, QrCode, UserSearch } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "../../../utils/supabaseClient";
+import { requestCache } from "../../../services/requestCache";
 
 export default function StatCards() {
   const [statsData, setStatsData] = useState({
@@ -15,6 +16,8 @@ export default function StatCards() {
 
   const fetchStats = async () => {
     try {
+      console.log("[StatCards] Fetching admin stats");
+      
       const { data, error } = await supabase.from('items').select('type, status, metadata, description_embedding');
       if (error) throw error;
 
@@ -32,15 +35,12 @@ export default function StatCards() {
       });
       setStatsData({ total, lost, found, resolved, ai, qr, guest });
     } catch (err) {
-      console.error("Error fetching stats:", err);
+      console.error("[StatCards] Error fetching stats:", err);
     }
   };
 
   useEffect(() => {
     fetchStats();
-    
-    window.addEventListener('silent-refresh', fetchStats);
-    return () => window.removeEventListener('silent-refresh', fetchStats);
   }, []);
 
   const getPercentage = (val) => {

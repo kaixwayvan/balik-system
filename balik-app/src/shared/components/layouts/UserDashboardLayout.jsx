@@ -8,6 +8,7 @@ export default function UserDashboardLayout() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
+
   useEffect(() => {
     // 1. Handle Redirects
     if (!loading && user) {
@@ -18,30 +19,10 @@ export default function UserDashboardLayout() {
     } else if (!loading && !user) {
       navigate('/login', { replace: true });
     }
-
-    // 2. Handle Silent Refresh on focus/tab switch
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && user && !loading) {
-        const lastRefresh = sessionStorage.getItem('last_dashboard_refresh');
-        const now = Date.now();
-        const fiveMinutes = 5 * 60 * 1000;
-
-        if (!lastRefresh || (now - parseInt(lastRefresh)) > fiveMinutes) {
-          console.log("Tab visible & 5m passed - refreshing session...");
-          sessionStorage.setItem('last_dashboard_refresh', now.toString());
-          window.location.reload();
-        } else {
-          console.log("Tab visible - performing silent data update...");
-          window.dispatchEvent(new CustomEvent('silent-refresh'));
-        }
-      }
-    };
-    
-    window.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => window.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [user, loading, navigate]);
 
   if (loading) {
+    console.log("UserDashboardLayout: Still loading auth state...");
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-100">
         <div className="text-center">
@@ -54,6 +35,7 @@ export default function UserDashboardLayout() {
 
   if (!user) return null;
 
+  console.log("UserDashboardLayout: Rendering dashboard for user:", user?.id);
   return (
     <div className="flex min-h-screen bg-slate-100">
       <UserDashboardSidebar />

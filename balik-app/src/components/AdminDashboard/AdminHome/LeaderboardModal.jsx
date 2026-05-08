@@ -9,7 +9,7 @@ export default function LeaderboardModal({ onClose }) {
   useEffect(() => {
     async function fetchLeaderboard() {
       try {
-        setLoading(true);
+        if (leaderboardData.length === 0) setLoading(true);
         // 1. Fetch all items to count finds per user
         const { data: items, error: itemsError } = await supabase
           .from('items')

@@ -63,7 +63,7 @@ export default function AIMatches({ matches, onClaim }) {
 
               <div className="flex gap-3 mt-6">
                 <button
-                  onClick={onClaim}
+                  onClick={() => onClaim(match)}
                   className="cursor-pointer flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-xs font-black py-3 rounded-xl shadow-lg shadow-green-200 transition-all active:scale-95 uppercase tracking-widest"
                 >
                   <CircleCheckBig size={14} />

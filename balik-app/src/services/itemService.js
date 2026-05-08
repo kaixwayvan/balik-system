@@ -165,5 +165,24 @@ export const itemService = {
 
         if (error) throw error
         return data
+    },
+
+    /**
+     * Submit a claim request for a found item
+     */
+    async submitClaim(claimData) {
+        const { data, error } = await supabase
+            .from('item_claims')
+            .insert([claimData])
+
+        return { data, error }
+    },
+
+    /**
+     * Get current authenticated user
+     */
+    async getCurrentUser() {
+        const { data: { user } } = await supabase.auth.getUser()
+        return user
     }
 }

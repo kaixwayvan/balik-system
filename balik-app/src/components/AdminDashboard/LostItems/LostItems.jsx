@@ -68,7 +68,8 @@ export default function LostItems() {
 
   const fetchLostItems = async () => {
     try {
-      setLoading(true);
+      // Only show loading spinner on initial load (no data yet)
+      if (lostItems.length === 0) setLoading(true);
       const { data, error } = await supabase
         .from("items")
         .select("*")

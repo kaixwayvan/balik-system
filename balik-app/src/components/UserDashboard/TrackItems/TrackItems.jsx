@@ -13,6 +13,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { useAuth } from "../../../shared/context/AuthContext";
+import { requestCache } from "../../../services/requestCache";
 import { supabase } from "../../../utils/supabaseClient";
 
 const typeStyles = {
@@ -44,13 +45,23 @@ export default function TrackItems() {
   });
 
   const fetchItems = async () => {
-    if (!user) {
+    if (!user?.id) {
       setLoading(false);
       return;
     }
-    setLoading(true);
+    
+    // Only show loading spinner on initial load (no data yet)
+    if (items.length === 0) {
+      console.log("[TrackItems] Initial items fetch. Showing spinner.");
+      setLoading(true);
+    } else {
+      console.log("[TrackItems] Background items refresh. UI remains interactive.");
+    }
     setError(null);
+    
     try {
+      console.log("[TrackItems] Fetching tracked items for:", user.id);
+      
       const { data, error: fetchError } = await supabase
         .from('items')
         .select('*')
@@ -58,9 +69,10 @@ export default function TrackItems() {
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
-      setItems(data);
+
+      setItems(data || []);
     } catch (err) {
-      console.error("Error fetching tracked items:", err);
+      console.error("[TrackItems] Error fetching tracked items:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -68,8 +80,7 @@ export default function TrackItems() {
   };
 
   useEffect(() => {
-    fetchItems();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchItems(); // Initial load
   }, [user?.id]);
 
   const stats = {
@@ -236,7 +247,7 @@ export default function TrackItems() {
             </div>
 
             <div className="space-y-5">
-              {loading ? (
+              {loading && items.length === 0 ? (
                 <div className="flex justify-center items-center py-20">
                   <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
                 </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../../utils/supabaseClient";
+import { requestCache } from "../../../services/requestCache";
 
 export default function RecentReports() {
   const [filter, setFilter] = useState("All");
@@ -12,6 +13,10 @@ export default function RecentReports() {
 
   const fetchReports = async () => {
     try {
+      // Only show loading spinner on initial load (no data yet)
+      if (items.length === 0) setLoading(true);
+      console.log("[RecentReports] Fetching recent admin reports");
+      
       const { data, error } = await supabase
         .from("items")
         .select("*")
@@ -19,7 +24,7 @@ export default function RecentReports() {
         .limit(10);
       
       if (error) throw error;
-      
+
       const formattedData = data.map(dbItem => {
         const reporter = dbItem.metadata?.reporter || {};
         return {
@@ -41,7 +46,7 @@ export default function RecentReports() {
       
       setItems(formattedData);
     } catch (err) {
-      console.error("Error fetching admin reports:", err);
+      console.error("[RecentReports] Error fetching admin reports:", err);
     } finally {
       setLoading(false);
     }
@@ -49,9 +54,6 @@ export default function RecentReports() {
 
   useEffect(() => {
     fetchReports();
-
-    window.addEventListener('silent-refresh', fetchReports);
-    return () => window.removeEventListener('silent-refresh', fetchReports);
   }, []);
 
   const typeStyles = (type) => {

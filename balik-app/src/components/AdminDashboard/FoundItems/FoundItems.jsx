@@ -86,7 +86,8 @@ export default function FoundItems() {
 
   const fetchFoundItems = async () => {
     try {
-      setLoading(true);
+      // Only show loading spinner on initial load (no data yet)
+      if (foundItems.length === 0) setLoading(true);
       const { data, error } = await supabase
         .from("items")
         .select("*")

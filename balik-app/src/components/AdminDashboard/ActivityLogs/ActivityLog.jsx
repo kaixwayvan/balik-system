@@ -146,7 +146,8 @@ export default function ActivityLog() {
   const [selected, setSelected] = useState(null);
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
+    // Only show loading spinner on initial load (no data yet)
+    if (allActivities.length === 0) setLoading(true);
     try {
       const [{ data: items }, { data: claims }] = await Promise.all([
         supabase

@@ -11,9 +11,9 @@ import {
   ChevronRight,
   Zap,
   Star,
-  Shield,
   Search,
-  RefreshCw
+  RefreshCw,
+  Shield
 } from 'lucide-react';
 import { supabase } from '../../../utils/supabaseClient';
 
@@ -43,7 +43,7 @@ export default function Gamification() {
 
   const fetchLiveData = async () => {
     try {
-      setLoading(true);
+      if (leaderboard.length === 0) setLoading(true);
       
       const { data: profiles, error: profileError } = await supabase
         .from('profiles')

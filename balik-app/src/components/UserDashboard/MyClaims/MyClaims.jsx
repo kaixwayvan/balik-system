@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   MapPin,
   Calendar,
@@ -11,10 +11,11 @@ import {
 } from "lucide-react";
 import ClaimQrModal from "./ClaimQrModal";
 import ClaimDetailsModal from "./ClaimDetailsModal";
+import { supabase } from "../../../utils/supabaseClient";
+import { useAuth } from "../../../shared/context/AuthContext";
+
 
 const TABS = ["All Claims", "Pending", "Approved", "Released"];
-
-const claimsData = [];
 
 const statusStyles = {
   Approved: "bg-green-100 text-green-700",
@@ -24,10 +25,57 @@ const statusStyles = {
 };
 
 export default function MyClaims() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("All Claims");
   const [showQrModal, setShowQrModal] = useState(false);
   const [selectedClaim, setSelectedClaim] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [claimsData, setClaimsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchClaims = async () => {
+    if (!user?.id) return;
+    
+    // Only show loading spinner on initial load (no data yet)
+    if (claimsData.length === 0) setLoading(true);
+    try {
+      console.log("[MyClaims] Fetching claims for user:", user.id);
+      
+      const { data, error } = await supabase
+        .from('item_claims')
+        .select(`
+          *,
+          items:item_id (*)
+        `)
+        .eq('claimer_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Map data to match the UI structure
+      const mappedClaims = data.map(claim => ({
+        id: claim.id,
+        title: claim.items?.title || "Unknown Item",
+        description: claim.items?.description || "",
+        status: claim.status,
+        foundAt: claim.items?.location || "Unknown",
+        date: new Date(claim.created_at).toLocaleDateString(),
+        points: 50, // Static points for now
+        image: claim.items?.image_url || "https://images.unsplash.com/photo-1544391439-1dfdc422e178?auto=format&fit=crop&q=80&w=400",
+        originalClaim: claim
+      }));
+
+      setClaimsData(mappedClaims);
+    } catch (err) {
+      console.error("[MyClaims] Error fetching claims:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchClaims(); // Initial load
+  }, [user?.id]);
 
   const filteredClaims =
     activeTab === "All Claims"
@@ -60,7 +108,12 @@ export default function MyClaims() {
 
       {/* Claims List */}
       <div className="space-y-5">
-        {filteredClaims.length > 0 ? (
+        {loading && claimsData.length === 0 ? (
+          <div className="bg-white rounded-xl shadow-sm p-20 flex flex-col items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mb-4"></div>
+            <p className="text-gray-500 animate-pulse">Syncing your claims...</p>
+          </div>
+        ) : filteredClaims.length > 0 ? (
           filteredClaims.map((item) => (
             <div
               key={item.id}

@@ -11,6 +11,7 @@ export default function AIMatches() {
   useEffect(() => {
     async function fetchMatches() {
       try {
+        if (matches.length === 0) setLoading(true);
         const { data, error } = await supabase.from("items").select('*');
         if (error) throw error;
         

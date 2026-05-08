@@ -11,6 +11,5 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         storage: window.localStorage,
         storageKey: 'balik-auth-token',
         flowType: 'pkce',
-        lock: async (_name, _acquireTimeout, fn) => fn(),
     }
 });

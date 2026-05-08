@@ -11,6 +11,7 @@ import {
 import DatePicker from "react-datepicker";
 import { itemService } from "../../../services/itemService";
 import { nlpService } from "../../../services/nlpService";
+import { requestCache } from "../../../services/requestCache";
 import { ALL_CATEGORIES } from "../../../shared/constants/categories";
 
 import iphoneImg from "../../../assets/home-assets/img-items/iphone.png";
@@ -34,30 +35,36 @@ export default function SubmitReport() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const fetchItems = async () => {
-    setLoading(true);
+    // Only show loading spinner on initial load (no data yet)
+    if (items.length === 0) setLoading(true);
     try {
+      console.log("[SearchItems] Starting fetch with query:", searchQuery, "category:", activeCategory);
+      
       let embedding = null;
       if (searchQuery && searchQuery.trim().length > 2) {
-        // Generate embedding for smart search (must be > 2 chars to be meaningful)
         embedding = await nlpService.generateEmbedding(searchQuery);
       }
 
+      console.log("[SearchItems] Calling itemService.searchItems...");
       const data = await itemService.searchItems({
         query: searchQuery,
         category: activeCategory,
         type: 'found',
         embedding
       });
-      setItems(data);
+      console.log("[SearchItems] itemService.searchItems returned:", data?.length, "items");
+      
+      setItems(data || []);
     } catch (error) {
-      console.error("Error fetching items:", error);
+      console.error("[SearchItems] Error fetching items:", error);
     } finally {
+      console.log("[SearchItems] Fetch complete. Setting loading to false.");
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchItems();
+    fetchItems(); // Initial load or filter change
   }, [activeCategory, searchQuery]);
 
   const [form, setForm] = useState({
@@ -755,18 +762,50 @@ export default function SubmitReport() {
                 Back
               </button>
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (step === 1) {
                     if (validateStep1()) {
                       setStep(2);
                     }
                   } else {
-                    console.log("Submit", form);
+                    // Actual Submission Logic
+                    setLoading(true);
+                    try {
+                      const claimData = {
+                        item_id: selectedItem.id,
+                        claimer_id: (await itemService.getCurrentUser())?.id,
+                        status: 'pending',
+                        created_at: new Date().toISOString()
+                      };
+
+                      // Check if itemService has createClaim method, else use supabase directly
+                      const { error } = await itemService.submitClaim(claimData);
+                      
+                      if (error) throw error;
+
+                      alert("Claim request submitted successfully! Admin will review your request.");
+                      setShowClaim(false);
+                      setSelectedItem(null);
+                      setStep(1);
+                      // Reset form
+                      setForm({
+                        fullName: "", mobile: "", email: "", lostLocation: "", lostDate: "",
+                        description: "", category: "", otherCategory: "", identifiers: "",
+                        itemType: "", colorMaterial: "", uniqueMarks: "", brand: "",
+                        insideItems: "", secretItem: "", lastSeen: ""
+                      });
+                    } catch (err) {
+                      console.error("Claim Submission Error:", err);
+                      alert("Failed to submit claim: " + err.message);
+                    } finally {
+                      setLoading(false);
+                    }
                   }
                 }}
-                className="cursor-pointer flex-1 rounded-lg bg-green-500 py-2 text-sm font-medium text-white hover:bg-green-600 transition"
+                disabled={loading}
+                className={`cursor-pointer flex-1 rounded-lg bg-green-500 py-2 text-sm font-medium text-white hover:bg-green-600 transition ${loading ? 'opacity-50' : ''}`}
               >
-                {step === 1 ? "Next" : "Submit"}
+                {loading ? "Processing..." : step === 1 ? "Next" : "Submit"}
               </button>
             </div>
           </div>

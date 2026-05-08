@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useRef } from "react";
+import { createContext, useContext, useEffect, useState, useRef, useCallback } from "react";
 import { supabase } from "../../utils/supabaseClient";
 
 const AuthContext = createContext();
@@ -7,13 +7,14 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const userRef = useRef(null);
+  const profileFetchedRef = useRef(false);
 
   // Sync ref with state
   useEffect(() => {
     userRef.current = user;
   }, [user]);
 
-  const fetchProfile = async (currentUser) => {
+  const fetchProfile = useCallback(async (currentUser, isInitial = false) => {
     try {
       const { data, error } = await supabase
         .from("profiles")
@@ -57,14 +58,27 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error("Profile sync/fetch error:", err);
     } finally {
-      setUser(currentUser);
+      // CRITICAL: Only update user state if ID actually changed or this is the first load.
+      // This prevents unnecessary re-renders that cascade to all dashboard components.
+      const existingUser = userRef.current;
+      if (!existingUser || existingUser.id !== currentUser.id || isInitial) {
+        console.log('[Auth] User state updated in AuthContext:', currentUser.id);
+        setUser(currentUser);
+      } else {
+        console.log('[Auth] User ID unchanged. Skipping state update to prevent UI flicker.');
+      }
+      profileFetchedRef.current = true;
       setLoading(false);
     }
-  };
+  }, []);
 
   const refreshUser = async () => {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const { data: { user: currentUser }, error } = await supabase.auth.getUser();
+      if (error) {
+        console.warn("Background session refresh error:", error.message);
+        return; // Don't clear user on background error
+      }
       if (currentUser) {
         await fetchProfile(currentUser);
       }
@@ -74,58 +88,78 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     const initAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          await fetchProfile(session.user);
-        } else {
-          setLoading(false);
+        if (isMounted) {
+          if (session?.user) {
+            await fetchProfile(session.user, true);
+          } else {
+            setLoading(false);
+          }
         }
       } catch (err) {
         console.error("Auth init error:", err);
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!isMounted) return;
         console.log(`Auth Event: ${event}`);
 
-        if (session?.user) {
-          // Use userRef.current to avoid stale closure
-          const currentUser = userRef.current;
-          
-          // Only fetch profile if it's a new user or a SIGNED_IN/USER_UPDATED event
-          // TOKEN_REFRESHED events for the same user are ignored to avoid redundant re-renders
-          if (!currentUser || currentUser.id !== session.user.id || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
-
-            if (event === 'SIGNED_IN') {
-              // Update last active timestamp on login
-              await supabase.from("profiles").update({ last_sign_in_at: new Date().toISOString() }).eq("id", session.user.id);
-            }
-
-            console.log("Performing full profile fetch/sync...");
-            await fetchProfile(session.user);
-          } else {
-            // Keep the user object updated but avoid triggering a state change if ID is same
-            // This prevents focus-triggered "refreshing" loops
-            console.log("Skipping redundant profile fetch on token refresh/focus");
-          }
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-          setLoading(false);
-        } else if (!session && event !== 'INITIAL_SESSION') {
-          setUser(null);
-          setLoading(false);
+        // TOKEN_REFRESHED fires when the tab becomes visible again.
+        // The session is still valid — do NOT touch user state or trigger re-renders.
+        if (event === 'TOKEN_REFRESHED') {
+          console.log('[Auth] Token refreshed silently. UI state preserved to prevent loading hang.');
+          return;
         }
+
+        // INITIAL_SESSION is handled by initAuth above — skip to avoid double-fetch.
+        if (event === 'INITIAL_SESSION') {
+          console.log('[Auth] Initial session detected. UI already handled by initAuth.');
+          return;
+        }
+
+        if (event === 'SIGNED_IN') {
+          if (session?.user) {
+            // Update last sign-in timestamp
+            await supabase.from("profiles").update({ last_sign_in_at: new Date().toISOString() }).eq("id", session.user.id);
+            if (isMounted) await fetchProfile(session.user, true);
+          }
+          return;
+        }
+
+        if (event === 'USER_UPDATED') {
+          if (session?.user && isMounted) {
+            await fetchProfile(session.user, true);
+          }
+          return;
+        }
+
+        if (event === 'SIGNED_OUT') {
+          if (isMounted) {
+            setUser(null);
+            userRef.current = null;
+            profileFetchedRef.current = false;
+            setLoading(false);
+          }
+          return;
+        }
+
+        // For any other unknown events with no session, do nothing.
+        // This prevents accidental user-clearing on edge-case events.
       }
     );
 
     initAuth();
 
     return () => {
+      isMounted = false;
       subscription?.unsubscribe();
     };
   }, []); // Run only once on mount

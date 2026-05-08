@@ -107,7 +107,7 @@ export default function ReportCard({
       </div>
 
       {isOpen && report.status === "matches" && (
-        <AIMatches matches={report.matches || []} onClaim={onClaim} />
+        <AIMatches matches={report.matches || []} onClaim={(match) => onClaim(match)} />
       )}
     </div>
   );

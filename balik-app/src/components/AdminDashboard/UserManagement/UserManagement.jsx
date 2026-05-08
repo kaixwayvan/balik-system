@@ -119,7 +119,8 @@ export default function UserManagement() {
   useEffect(() => {
     async function fetchUsers() {
       try {
-        setLoading(true);
+        // Only show loading spinner on initial load (no data yet)
+        if (users.length === 0) setLoading(true);
 
         // 1. All profiles
         const { data: profiles, error: profilesError } = await supabase

@@ -31,7 +31,8 @@ export default function ActivityHistory() {
     async function fetchHistory() {
       if (!user?.id) return;
       try {
-        setLoading(true);
+        // Only show loading spinner on initial load (no data yet)
+        if (history.length === 0) setLoading(true);
         const data = await itemService.getUserHistory(user.id);
         
         // Map Supabase data to history format
@@ -57,7 +58,7 @@ export default function ActivityHistory() {
     }
 
     fetchHistory();
-  }, [user]);
+  }, [user?.id]);
 
   const filteredHistory = history.filter((item) => {
     const matchesSearch =
@@ -69,7 +70,7 @@ export default function ActivityHistory() {
     return matchesSearch && matchesFilter;
   });
 
-  if (loading) {
+  if (loading && history.length === 0) {
     return (
       <div className="p-8 bg-[#EEF1FA] min-h-screen flex flex-col items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>

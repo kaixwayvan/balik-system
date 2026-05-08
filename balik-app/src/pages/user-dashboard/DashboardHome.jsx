@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPinned, LogOut, X, AlertCircle, Plus, Info, Search } from "lucide-react";
+import { MapPinned, LogOut, X, AlertCircle, Plus, Info, Search, Brain, MapPin, CheckCircle } from "lucide-react";
 import ColorPicker from "../../shared/components/ColorPicker";
 import MapPicker from "../../shared/components/MapPicker";
 import { useAuth } from "../../shared/context/AuthContext";
 import { itemService } from "../../services/itemService";
 import { nlpService } from "../../services/nlpService";
+import { requestCache } from "../../services/requestCache";
 import WelcomeBanner from "../../components/UserDashboard/Home/WelcomeBanner";
 import StatsCards from "../../components/UserDashboard/Home/StatsCards";
 import QuickActions from "../../components/UserDashboard/Home/QuickActions";
@@ -60,7 +61,7 @@ export default function DashboardHome() {
   const [lostFormData, setLostFormData] = useState(initialLostFormData);
   const [foundFormData, setFoundFormData] = useState(initialFoundFormData);
   const [photoPreview, setPhotoPreview] = useState(null);
-  const [recentItems, setRecentItems] = useState([]);
+
 
   // New state for instant matching features
   const [showMatchModal, setShowMatchModal] = useState(false);
@@ -73,50 +74,47 @@ export default function DashboardHome() {
 
 
 
-  // Fetch stats and recent items from Supabase
-  const fetchDashboardData = async () => {
-    if (!user?.id) return;
-    
+  // ROBUST PATTERN: Single state for items and loading
+  const [items, setItems] = useState([]);
+  const [fetching, setFetching] = useState(true);
+
+  // ROBUST PATTERN: Simple fetch function
+  async function fetchItems(userId) {
+    if (!userId) return;
     try {
-      console.log("Fetching dashboard data silently for:", user.id);
-      const userStats = await itemService.getUserStats(user.id);
+      // Only show loading spinner on initial load (no data yet)
+      if (items.length === 0) {
+        console.log("[DashboardHome] Initial items fetch. Showing spinner.");
+        setFetching(true);
+      } else {
+        console.log("[DashboardHome] Background items refresh. UI remains interactive.");
+      }
+      const { data, error: fetchError } = await supabase
+        .from("items")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (fetchError) throw fetchError;
+
+      setItems(data || []);
+      
+      // Also sync stats
+      const userStats = await itemService.getUserStats(userId);
       setStats(userStats);
-
-      const { data: userItems, error: itemsError } = await supabase
-        .from('items')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (!itemsError && userItems) {
-        setRecentItems(userItems);
-      }
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error);
+    } catch (err) {
+      console.error("[Robust Dashboard] Fetch Error:", err.message);
+    } finally {
+      setFetching(false);
     }
-  };
+  }
 
   useEffect(() => {
-    fetchDashboardData();
-
-    // Listen for silent refreshes from the layout
-    window.addEventListener('silent-refresh', fetchDashboardData);
-    return () => window.removeEventListener('silent-refresh', fetchDashboardData);
-  }, [user?.id]);
-
-  // Connection test
-  useEffect(() => {
-    async function testConnection() {
-      try {
-        const { error } = await supabase.from('items').select('id', { count: 'exact', head: true });
-        if (error) console.error("Supabase Connection Error:", error.message);
-      } catch (err) {
-        console.error("Supabase Connection Exception:", err);
-      }
+    // 1. Initial Load
+    if (user?.id) {
+      fetchItems(user.id);
     }
-    testConnection();
-  }, []);
+  }, [user?.id]); // Re-run if user changes
 
   // DashboardHome no longer needs independent redirect logic as it is wrapped in Protected Layout
   // Render dashboard contents directly as user and loading are guaranteed by UserDashboardLayout
@@ -448,7 +446,7 @@ export default function DashboardHome() {
 
         <div className="col-span-8 space-y-6">
           <QuickActions onReportClick={handleReportClick} />
-          <RecentActivity items={recentItems} />
+          <RecentActivity items={items.slice(0, 5)} />
         </div>
 
         <div className="col-span-4 space-y-6">

@@ -30,13 +30,42 @@ export const signupWithEmail = async (email, password, fullName, contact) => {
 
     return {
       success: true,
-      message: "Check your email for confirmation link",
+      message: "Check your email for verification code",
       user: data.user,
     };
   } catch (error) {
     return {
       success: false,
       error: error.message,
+    };
+  }
+};
+
+export const verifyOtp = async (email, token) => {
+  try {
+    // 1. Verify the code
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'signup'
+    });
+
+    if (error) throw error;
+
+    if (!data?.user) throw new Error("Verification failed - No user returned");
+
+    // 2. We don't wait for profile sync here because the trigger handles it.
+    // We just return success and let the app move on.
+    return {
+      success: true,
+      user: data.user,
+      session: data.session
+    };
+  } catch (error) {
+    console.error("OTP Verification Error:", error);
+    return {
+      success: false,
+      error: error.message || "Invalid or expired code. Please try again."
     };
   }
 };

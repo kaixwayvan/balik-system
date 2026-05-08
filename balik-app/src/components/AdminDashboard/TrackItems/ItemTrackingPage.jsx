@@ -16,7 +16,7 @@ export default function ItemTrackingPage() {
   useEffect(() => {
     async function fetchReports() {
       try {
-        setLoading(true);
+        if (reports.length === 0) setLoading(true);
         const data = await itemService.getAllItems();
         
         // Map Supabase data to component format

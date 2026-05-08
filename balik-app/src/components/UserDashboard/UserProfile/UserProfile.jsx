@@ -43,21 +43,20 @@ export default function UserProfile() {
   });
   const [loadingStats, setLoadingStats] = useState(true);
 
-  useEffect(() => {
-    if (user?.id) {
-      fetchUserStats();
-    }
-  }, [user?.id]);
-
   const fetchUserStats = async () => {
+    if (!user?.id) return;
     try {
-      setLoadingStats(true);
+      if (stats.total === 0) {
+        console.log("[UserProfile] Initial stats fetch. Showing spinner.");
+        setLoadingStats(true);
+      } else {
+        console.log("[UserProfile] Background stats refresh. UI remains interactive.");
+      }
+      
       const data = await itemService.getUserStats(user.id);
       setStats(prev => ({
         ...prev,
         ...data,
-        // In a real app, points/badges would come from a dedicated table or profile metadata
-        // For now, we'll use metadata if available or mock some based on resolved count
         points: user?.user_metadata?.points || (data.resolved * 100) || 0,
         badges: user?.user_metadata?.badges || (data.resolved > 0 ? ['First Report'] : []),
         certificates: user?.user_metadata?.certificates || (data.resolved > 5 ? ['Community Helper'] : [])
@@ -68,6 +67,10 @@ export default function UserProfile() {
       setLoadingStats(false);
     }
   };
+
+  useEffect(() => {
+    fetchUserStats();
+  }, [user?.id]);
 
   return (
     <div className="p-6">
@@ -126,8 +129,8 @@ export default function UserProfile() {
           <button
             onClick={() => setActiveTab("achievements")}
             className={`cursor-pointer pb-2 px-4 rounded-t-xl py-2 text-sm font-medium hover:bg-gray-200 ${activeTab === "achievements"
-                ? "border-b-2 border-black text-black"
-                : "text-gray-400"
+              ? "border-b-2 border-black text-black"
+              : "text-gray-400"
               }`}
           >
             Achievements
@@ -136,8 +139,8 @@ export default function UserProfile() {
           <button
             onClick={() => setActiveTab("settings")}
             className={`cursor-pointer pb-2 px-4 py-2 rounded-t-xl text-sm font-medium hover:bg-gray-200 ${activeTab === "settings"
-                ? "border-b-2 border-black text-black"
-                : "text-gray-400"
+              ? "border-b-2 border-black text-black"
+              : "text-gray-400"
               }`}
           >
             Account Settings
@@ -174,7 +177,7 @@ function Achievements({ achievementView, setAchievementView, stats }) {
           Your accomplishments and milestones in BALIK
         </p>
       </div>
-      
+
       {/* Points + Tasks */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white shadow-md border border-gray-300 rounded-lg p-4">
@@ -217,8 +220,8 @@ function Achievements({ achievementView, setAchievementView, stats }) {
         <button
           onClick={() => setAchievementView("challenges")}
           className={`cursor-pointer px-8 py-2 rounded-lg text-sm font-medium ${achievementView === "challenges"
-              ? "bg-indigo-800 text-white"
-              : "border text-gray-600"
+            ? "bg-indigo-800 text-white"
+            : "border text-gray-600"
             }`}
         >
           Challenges
@@ -227,8 +230,8 @@ function Achievements({ achievementView, setAchievementView, stats }) {
         <button
           onClick={() => setAchievementView("certificates")}
           className={`cursor-pointer px-8 py-2 rounded-lg text-sm font-medium ${achievementView === "certificates"
-              ? "bg-indigo-800 text-white"
-              : "border text-gray-600"
+            ? "bg-indigo-800 text-white"
+            : "border text-gray-600"
             }`}
         >
           Certificates
@@ -298,8 +301,8 @@ function AccountSettings({ activeSection, setActiveSection }) {
         <button
           onClick={() => setActiveSection("profile")}
           className={`cursor-pointer flex items-center relative w-full flex items-center gap-2 pl-6 pr-4 pl-9 py-3 text-sm ${activeSection === "profile"
-              ? "bg-indigo-100 text-indigo-700 font-bold"
-              : "hover:bg-gray-100"
+            ? "bg-indigo-100 text-indigo-700 font-bold"
+            : "hover:bg-gray-100"
             }`}
         >
           {activeSection === "profile" && (
@@ -311,8 +314,8 @@ function AccountSettings({ activeSection, setActiveSection }) {
         <button
           onClick={() => setActiveSection("security")}
           className={`cursor-pointer relative w-full flex items-center gap-3 pl-6 pr-4 pl-9 py-3 text-sm ${activeSection === "security"
-              ? "bg-indigo-100 text-indigo-700 font-bold"
-              : "hover:bg-gray-100"
+            ? "bg-indigo-100 text-indigo-700 font-bold"
+            : "hover:bg-gray-100"
             }`}
         >
           {activeSection === "security" && (
@@ -324,8 +327,8 @@ function AccountSettings({ activeSection, setActiveSection }) {
         <button
           onClick={() => setActiveSection("preferences")}
           className={`cursor-pointer relative w-full flex items-center gap-3 pl-6 pr-4 pl-9 py-3 text-sm ${activeSection === "preferences"
-              ? "bg-indigo-100 text-indigo-700 font-bold"
-              : "hover:bg-gray-100"
+            ? "bg-indigo-100 text-indigo-700 font-bold"
+            : "hover:bg-gray-100"
             }`}
         >
           {activeSection === "preferences" && (
@@ -418,11 +421,11 @@ function CertificateCard({ title }) {
 function ProfileSettings() {
   const { user, refreshUser } = useAuth();
   const fileInputRef = useRef(null);
-  
+
   const initialAvatar = user?.user_metadata?.avatar_url || null;
   const [avatar, setAvatar] = useState(initialAvatar);
   const [selectedFile, setSelectedFile] = useState(null);
-  
+
   // Extract user details
   const fullNameStr = user?.user_metadata?.full_name || "";
   const nameParts = fullNameStr.split(" ");
@@ -491,7 +494,7 @@ function ProfileSettings() {
       setSaveStep("Updating Account...");
       // Add a wrapper timeout for the entire service call just in case the Supabase client itself locks up
       const serviceTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Supabase client hung completely")), 8000));
-      
+
       const result = await Promise.race([
         updateUserProfile(user.id, updates),
         serviceTimeout
@@ -525,9 +528,8 @@ function ProfileSettings() {
           Edit your Profile
         </h2>
         {status.message && (
-          <div className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm animate-in fade-in slide-in-from-top-2 duration-300 ${
-            status.type === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-          }`}>
+          <div className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm animate-in fade-in slide-in-from-top-2 duration-300 ${status.type === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+            }`}>
             {status.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
             {status.message}
           </div>
@@ -573,22 +575,22 @@ function ProfileSettings() {
       <div>
         <p className="text-sm font-medium mb-2">Gender (Optional)</p>
         <div className="flex gap-4">
-          <GenderOption 
-            label="Male" 
-            checked={gender === "Male"} 
-            onChange={() => setGender("Male")} 
+          <GenderOption
+            label="Male"
+            checked={gender === "Male"}
+            onChange={() => setGender("Male")}
           />
-          <GenderOption 
-            label="Female" 
-            checked={gender === "Female"} 
-            onChange={() => setGender("Female")} 
+          <GenderOption
+            label="Female"
+            checked={gender === "Female"}
+            onChange={() => setGender("Female")}
           />
         </div>
       </div>
 
       {/* Save */}
       <div className="flex justify-end pt-4">
-        <button 
+        <button
           onClick={handleSave}
           disabled={isSaving}
           className="cursor-pointer px-8 py-2.5 bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-md active:scale-95"
@@ -630,13 +632,12 @@ function Input({ label, placeholder, value, onChange, disabled }) {
 
 function GenderOption({ label, checked, onChange }) {
   return (
-    <label className={`flex items-center gap-2 border rounded-lg px-4 py-2 cursor-pointer transition-all ${
-      checked ? "border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500" : "hover:bg-gray-50"
-    }`}>
-      <input 
-        type="radio" 
-        name="gender" 
-        checked={checked} 
+    <label className={`flex items-center gap-2 border rounded-lg px-4 py-2 cursor-pointer transition-all ${checked ? "border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500" : "hover:bg-gray-50"
+      }`}>
+      <input
+        type="radio"
+        name="gender"
+        checked={checked}
         onChange={onChange}
         className="cursor-pointer accent-indigo-600"
       />

@@ -23,34 +23,36 @@ export default function FoundItems() {
   const [photoFiles, setPhotoFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
 
-  const fetchReports = async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    setError(null);
+  async function fetchItems(userId) {
+    if (!userId) return;
     try {
+      // Only show loading spinner on initial load (no data yet)
+      if (reports.length === 0) setLoading(true);
+      setError(null);
+
       const { data, error: fetchError } = await supabase
         .from('items')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .eq('type', 'found')
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
-      setReports(data);
+      
+      setReports(data || []);
     } catch (err) {
-      console.error("Error fetching found reports:", err);
+      console.error("[Robust FoundItems] Fetch Error:", err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
-    fetchReports();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // 1. Initial Load
+    if (user?.id) {
+      fetchItems(user.id);
+    }
   }, [user?.id]);
 
   const stats = [
@@ -118,7 +120,7 @@ export default function FoundItems() {
 
         <div className="flex gap-3">
           <button
-            onClick={fetchReports}
+            onClick={() => fetchItems(user?.id)}
             className="cursor-pointer flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition"
           >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />

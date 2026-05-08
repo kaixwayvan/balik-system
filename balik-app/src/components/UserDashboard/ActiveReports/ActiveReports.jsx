@@ -4,6 +4,7 @@ import { Plus, RefreshCw, AlertCircle } from "lucide-react";
 import { supabase } from "../../../utils/supabaseClient";
 import { useAuth } from "../../../shared/context/AuthContext";
 import { itemService } from "../../../services/itemService";
+import { requestCache } from "../../../services/requestCache";
 
 import ReportCard from "./ReportCard";
 import ConfirmMatchModal from "./ConfirmMatchModal";
@@ -46,6 +47,7 @@ export default function ActiveReports() {
   const [openReportId, setOpenReportId] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showClaim, setShowClaim] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState(null);
   const [step, setStep] = useState(1);
 
   const [form, setForm] = useState({
@@ -71,15 +73,17 @@ export default function ActiveReports() {
 
 
   const fetchReports = async () => {
-    if (!user) {
+    if (!user?.id) {
       setLoading(false);
       return;
     }
 
-    setLoading(true);
+    // Only show loading spinner on initial load (no data yet)
+    if (reports.length === 0) setLoading(true);
     setError(null);
     try {
-      console.log("ActiveReports: Fetching items for user:", user.id);
+      console.log("[ActiveReports] Fetching active reports for user:", user.id);
+      
       const { data, error: fetchError } = await supabase
         .from('items')
         .select('*')
@@ -89,10 +93,10 @@ export default function ActiveReports() {
 
       if (fetchError) throw fetchError;
 
-      console.log("ActiveReports: Raw items found:", data);
+      console.log("[ActiveReports] Raw items found:", data || []);
 
       // Transform data for the UI with Live Match Check
-      const formattedReports = await Promise.all(data.map(async (item) => {
+      const formattedReports = await Promise.all((data || []).map(async (item) => {
         // Map database status to UI status
         let uiStatus = 'searching';
         let progress = 45;
@@ -176,10 +180,10 @@ export default function ActiveReports() {
         };
       }));
 
-      console.log("ActiveReports: Formatted reports:", formattedReports);
+      console.log("[ActiveReports] Formatted reports:", formattedReports);
       setReports(formattedReports);
     } catch (err) {
-      console.error("Error fetching reports:", err);
+      console.error("[ActiveReports] Error fetching reports:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -187,8 +191,7 @@ export default function ActiveReports() {
   };
 
   useEffect(() => {
-    fetchReports();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchReports(); // Initial load
   }, [user?.id]);
 
   useEffect(() => {
@@ -231,7 +234,7 @@ export default function ActiveReports() {
       )}
 
       <div className="space-y-6">
-        {loading ? (
+        {loading && reports.length === 0 ? (
           <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-red-700"></div>
           </div>
@@ -242,7 +245,10 @@ export default function ActiveReports() {
               report={report}
               openReportId={openReportId}
               setOpenReportId={setOpenReportId}
-              onClaim={() => setShowConfirmModal(true)}
+              onClaim={(match) => {
+                setSelectedMatch(match);
+                setShowConfirmModal(true);
+              }}
             />
           ))
         ) : (
@@ -270,7 +276,7 @@ export default function ActiveReports() {
           setShowClaim={setShowClaim}
           step={step}
           setStep={setStep}
-          form={form}
+          form={{ ...form, itemId: selectedMatch?.id }}
           setForm={setForm}
           errors={errors}
           setErrors={setErrors}
