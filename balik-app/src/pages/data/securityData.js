@@ -44,4 +44,4 @@ export const securityData = [
       "Members earn trust scores based on successful reunions, verified identity, and community feedback, helping you identify reliable helpers.",
     icon: Users
   }
-]
+];

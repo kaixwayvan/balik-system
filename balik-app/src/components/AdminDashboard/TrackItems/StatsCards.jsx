@@ -3,25 +3,25 @@ import { Package, Search, CheckCircle, Archive } from "lucide-react";
 const stats = [
   {
     label: "Total Reports",
-    value: 128,
+    value: 0,
     color: "bg-purple-500 border-2 border-purple-400",
     icon: Package,
   },
   {
     label: "Lost Items",
-    value: 42,
+    value: 0,
     color: "bg-red-500 border-2 border-red-400",
     icon: Search,
   },
   {
     label: "Found Items",
-    value: 37,
+    value: 0,
     color: "bg-yellow-500  border-2 border-yellow-400",
     icon: Archive,
   },
   {
     label: "Successfully Claimed",
-    value: 21,
+    value: 0,
     color: "bg-green-500 border-2 border-green-400",
     icon: CheckCircle,
   },

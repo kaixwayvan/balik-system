@@ -1,18 +1,19 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { useGoogleLogin } from "@react-oauth/google";
+import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import {
-  loginWithGoogle,
   loginWithPassword,
 } from "../auth/services/authService";
 import BALIKLogo from "../../assets/BALIK.png";
 import StudentSupportImg from "../../assets/auth-assets/studentsupport.png";
 
 export default function Login() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({ identifier: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
   // VALIDATION FUNCTIONS
   const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -37,21 +38,6 @@ export default function Login() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // GOOGLE LOGIN
-  const googleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      try {
-        setLoading(true);
-        setError("");
-        await loginWithGoogle(tokenResponse.access_token);
-      } catch {
-        setError("Google login failed. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    },
-    onError: () => setError("Google login was cancelled."),
-  });
 
   // FORM SUBMIT
   const handleSubmit = async (e) => {
@@ -63,6 +49,7 @@ export default function Login() {
       setLoading(true);
       setError("");
       await loginWithPassword(form);
+      navigate("/dashboard");
     } catch {
       setError("Invalid credentials. Please try again.");
     } finally {
@@ -173,28 +160,37 @@ export default function Login() {
               >
                 Password
               </label>
-              <input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                value={form.password}
-                onChange={(e) => {
-                  setForm({ ...form, password: e.target.value });
-                  setErrors((prev) => ({
-                    ...prev,
-                    password: !e.target.value
-                      ? "Password is required."
-                      : e.target.value.length < 6
-                      ? "Password must be at least 6 characters."
-                      : "",
-                  }));
-                }}
-                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:outline-none ${
-                  errors.password
-                    ? "border-red-500 focus:ring-red-500"
-                    : "focus:ring-blue-600"
-                }`}
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  value={form.password}
+                  onChange={(e) => {
+                    setForm({ ...form, password: e.target.value });
+                    setErrors((prev) => ({
+                      ...prev,
+                      password: !e.target.value
+                        ? "Password is required."
+                        : e.target.value.length < 6
+                        ? "Password must be at least 6 characters."
+                        : "",
+                    }));
+                  }}
+                  className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:outline-none pr-10 ${
+                    errors.password
+                      ? "border-red-500 focus:ring-red-500"
+                      : "focus:ring-blue-600"
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               {errors.password && (
                 <p className="text-red-500 text-xs mt-1">{errors.password}</p>
               )}
@@ -218,37 +214,16 @@ export default function Login() {
             </div>
 
             {/* Submit */}
-            <Link to="/dashboard">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 text-white py-2.5 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-              >
-                {loading ? "Logging in..." : "Login"}
-              </button>
-            </Link>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-2.5 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
           </form>
 
-          {/* Divider */}
-          <div className="my-6 flex items-center gap-3">
-            <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-sm text-gray-500">or</span>
-            <div className="flex-1 h-px bg-gray-200" />
-          </div>
 
-          {/* Google Login */}
-          <button
-            onClick={googleLogin}
-            disabled={loading}
-            className="w-full border py-2.5 rounded-md font-medium flex items-center justify-center gap-3 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50"
-          >
-            <img
-              src="https://www.pngall.com/wp-content/uploads/5/Google-G-Logo-PNG-Image.png"
-              alt="Google Logo"
-              className="w-5"
-            />
-            Continue with Google
-          </button>
 
           {/* Signup */}
           <p className="mt-6 text-center text-sm text-gray-600">

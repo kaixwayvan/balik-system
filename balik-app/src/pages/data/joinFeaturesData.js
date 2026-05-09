@@ -19,4 +19,4 @@ export const joinFeaturesData = [
       "Get points and rewards for helping reunite items",
     icon: Trophy
   }
-]
+];

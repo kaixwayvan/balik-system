@@ -28,3 +28,48 @@ body {
   padding: 0;
   box-sizing: border-box;
 }
+
+/* Align native date picker indicator exactly with the custom icon in the home form */
+.date-input-field {
+  position: relative;
+}
+
+.date-input-field::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 1.25rem; /* Matches tailwind 'right-5' */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px; /* Matches tailwind 'size-6' (24px) */
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 10;
+}
+
+/* Seamless Scrollbar Utility */
+.seamless-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.seamless-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.seamless-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+.seamless-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* For Firefox */
+.seamless-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+}

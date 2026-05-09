@@ -32,53 +32,7 @@ const statusStyles = {
 export default function TrackItems() {
   const [filter, setFilter] = useState("All");
 
-  const items = [
-    {
-      id: "ITEM - 10137",
-      category: "Electronics - Camera",
-      location: "PUP-Main Library",
-      date: "2025 - 09 - 10",
-      time: "1 hour ago",
-      type: "Lost",
-      status: "Report Submitted",
-    },
-    {
-      id: "ITEM - 20146",
-      category: "Personal Belongings - ID",
-      location: "PUP-ITech Lab 105",
-      date: "2025 - 09 - 10",
-      time: "1 hour ago",
-      type: "Found",
-      status: "Under Review",
-    },
-    {
-      id: "ITEM - 30146",
-      category: "Personal Belongings - Green card holder",
-      location: "PUP-Lagoon",
-      date: "2025 - 09 - 10",
-      time: "1 hour ago",
-      type: "Found",
-      status: "Potential Matches Found",
-    },
-    {
-      id: "ITEM - 4625",
-      category: "Electronics - Camera",
-      location: "PUP-CEA",
-      date: "2025 - 09 - 10",
-      time: "1 hour ago",
-      type: "Lost",
-      status: "Waiting for Matches",
-    },
-    {
-      id: "ITEM - 50784",
-      category: "Personal Belongings - ID",
-      location: "PUP-COC",
-      date: "2025 - 09 - 10",
-      time: "1 hour ago",
-      type: "Found",
-      status: "Report Submission Approved",
-    },
-  ];
+  const items = [];
 
   const filteredItems = items.filter((item) => {
     if (filter === "All") return true;
@@ -104,28 +58,28 @@ export default function TrackItems() {
               color="bg-purple-500"
               title="Total Items"
               subtitle="All reported items"
-              value="6"
+              value="0"
               icon={Files}
             />
             <StatCard
               color="bg-red-500"
               title="Lost Items"
               subtitle="Currently lost"
-              value="3"
+              value="0"
               icon={Search}
             />
             <StatCard
               color="bg-green-700"
               title="Found Items"
               subtitle="Recovered items"
-              value="3"
+              value="0"
               icon={FileBadge}
             />
             <StatCard
               color="bg-green-500"
               title="Resolved"
               subtitle="Items claimed"
-              value="2"
+              value="0"
               icon={CheckCircle}
             />
           </div>

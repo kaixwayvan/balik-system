@@ -66,7 +66,7 @@ export default function ClaimModal({
         </div>
 
         {/* BODY */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+        <div className="flex-1 overflow-y-auto seamless-scrollbar px-6 py-5 space-y-6">
           {step === 1 ? (
             <>
               {/* PAGE 1 — Contact Information & Item Ownership Details */}

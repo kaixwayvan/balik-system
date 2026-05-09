@@ -10,78 +10,11 @@ import {
 } from "lucide-react";
 import DatePicker from "react-datepicker";
 
-import iphoneImg from "../../../assets/home-assets/img-items/iphone.png";
-import bagImg from "../../../assets/home-assets/img-items/bag.png";
-import keysImg from "../../../assets/home-assets/img-items/keys.png";
-import walletImg from "../../../assets/home-assets/img-items/wallet.png";
-import glassesImg from "../../../assets/home-assets/img-items/glasses.png";
-import bottleImg from "../../../assets/home-assets/img-items/bottle.png";
 
-const categories = ["All Items", "Electronics", "Accessories", "Bags"];
 
-const items = [
-  {
-    id: 1,
-    title: "iPhone 15",
-    category: "Electronics",
-    tag: "Electronics",
-    description:
-      "Black iPhone 15 with baby blue phone case, found in Main Bldg",
-    location: "PUP - Main Bldg",
-    date: "2025-11-28",
-    image: iphoneImg,
-  },
-  {
-    id: 2,
-    title: "Brown Leather Bag",
-    category: "Bags",
-    tag: "Bag",
-    description: "Brown leather bag with books inside, found in Main Library",
-    location: "PUP - Main Library",
-    date: "2025-11-28",
-    image: bagImg,
-  },
-  {
-    id: 3,
-    title: "Car Keys",
-    category: "Accessories",
-    tag: "Accessories",
-    description: "Toyota car keys remote with black fur key chains.",
-    location: "PUP - Itech Parking",
-    date: "2025-11-28",
-    image: keysImg,
-  },
-  {
-    id: 4,
-    title: "Black Leather Wallet",
-    category: "Accessories",
-    tag: "Accessories",
-    description: "YSL black leather wallet containing credit cards and ID.",
-    location: "PUP - Lagoon",
-    date: "2025-11-28",
-    image: walletImg,
-  },
-  {
-    id: 5,
-    title: "Prescription Glasses",
-    category: "Accessories",
-    tag: "Accessories",
-    description: "Black frame prescription glasses with white cleaning cloth.",
-    location: "PUP - CEA",
-    date: "2025-11-28",
-    image: glassesImg,
-  },
-  {
-    id: 6,
-    title: "Water Bottle",
-    category: "Accessories",
-    tag: "Accessories",
-    description: "White Aquaflask water bottle, found in Itech Lab 105.",
-    location: "PUP - Itech Lab 105",
-    date: "2025-11-28",
-    image: bottleImg,
-  },
-];
+const categories = ["All Items", "Electronics", "Accessories", "Bags", "Documents", "Others"];
+
+const items = [];
 
 export default function SubmitReport() {
   const [activeCategory, setActiveCategory] = useState("All Items");
@@ -341,7 +274,7 @@ export default function SubmitReport() {
             </div>
 
             {/* BODY */}
-            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+            <div className="flex-1 overflow-y-auto seamless-scrollbar px-6 py-5 space-y-6">
               {step === 1 ? (
                 <>
                   {/* PAGE 1 — Contact Information & Item Ownership Details */}

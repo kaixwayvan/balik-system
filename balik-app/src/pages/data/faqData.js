@@ -24,4 +24,4 @@ export const faqData = [
     answer:
       "False claims are minimized through NLP-based smart matching, QR code verification, and admin review. If a claim does not meet verification requirements, it is automatically rejected. Administrators have full control to invalidate suspicious or unauthorized claims, ensuring that items are released only to legitimate owners."
   }
-]
+];

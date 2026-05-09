@@ -20,9 +20,7 @@ export default function ActivityTable({ logs }) {
     page * ITEMS_PER_PAGE,
   );
 
-  useEffect(() => {
-    setPage(1);
-  }, [logs]);
+
 
   return (
     <div className="overflow-x-auto">

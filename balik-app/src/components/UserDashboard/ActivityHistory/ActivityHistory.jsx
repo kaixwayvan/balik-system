@@ -9,62 +9,7 @@ import {
   Handshake,
 } from "lucide-react";
 
-const historyData = [
-  {
-    id: 1,
-    time: "1:26 PM",
-    date: "December 9, 2025",
-    title: "Found Laptop",
-    description: "Verified by admin",
-    category: "found",
-    status: "success",
-  },
-  {
-    id: 2,
-    time: "10:48 AM",
-    date: "December 6, 2025",
-    title: "Submitted a Report",
-    description: "Status: Under Review",
-    category: "submitted",
-    status: "info",
-  },
-  {
-    id: 3,
-    time: "9:08 AM",
-    date: "November 21, 2025",
-    title: "Recovered Lost Phone",
-    description: "Claim comment",
-    category: "claims",
-    status: "file",
-  },
-  {
-    id: 4,
-    time: "6:38 PM",
-    date: "November 8, 2025",
-    title: "Claim Rejected",
-    description: "Please provide more details",
-    category: "rejected",
-    status: "error",
-  },
-  {
-    id: 5,
-    time: "10:48 AM",
-    date: "October 29, 2025",
-    title: "Email Updated",
-    description: "Change of email from user@example.com",
-    category: "account",
-    status: "neutral",
-  },
-  {
-    id: 6,
-    time: "5:52 PM",
-    date: "October 20, 2025",
-    title: "Edited a Report",
-    description: "Verified by admin",
-    category: "reported",
-    status: "edit",
-  },
-];
+const historyData = [];
 
 const statusStyles = {
   success: { icon: CheckCircle, color: "bg-green-500" },
@@ -172,12 +117,7 @@ export default function ActivityHistory() {
         })}
       </div>
 
-      {/* Pagination */}
-      <div className="flex justify-end mt-8">
-        <button className="w-10 h-10 rounded-full border flex items-center justify-center hover:bg-gray-100">
-          →
-        </button>
-      </div>
+
     </div>
   );
 }

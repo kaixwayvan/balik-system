@@ -7,48 +7,7 @@ export default function ItemTrackingPage() {
   const [status, setStatus] = useState("All");
   const [search, setSearch] = useState("");
 
-  const reports = [
-    {
-      id: 10137,
-      item: "Camera",
-      user: "Juan D.",
-      location: "PUP-Main Library",
-      activity: "Reported Submitted",
-      status: "Claimed",
-      time: "1 hour ago",
-      image: "/camera.jpg",
-    },
-    {
-      id: 40102,
-      item: "Power Bank",
-      user: "Kevin R.",
-      location: "PUP South Wing",
-      activity: "Admin requested additional details",
-      status: "Pending",
-      time: "3 hours ago",
-      image: "/powerbank.jpg",
-    },
-    {
-      id: 50988,
-      item: "Blue Backpack",
-      user: "Admin System",
-      location: "",
-      activity: "Item status updated to Claimed",
-      status: "Claimed",
-      time: "Sept 13, 2025",
-      image: "/bag.jpg",
-    },
-    {
-      id: 61277,
-      item: "Wallet",
-      user: "Anonymous",
-      location: "",
-      activity: "Duplicate report flagged",
-      status: "Flagged",
-      time: "Sept 12, 2025",
-      image: "/wallet.jpg",
-    },
-  ];
+  const reports = [];
 
   const filteredReports = reports.filter((report) => {
     const matchesStatus =

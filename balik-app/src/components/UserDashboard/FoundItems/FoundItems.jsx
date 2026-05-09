@@ -6,78 +6,35 @@ import Ring from "../../../assets/home-assets/img-items/ring.png";
 import BlackWallet from "../../../assets/home-assets/img-items/wallet-black.png";
 import Airpods from "../../../assets/home-assets/img-items/airpods.png";
 import VerifiedIcon from "@mui/icons-material/Verified";
+import ReportFoundItemModal from "../Home/ReportFoundItemModal";
 
 const stats = [
   {
     title: "Total Items",
-    value: 5,
+    value: 0,
     subtitle: "Items you reported",
     bg: "bg-blue-500",
   },
   {
     title: "Claimed",
-    value: 1,
+    value: 0,
     subtitle: "Successfully returned",
     bg: "bg-green-500",
   },
   {
     title: "Claim request",
-    value: 4,
+    value: 0,
     subtitle: "Pending review",
     bg: "bg-orange-400",
   },
 ];
 
-const reports = [
-  {
-    id: 1,
-    title: "Green Backpack",
-    desc: "Forest green backpack with laptop inside, found near Itech’s registrar’s office",
-    image: GreenBag,
-    location: "PUP-Itech Lab 105",
-    time: "6 days ago",
-    views: 150,
-    requests: 2,
-    status: "Verified",
-  },
-  {
-    id: 2,
-    title: "Diamond Yellow Golden Ring",
-    desc: "Diamond Yellow Gold engagement ring with engraving inside, found in Main campus restroom",
-    image: Ring,
-    location: "PUP-Main",
-    time: "2 days ago",
-    views: 0,
-    requests: 0,
-    status: "Pending Verification",
-  },
-  {
-    id: 3,
-    title: "Black Leather YSL Wallet",
-    desc: "YSL Black Leather Wallet containing credit cards and ID, found near the PUP Lagoon",
-    image: BlackWallet,
-    location: "PUP-Itech Lab 105",
-    time: "6 days ago",
-    views: 150,
-    requests: 1,
-    status: "Claimed",
-  },
-  {
-    id: 4,
-    title: "Samsung Galaxy Earbuds",
-    desc: "White Samsung Galaxy Buds Pro in a charging case, found in the Itech restroom",
-    image: Airpods,
-    location: "PUP-Itech Lab 105",
-    time: "6 days ago",
-    views: 150,
-    requests: 2,
-    status: "Verified",
-  },
-];
+const reports = [];
 
 export default function FoundItems() {
   const [openModal, setOpenModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   return (
     <div className="p-8 space-y-6">
@@ -90,12 +47,17 @@ export default function FoundItems() {
           </p>
         </div>
 
-        <Link to="/submitreport">
-          <button className="cursor-pointer flex items-center gap-1 bg-green-500 hover:bg-green-800 text-white px-5 py-2 rounded-lg font-medium">
-            <Plus size={13} /> Report Found Item
-          </button>
-        </Link>
+        <button 
+          onClick={() => setShowReportModal(true)}
+          className="cursor-pointer flex items-center gap-1 bg-green-500 hover:bg-green-800 text-white px-5 py-2 rounded-lg font-medium"
+        >
+          <Plus size={13} /> Report Found Item
+        </button>
       </div>
+
+      {showReportModal && (
+        <ReportFoundItemModal onClose={() => setShowReportModal(false)} />
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

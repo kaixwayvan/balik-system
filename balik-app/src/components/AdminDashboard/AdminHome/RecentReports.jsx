@@ -4,36 +4,7 @@ import { Search } from "lucide-react";
 export default function RecentReports() {
   const [filter, setFilter] = useState("All");
 
-  const items = [
-    {
-      date: "Nov 12, 2024",
-      time: "10:30 AM",
-      item: "Blue Water Bottle",
-      description: "Stainless steel, university logo sticker",
-      location: "University Library",
-      name: "Michael Chue",
-      email: "mchen@gluoglu.com",
-      contact: "(555) 123-4567",
-      status: "Verified",
-      qrStat: "Scanned",
-      aiMatch: "95% Match",
-      type: "Found",
-    },
-    {
-      date: "Nov 10, 2024",
-      time: "4:30 PM",
-      item: "Black Wallet",
-      description: "contains student ID and credit cards",
-      location: "Cafeteria",
-      name: "John Cruz",
-      email: "djmod@sophia.com",
-      contact: "(911) 123-4567",
-      status: "Pending",
-      qrStat: "Not Scanned",
-      aiMatch: "80% Match",
-      type: "Lost",
-    },
-  ];
+  const items = [];
 
   const typeStyles = (type) => {
     if (type === "Lost") return "bg-red-100 text-red-600";

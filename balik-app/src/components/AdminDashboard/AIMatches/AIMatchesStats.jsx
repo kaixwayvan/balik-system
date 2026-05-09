@@ -3,28 +3,28 @@ import { Brain, CheckCircle2, Clock, Percent } from "lucide-react";
 const stats = [
   {
     label: "Total Matches",
-    value: 127,
+    value: 0,
     icon: Brain,
     bg: "bg-purple-100",
     color: "text-purple-600",
   },
   {
     label: "Approved",
-    value: 89,
+    value: 0,
     icon: CheckCircle2,
     bg: "bg-green-100",
     color: "text-green-600",
   },
   {
     label: "Pending",
-    value: 23,
+    value: 0,
     icon: Clock,
     bg: "bg-yellow-100",
     color: "text-yellow-600",
   },
   {
     label: "Avg. Confidence",
-    value: "87%",
+    value: "0%",
     icon: Percent,
     bg: "bg-blue-100",
     color: "text-blue-600",

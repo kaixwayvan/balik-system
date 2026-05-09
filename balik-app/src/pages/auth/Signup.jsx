@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
-import { useGoogleLogin } from "@react-oauth/google";
-import { loginWithGoogle } from "../auth/services/authService";
+import { signUpWithEmail } from "../auth/services/authService";
 import BALIKLogo from "../../assets/BALIK.png";
 import StudentSupportImg from "../../assets/auth-assets/studentsupport.png";
 
 export default function Signup() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -18,10 +19,13 @@ export default function Signup() {
   const [captchaValue, setCaptchaValue] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // VALIDATION FUNCTIONS
   const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   const isMobile = (value) => /^(09|\+639)\d{9}$/.test(value);
+  const PUP_DOMAIN = "@iskolarngbayan.pup.edu.ph";
 
   const validateField = (name, value) => {
     switch (name) {
@@ -30,6 +34,9 @@ export default function Signup() {
       case "email":
         if (!value) return "Email is required.";
         if (!isEmail(value)) return "Enter a valid email.";
+        if (!value.toLowerCase().endsWith(PUP_DOMAIN)) {
+          return "Only @iskolarngbayan.pup.edu.ph emails are allowed.";
+        }
         return "";
       case "contact":
         if (!value) return "Contact number is required.";
@@ -59,23 +66,7 @@ export default function Signup() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // GOOGLE LOGIN
-  const googleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      try {
-        setLoading(true);
-        setError("");
-        await loginWithGoogle(tokenResponse.access_token);
-      } catch {
-        setError("Google signup failed. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    },
-    onError: () => setError("Google signup was cancelled."),
-  });
-
-  // FORM SUBMIT
+  // FORM SUBMIT — calls Supabase then navigates to OTP page
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -83,21 +74,29 @@ export default function Signup() {
     try {
       setLoading(true);
       setError("");
-      // BACKEND: Replace with actual signup function
-      console.log("Signup data:", form, "Captcha:", captchaValue);
-    } catch {
-      setError("Signup failed. Please try again.");
+      await signUpWithEmail({
+        fullName: form.fullName,
+        email: form.email,
+        contact: form.contact,
+        password: form.password,
+      });
+
+      // Navigate to OTP verify page, passing the email so it can be displayed
+      navigate("/verify-email", { state: { email: form.email } });
+    } catch (err) {
+      setError(err.message || "Signup failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // FIELD CHANGE (for errors)
+  // FIELD CHANGE
   const handleChange = (e) => {
     const { id, value } = e.target;
     setForm({ ...form, [id]: value });
     setErrors({ ...errors, [id]: validateField(id, value) });
   };
+
 
   return (
     <main className="relative min-h-screen flex flex-col lg:flex-row">
@@ -212,15 +211,24 @@ export default function Signup() {
               <label htmlFor="password" className="text-sm font-medium text-gray-700">
                 Password
               </label>
-              <input
-                id="password"
-                type="password"
-                value={form.password}
-                onChange={handleChange}
-                className={`w-full border rounded-md px-3 py-2 focus:ring-2 focus:outline-none ${
-                  errors.password ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-600"
-                }`}
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={form.password}
+                  onChange={handleChange}
+                  className={`w-full border rounded-md px-3 py-2 focus:ring-2 focus:outline-none pr-10 ${
+                    errors.password ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-600"
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
             </div>
 
@@ -229,15 +237,24 @@ export default function Signup() {
               <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
                 Confirm Password
               </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                className={`w-full border rounded-md px-3 py-2 focus:ring-2 focus:outline-none ${
-                  errors.confirmPassword ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-600"
-                }`}
-              />
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  className={`w-full border rounded-md px-3 py-2 focus:ring-2 focus:outline-none pr-10 ${
+                    errors.confirmPassword ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-600"
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               {errors.confirmPassword && (
                 <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
               )}
@@ -265,26 +282,7 @@ export default function Signup() {
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="my-6 flex items-center gap-3">
-            <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-sm text-gray-500">or</span>
-            <div className="flex-1 h-px bg-gray-200" />
-          </div>
 
-          {/* Google Signup */}
-          <button
-            onClick={() => googleLogin()}
-            disabled={loading}
-            className="w-full border py-2.5 rounded-md font-medium flex items-center justify-center gap-3 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50"
-          >
-            <img
-              src="https://www.pngall.com/wp-content/uploads/5/Google-G-Logo-PNG-Image.png"
-              alt="Google Logo"
-              className="w-5"
-            />
-            Continue with Google
-          </button>
 
           <p className="mt-6 text-center text-sm text-gray-600">
             Already have an account?{" "}

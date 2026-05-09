@@ -31,44 +31,7 @@ const statusActions = {
   Claimed: ["view", "coin"],
 };
 
-const foundItems = [
-  {
-    name: "Red Wallet",
-    category: "Personal Items",
-    location: "Cafeteria, Table 15",
-    submittedType: "Registered User",
-    submittedBy: "Emma Wilson",
-    time: "2025-01-26 15:20",
-    status: "Pending",
-  },
-  {
-    name: "Red Wallet",
-    category: "Personal Items",
-    location: "Cafeteria, Table 15",
-    submittedType: "Guest",
-    submittedBy: "Anonymous Guest",
-    time: "2025-01-26 15:20",
-    status: "Approved",
-  },
-  {
-    name: "Red Wallet",
-    category: "Personal Items",
-    location: "Cafeteria, Table 15",
-    submittedType: "Registered User",
-    submittedBy: "Emma Wilson",
-    time: "2025-01-26 15:20",
-    status: "Matched",
-  },
-  {
-    name: "Red Wallet",
-    category: "Personal Items",
-    location: "Cafeteria, Table 15",
-    submittedType: "Registered User",
-    submittedBy: "Emma Wilson",
-    time: "2025-01-26 15:20",
-    status: "Claimed",
-  },
-];
+const foundItems = [];
 
 function ActionIcons({ status, onView }) {
   const actions = statusActions[status];
@@ -144,13 +107,13 @@ export default function FoundItems() {
         <div className="flex items-center gap-2">
           <FaUserCircle size={15} className="text-green-600" />
           <p className="text-sm font-semibold text-gray-600">
-            Registered Users: 147
+            Registered Users: 0
           </p>
         </div>
         <div className="flex items-center gap-2">
           <FaUserCircle size={15} className="text-orange-500" />
           <p className="text-sm font-semibold text-gray-600">
-            Guest Submissions: 45
+            Guest Submissions: 0
           </p>
         </div>
       </div>

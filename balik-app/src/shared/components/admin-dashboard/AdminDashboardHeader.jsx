@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { IoNotifications } from "react-icons/io5";
+import { useProfile } from "../../../hooks/useProfile";
 import {
   ChevronDown,
   User,
@@ -12,9 +13,14 @@ import {
 } from "lucide-react";
 
 export default function AdminDashboardHeader() {
+  const { profile, loading } = useProfile();
   const [isOpen, setIsOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const dropdownRef = useRef(null);
+
+  const userName = profile?.full_name || "Administrator";
+  const avatarUrl = profile?.avatar_url
+    || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=991b1b&color=fff&size=128&bold=true`;
 
   useEffect(() => {
     const handler = (e) => {
@@ -45,11 +51,11 @@ export default function AdminDashboardHeader() {
             onClick={() => setIsOpen(!isOpen)}
             className="flex items-center gap-3 cursor-pointer"
           >
-            <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12" className="w-10 h-10 rounded-full object-cover" />
-            <div className="text-left text-sm">
-              <p className="font-medium">Jack Sparrow</p>
-              <p className="text-xs text-gray-500">System Administrator</p>
-            </div>
+            <img src={avatarUrl} className="w-10 h-10 rounded-full object-cover" alt="Admin Avatar" />
+              <div className="text-left text-sm">
+                <p className="font-medium text-black">{loading ? "Loading..." : userName}</p>
+                <p className="text-xs text-gray-500 capitalize">{profile?.role || "Administrator"}</p>
+              </div>
             <ChevronDown
               size={16}
               className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
@@ -61,10 +67,10 @@ export default function AdminDashboardHeader() {
             <div className="absolute right-0 mt-7 w-72 bg-white rounded-xl shadow-xl border border-gray-300 overflow-hidden z-50">
               {/* Profile Header */}
               <div className="flex items-center gap-3 p-4 border-b border-gray-300">
-                <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12" className="w-10 h-10 rounded-full object-cover" />
+                <img src={avatarUrl} className="w-10 h-10 rounded-full object-cover" alt="Admin Avatar" />
                 <div>
-                  <p className="font-semibold">Jack Sparrow</p>
-                  <p className="text-sm text-gray-500">System Administrator</p>
+                  <p className="font-semibold">{userName}</p>
+                  <p className="text-sm text-gray-500">{profile?.email || "admin@balik.com"}</p>
                 </div>
               </div>
 
@@ -108,8 +114,8 @@ export default function AdminDashboardHeader() {
 
               {/* Logout */}
               <Link to="/login">
-                <button className="cursor-pointer w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50">
-                  <LogOut size={18} />
+                <button className="cursor-pointer w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                  <LogOut size={18} className="text-red-600" />
                   Log Out
                 </button>
               </Link>

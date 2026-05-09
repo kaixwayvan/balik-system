@@ -15,7 +15,7 @@ export default function ClaimDetailsModal({ isOpen, onClose, claim }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white w-full max-w-lg rounded-xl shadow-lg overflow-y-auto max-h-[90vh]">
+      <div className="bg-white w-full max-w-lg rounded-xl shadow-lg overflow-y-auto seamless-scrollbar max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
           <h2 className="font-bold text-gray-800">Details</h2>

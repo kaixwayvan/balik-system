@@ -1,4 +1,6 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useProfile } from "../../../hooks/useProfile";
+import { supabase } from "../../../utils/supabaseClient";
 import {
   Trophy,
   Award,
@@ -17,9 +19,15 @@ import { GiStarsStack } from "react-icons/gi";
 import { FaPeopleGroup, FaHandsHoldingCircle } from "react-icons/fa6";
 
 export default function UserProfile() {
+  const { profile, loading } = useProfile();
   const [activeTab, setActiveTab] = useState("achievements");
   const [achievementView, setAchievementView] = useState("challenges");
   const [activeSection, setActiveSection] = useState(null);
+
+  const avatarUrl = profile?.avatar_url
+    || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || "User")}&background=991b1b&color=fff&size=128&bold=true`;
+  const userName = profile?.full_name || (loading ? "Loading..." : "---");
+  const userEmail = profile?.email || "---";
 
   return (
     <div className="p-6">
@@ -28,65 +36,60 @@ export default function UserProfile() {
         <div className="flex justify-between items-start">
           <div className="flex gap-6">
             <img
-              src="https://images.unsplash.com/photo-1527980965255-d3b416303d12"
+              src={avatarUrl}
               alt="Profile"
               className="w-28 h-28 rounded-full border border-gray-300 shadow-md object-cover"
             />
 
             <div>
-              <h2 className="text-2xl font-bold">Mike Wazowski</h2>
-              <p className="text-sm text-gray-500">mike_wazowski@gmail.com</p>
+              <h2 className="text-2xl font-bold">{userName}</h2>
+              <p 
+                className="text-sm text-gray-500 truncate max-w-[200px] md:max-w-xs" 
+                title={userEmail}
+              >
+                {userEmail}
+              </p>
 
               <p className="mt-2 text-sm italic text-gray-600">
-                “Always here to help the BALIK community”
+                “Registered User”
               </p>
 
               <div className="flex gap-4 mt-4">
                 <StatCard
                   icon={<Award size={18} />}
-                  title="5 Certificates"
+                  title="0 Certificates"
                   subtitle="Achieved"
                 />
                 <StatCard
                   icon={<Trophy size={18} />}
-                  title="Top Contributor"
+                  title="New Member"
                   subtitle="Ranked"
                 />
               </div>
             </div>
           </div>
 
-          <button
-            onClick={() => {
-              setActiveTab("settings");
-              setActiveSection("profile");
-            }}
-            className="cursor-pointer px-6 py-2 bg-blue-500 text-white rounded-3xl text-sm hover:bg-blue-600"
-          >
-            Edit Profile
-          </button>
+
         </div>
 
         {/* ================= TOP TAB SWITCH ================= */}
         <div className="flex gap-6 border-b mt-6">
           <button
             onClick={() => setActiveTab("achievements")}
-            className={`cursor-pointer pb-2 px-4 rounded-t-xl py-2 text-sm font-medium hover:bg-gray-200 ${
-              activeTab === "achievements"
+            className={`cursor-pointer pb-2 px-4 rounded-t-xl py-2 text-sm font-medium hover:bg-gray-200 ${activeTab === "achievements"
                 ? "border-b-2 border-black text-black"
                 : "text-gray-400"
-            }`}
+              }`}
           >
             Achievements
           </button>
 
           <button
             onClick={() => setActiveTab("settings")}
-            className={`cursor-pointer pb-2 px-4 py-2 rounded-t-xl text-sm font-medium hover:bg-gray-200 ${
-              activeTab === "settings"
+            className={`cursor-pointer pb-2 px-4 py-2 rounded-t-xl text-sm font-medium hover:bg-gray-200 ${activeTab === "settings"
                 ? "border-b-2 border-black text-black"
                 : "text-gray-400"
-            }`}
+              }`}
           >
             Account Settings
           </button>
@@ -122,15 +125,15 @@ function Achievements({ achievementView, setAchievementView }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white shadow-md border border-gray-300 rounded-lg p-4">
           <p className="text-sm text-gray-500">Total Points</p>
-          <h2 className="text-2xl font-semibold">950</h2>
-          <ProgressBar value={70} dark />
+          <h2 className="text-2xl font-semibold">0</h2>
+          <ProgressBar value={0} dark />
         </div>
 
         <div className="bg-white shadow-md border border-gray-300 rounded-lg p-4 flex gap-4 items-center">
           <Trophy className="text-yellow-500" />
           <div>
             <p className="text-sm text-gray-500">Task Completed</p>
-            <h2 className="text-xl font-semibold">45%</h2>
+            <h2 className="text-xl font-semibold">0%</h2>
           </div>
         </div>
       </div>
@@ -138,15 +141,8 @@ function Achievements({ achievementView, setAchievementView }) {
       {/* Badges */}
       <div className="bg-white p-5 border border-gray-300 rounded-lg shadow-md">
         <p className="font-bold mb-4">Badges Earned</p>
-        <div className="flex gap-3">
-          <Badge
-            label="First Report"
-            icon={<Award size={17} className="text-indigo-600" />}
-          />
-          <Badge
-            label="Trusted User"
-            icon={<CircleStar size={17} className="text-yellow-600" />}
-          />
+        <div className="flex gap-3 text-gray-400 text-sm italic">
+          No badges earned yet.
         </div>
       </div>
 
@@ -154,22 +150,20 @@ function Achievements({ achievementView, setAchievementView }) {
       <div className="flex gap-3 items-center">
         <button
           onClick={() => setAchievementView("challenges")}
-          className={`cursor-pointer px-8 py-2 rounded-lg text-sm font-medium ${
-            achievementView === "challenges"
+          className={`cursor-pointer px-8 py-2 rounded-lg text-sm font-medium ${achievementView === "challenges"
               ? "bg-indigo-800 text-white"
               : "border text-gray-600"
-          }`}
+            }`}
         >
           Challenges
         </button>
 
         <button
           onClick={() => setAchievementView("certificates")}
-          className={`cursor-pointer px-8 py-2 rounded-lg text-sm font-medium ${
-            achievementView === "certificates"
+          className={`cursor-pointer px-8 py-2 rounded-lg text-sm font-medium ${achievementView === "certificates"
               ? "bg-indigo-800 text-white"
               : "border text-gray-600"
-          }`}
+            }`}
         >
           Certificates
         </button>
@@ -189,37 +183,16 @@ function Achievements({ achievementView, setAchievementView }) {
 
 function ChallengesSection() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <ChallengeCard
-        icon={<GiStarsStack className="w-10 h-10 text-yellow-500" />}
-        title="Community Helper"
-        desc="Verified 20 claimed items"
-        progress={75}
-      />
-
-      <ChallengeCard
-        icon={<FaPeopleGroup className="w-10 h-10 text-cyan-400" />}
-        title="Community Hero"
-        desc="Helped recover 75 items"
-        progress={40}
-      />
-
-      <ChallengeCard
-        icon={<FaHandsHoldingCircle className="w-10 h-10 text-green-500" />}
-        title="Volunteer"
-        desc="Joined 5 community events"
-        progress={25}
-      />
+    <div className="text-center py-10 text-gray-500">
+      <p>No active challenges at the moment.</p>
     </div>
   );
 }
 
 function CertificatesSection() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <CertificateCard title="First Finder" />
-      <CertificateCard title="Trusted User" />
-      <CertificateCard title="Community Helper" />
+    <div className="text-center py-10 text-gray-500 col-span-3">
+      <p>No certificates earned yet.</p>
     </div>
   );
 }
@@ -233,11 +206,10 @@ function AccountSettings() {
       <div className="w-64 h-46 bg-white rounded-xl border border-gray-300 shadow-md py-4 space-y-2">
         <button
           onClick={() => setActiveSection("profile")}
-          className={`cursor-pointer flex items-center relative w-full flex items-center gap-2 pl-6 pr-4 pl-9 py-3 text-sm ${
-            activeSection === "profile"
+          className={`cursor-pointer flex items-center relative w-full flex items-center gap-2 pl-6 pr-4 pl-9 py-3 text-sm ${activeSection === "profile"
               ? "bg-indigo-100 text-indigo-700 font-bold"
               : "hover:bg-gray-100"
-          }`}
+            }`}
         >
           {activeSection === "profile" && (
             <span className="absolute left-0 top-0 bottom-0 w-6 bg-indigo-300" />
@@ -247,11 +219,10 @@ function AccountSettings() {
 
         <button
           onClick={() => setActiveSection("security")}
-          className={`cursor-pointer relative w-full flex items-center gap-3 pl-6 pr-4 pl-9 py-3 text-sm ${
-            activeSection === "security"
+          className={`cursor-pointer relative w-full flex items-center gap-3 pl-6 pr-4 pl-9 py-3 text-sm ${activeSection === "security"
               ? "bg-indigo-100 text-indigo-700 font-bold"
               : "hover:bg-gray-100"
-          }`}
+            }`}
         >
           {activeSection === "security" && (
             <span className="absolute left-0 top-0 bottom-0 w-6 bg-indigo-300" />
@@ -261,11 +232,10 @@ function AccountSettings() {
 
         <button
           onClick={() => setActiveSection("preferences")}
-          className={`cursor-pointer relative w-full flex items-center gap-3 pl-6 pr-4 pl-9 py-3 text-sm ${
-            activeSection === "preferences"
+          className={`cursor-pointer relative w-full flex items-center gap-3 pl-6 pr-4 pl-9 py-3 text-sm ${activeSection === "preferences"
               ? "bg-indigo-100 text-indigo-700 font-bold"
               : "hover:bg-gray-100"
-          }`}
+            }`}
         >
           {activeSection === "preferences" && (
             <span className="absolute left-0 top-0 bottom-0 w-6 bg-indigo-300" />
@@ -355,16 +325,112 @@ function CertificateCard({ title }) {
 /* Account setting sections */
 
 function ProfileSettings() {
+  const { profile } = useProfile();
   const fileInputRef = useRef(null);
-  const [avatar, setAvatar] = useState(
-    "https://images.unsplash.com/photo-1527980965255-d3b416303d12",
-  );
+
+  const nameParts = profile?.full_name?.split(" ") || [];
+  const firstName = nameParts[0] || "";
+  const lastName = nameParts.slice(1).join(" ") || "";
+
+  const [avatar, setAvatar] = useState(null);
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    mobile: "",
+    gender: "",
+  });
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState({ type: "", text: "" });
+
+  // Populate form fields once profile data is loaded from Supabase
+  useEffect(() => {
+    if (!profile) return;
+
+    const nameParts = profile.full_name?.split(" ") || [];
+    const firstName = nameParts[0] || "";
+    const lastName = nameParts.slice(1).join(" ") || "";
+
+    setFormData({
+      firstName,
+      lastName,
+      email: profile.email || "",
+      mobile: profile.mobile_number || "",
+      gender: profile.gender || "",
+    });
+
+    setAvatar(
+      profile.avatar_url
+      || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.full_name || "User")}&background=991b1b&color=fff&size=128&bold=true`
+    );
+  }, [profile]);
+
+  const handleChange = (field, value) => setFormData((p) => ({ ...p, [field]: value }));
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setAvatar(URL.createObjectURL(file));
+      setAvatarFile(file);
     }
   };
+
+  const handleSave = async () => {
+    if (!profile) return;
+    setIsSaving(true);
+    setMessage({ type: "", text: "" });
+
+    const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+
+    try {
+      let avatarUrl = profile.avatar_url;
+
+      // Upload avatar if a new file was selected
+      if (avatarFile) {
+        const fileExt = avatarFile.name.split('.').pop();
+        // The RLS policy expects the file to be inside a folder named with the user's ID!
+        const filePath = `${profile.id}/avatar.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("avatars")
+          .upload(filePath, avatarFile, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data: publicUrlData } = supabase.storage
+          .from("avatars")
+          .getPublicUrl(filePath);
+
+        avatarUrl = publicUrlData.publicUrl;
+      }
+
+      // Update profile data in Supabase
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: fullName,
+          mobile_number: formData.mobile,
+          gender: formData.gender,
+          avatar_url: avatarUrl,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", profile.id);
+
+      if (error) throw error;
+      
+      setMessage({ type: "success", text: "Profile updated successfully!" });
+      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+      setAvatarFile(null); // Clear selected file after successful save
+    } catch (err) {
+      console.error("Error updating profile:", err.message);
+      setMessage({ type: "error", text: "Failed to update profile." });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const placeholderAvatar = `https://ui-avatars.com/api/?name=User&background=991b1b&color=fff&size=128&bold=true`;
 
   return (
     <div className="space-y-6">
@@ -374,7 +440,7 @@ function ProfileSettings() {
       </h2>
       <div className="flex justify-center">
         <div className="relative">
-          <img src={avatar} className="w-28 h-28 rounded-full object-cover" />
+          <img src={avatar || placeholderAvatar} className="w-28 h-28 rounded-full object-cover" />
           <button
             onClick={() => fileInputRef.current.click()}
             className="cursor-pointer absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full shadow"
@@ -394,26 +460,34 @@ function ProfileSettings() {
 
       {/* FORM */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input label="First Name" placeholder="John" />
-        <Input label="Last Name" placeholder="Doe" />
-
-        <Input label="Email Address" placeholder="example@gmail.com" />
-        <Input label="Mobile Number" placeholder="09123456789" />
+        <Input label="First Name" value={formData.firstName} onChange={(v) => handleChange("firstName", v)} placeholder="Juan" />
+        <Input label="Last Name" value={formData.lastName} onChange={(v) => handleChange("lastName", v)} placeholder="dela Cruz" />
+        <Input label="Email Address" value={formData.email} onChange={(v) => handleChange("email", v)} placeholder="example@iskolarngbayan.pup.edu.ph" disabled />
+        <Input label="Mobile Number" value={formData.mobile} onChange={(v) => handleChange("mobile", v)} placeholder="09123456789" />
       </div>
 
       {/* Gender */}
       <div>
         <p className="text-sm font-medium mb-2">Gender (Optional)</p>
         <div className="flex gap-4">
-          <GenderOption label="Male" />
-          <GenderOption label="Female" />
+          <GenderOption label="Male" selected={formData.gender === "Male"} onChange={() => handleChange("gender", "Male")} />
+          <GenderOption label="Female" selected={formData.gender === "Female"} onChange={() => handleChange("gender", "Female")} />
         </div>
       </div>
 
       {/* Save */}
-      <div className="flex justify-end">
-        <button className="cursor-pointer px-6 py-2 bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600">
-          Save Changes
+      <div className="flex flex-col items-end gap-3">
+        {message.text && (
+          <p className={`text-sm font-medium ${message.type === "success" ? "text-green-600" : "text-red-600"}`}>
+            {message.text}
+          </p>
+        )}
+        <button
+          onClick={handleSave}
+          disabled={isSaving}
+          className="cursor-pointer px-6 py-2 bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        >
+          {isSaving ? "Saving..." : "Save Changes"}
         </button>
       </div>
     </div>
@@ -422,24 +496,32 @@ function ProfileSettings() {
 
 /* Profile setting helper functions */
 
-function Input({ label, placeholder }) {
+function Input({ label, placeholder, value, onChange, disabled }) {
   return (
     <div>
       <label className="text-sm font-medium">
-        {label} <span className="text-red-500">*</span>
+        {label} {!disabled && <span className="text-red-500">*</span>}
       </label>
       <input
         placeholder={placeholder}
-        className="mt-1 w-full placeholder:italic border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+        disabled={disabled}
+        className={`mt-1 w-full placeholder:italic border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300 ${disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""
+          }`}
       />
     </div>
   );
 }
 
-function GenderOption({ label }) {
+function GenderOption({ label, selected, onChange }) {
   return (
-    <label className="flex items-center gap-2 border rounded-lg px-4 py-2 cursor-pointer">
-      <input type="radio" name="gender" />
+    <label
+      onClick={onChange}
+      className={`flex items-center gap-2 border rounded-lg px-4 py-2 cursor-pointer transition-colors ${selected ? "border-indigo-500 bg-indigo-50 text-indigo-700" : ""
+        }`}
+    >
+      <input type="radio" name="gender" checked={selected} onChange={() => { }} className="accent-indigo-600" />
       <span className="text-sm">{label}</span>
     </label>
   );
@@ -448,6 +530,16 @@ function GenderOption({ label }) {
 /* Account setting sections */
 
 function SecurityAndPrivacy() {
+  const { profile } = useProfile();
+
+  const formatLastLogin = (timestamp) => {
+    if (!timestamp) return "---";
+    return new Intl.DateTimeFormat("en-PH", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(new Date(timestamp));
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold flex items-center gap-2">
@@ -474,16 +566,14 @@ function SecurityAndPrivacy() {
           <div className="bg-gray-100 border border-gray-200 shadow-md rounded-xl p-5">
             <p className="text-sm font-medium">Last Login</p>
             <p className="text-sm text-gray-600 mt-2">
-              December 11, 2025 – 10:45 PM
-              <br />
-              Chrome – Windows
+              {formatLastLogin(profile?.last_sign_in_at)}
             </p>
           </div>
 
           <div className="bg-gray-100 border border-gray-200 shadow-md rounded-xl p-5">
             <p className="text-sm font-medium">Active Session</p>
             <p className="text-sm text-gray-600 mt-2">
-              3 devices currently logged in
+              1 device currently logged in
             </p>
 
             <button className="cursor-pointer mt-3 px-4 py-1.5 bg-black hover:bg-gray-700 text-white text-xs rounded-md">
@@ -579,14 +669,12 @@ function ThemeToggle() {
   return (
     <div
       onClick={() => setDarkMode(!darkMode)}
-      className={`w-11 h-6 rounded-full relative cursor-pointer transition-colors ${
-        darkMode ? "bg-gray-700" : "bg-gray-300"
-      }`}
+      className={`w-11 h-6 rounded-full relative cursor-pointer transition-colors ${darkMode ? "bg-gray-700" : "bg-gray-300"
+        }`}
     >
       <div
-        className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${
-          darkMode ? "translate-x-5" : "translate-x-1"
-        }`}
+        className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${darkMode ? "translate-x-5" : "translate-x-1"
+          }`}
       />
     </div>
   );

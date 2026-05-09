@@ -83,20 +83,8 @@ export default function UserDashboardSidebar() {
             Achievements
           </p>
 
-          <div className="cursor-not-allowed flex items-start gap-3 bg-yellow-100 p-3 rounded-lg mb-2">
-            <Award className="text-yellow-600 mt-1" size={20} />
-            <div>
-              <p className="font-medium text-yellow-700">Helper Badge</p>
-              <p className="text-xs text-yellow-600">5 items helped return</p>
-            </div>
-          </div>
-
-          <div className="cursor-not-allowed flex items-start gap-3 bg-blue-100 p-3 rounded-lg">
-            <CircleStar className="text-blue-800 mt-1" size={20} />
-            <div>
-              <p className="font-medium text-blue-800">Active Reporter</p>
-              <p className="text-xs text-blue-800">10+ reports submitted</p>
-            </div>
+          <div className="text-center py-4 border-2 border-dashed border-gray-100 rounded-lg">
+            <p className="text-xs text-gray-400 italic">No achievements yet</p>
           </div>
         </div>
       </nav>

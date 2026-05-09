@@ -3,6 +3,7 @@ import RootLayout from "./shared/components/layouts/RootLayout";
 import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
+import VerifyEmail from "./pages/auth/VerifyEmail";
 
 import DashboardHome from "./pages/user-dashboard/DashboardHome";
 import DashboardSearch from "./components/UserDashboard/SearchItems/SearchItems";
@@ -30,6 +31,9 @@ import AdminDashboardLayout from "./shared/components/layouts/AdminDashboardLayo
 import SubmitReport from "./components/UserDashboard/Home/SubmitReport";
 import AdminReport from "./components/AdminDashboard/AdminHome/AdminReport";
 import ComingSoonPage from "./pages/ComingSoonPage";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfUse from "./pages/TermsOfUse";
+import AboutUs from "./pages/AboutUs";
 
 function App() {
   return (
@@ -42,9 +46,13 @@ function App() {
       {/* Pages without layout */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/comingsoon" element={<ComingSoonPage />} />
       <Route path="/submitreport" element={<SubmitReport />} />
       <Route path="/adminreport" element={<AdminReport />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/terms-of-service" element={<TermsOfUse />} />
+      <Route path="/about-us" element={<AboutUs />} />
 
       {/* Dashboard with its own layout */}
       <Route element={<UserDashboardLayout />}>

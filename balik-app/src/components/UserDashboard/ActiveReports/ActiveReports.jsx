@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import ReportCard from "./ReportCard";
 import ConfirmMatchModal from "./ConfirmMatchModal";
 import ClaimModal from "./ClaimModal";
+import ReportLostItemModal from "../Home/ReportLostItemModal";
 
 import Id from "../../../assets/home-assets/img-items/id.png";
 import Camera from "../../../assets/home-assets/img-items/camera.png";
@@ -34,44 +35,13 @@ export const STATUS_STYLES = {
   },
 };
 
-const reports = [
-  {
-    id: 1,
-    title: "ID Card",
-    description: "ID Card with Silver Star key-chain",
-    image: Id,
-    location: "PUP-ITECH Lab 105",
-    timeAgo: "6 days ago",
-    progress: 60,
-    status: "matches",
-  },
-  {
-    id: 2,
-    title: "Camera",
-    description: "Pink Sony Digital Camera with camera jewelry",
-    image: Camera,
-    location: "PUP-CEA",
-    timeAgo: "3 days ago",
-    progress: 30,
-    status: "searching",
-  },
-  {
-    id: 3,
-    title: "Card Holder",
-    description:
-      "Dark green card holder with yellow stitchings on the side, along with the cards inside",
-    image: GreenWallet,
-    location: "PUP-Lagoon",
-    timeAgo: "1 day ago",
-    progress: 100,
-    status: "claimed",
-  },
-];
+const reports = [];
 
 export default function ActiveReports() {
   const [openReportId, setOpenReportId] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showClaim, setShowClaim] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const [step, setStep] = useState(1);
 
   const [form, setForm] = useState({
@@ -94,7 +64,7 @@ export default function ActiveReports() {
   });
 
   const [errors, setErrors] = useState({});
-  const categories = ["ID", "Wallet", "Electronics", "Others"];
+  const categories = ["Electronics", "Accessories", "Bags", "Documents", "Others"];
 
   useEffect(() => {
     document.body.style.overflow =
@@ -112,12 +82,17 @@ export default function ActiveReports() {
           </p>
         </div>
 
-        <Link to="/submitreport">
-          <button className="cursor-pointer flex items-center gap-1 bg-red-700 hover:bg-red-800 text-white px-5 py-2 rounded-lg font-medium">
-            <Plus size={13} /> Report Lost Item
-          </button>
-        </Link>
+        <button 
+          onClick={() => setShowReportModal(true)}
+          className="cursor-pointer flex items-center gap-1 bg-red-700 hover:bg-red-800 text-white px-5 py-2 rounded-lg font-medium"
+        >
+          <Plus size={13} /> Report Lost Item
+        </button>
       </div>
+
+      {showReportModal && (
+        <ReportLostItemModal onClose={() => setShowReportModal(false)} />
+      )}
 
       {/* REPORT LIST */}
       <div className="space-y-6">

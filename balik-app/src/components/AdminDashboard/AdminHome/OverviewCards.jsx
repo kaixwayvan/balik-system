@@ -10,19 +10,19 @@ export default function OverviewCards() {
   const badges = [
     {
       name: "Good Samaritan",
-      count: 24,
+      count: 0,
       icon: HeartHandshake,
       color: "text-rose-500 bg-rose-100",
     },
     {
       name: "Super Finder",
-      count: 8,
+      count: 0,
       icon: Search,
       color: "text-blue-500 bg-blue-100",
     },
     {
       name: "Campus Finder",
-      count: 3,
+      count: 0,
       icon: Medal,
       color: "text-purple-500 bg-purple-100",
     },
@@ -40,7 +40,7 @@ export default function OverviewCards() {
         </div>
 
         <div className="flex flex-col justify-center items-center gap-1">
-          <p className="text-3xl font-bold text-green-600">2,450</p>
+          <p className="text-3xl font-bold text-green-600">0</p>
           <p className="text-sm text-gray-500 mb-2">Total Points Awarded</p>
           <div className="flex justify-center items-center gap-1">
             <ArrowBigUpDash
@@ -49,7 +49,7 @@ export default function OverviewCards() {
               strokeWidth={2.4}
             />
             <p className="text-sm font-bold text-green-600">
-              +18% from last month
+              0% from last month
             </p>
           </div>
         </div>
@@ -65,13 +65,13 @@ export default function OverviewCards() {
         </div>
 
         <div className="flex justify-center">
-          <div className="p-4 rounded-full bg-gradient-to-b from-[#FFD587] to-[#A1640E] flex items-center justify-center">
+          <div className="p-4 rounded-full bg-gradient-to-b from-gray-200 to-gray-400 flex items-center justify-center">
             <Trophy className="text-white" size={36} strokeWidth={1.5} />
           </div>
         </div>
 
-        <p className="mt-3 font-semibold">Rosmar Lamna</p>
-        <p className="text-sm text-gray-500">850 points</p>
+        <p className="mt-3 font-semibold">No data</p>
+        <p className="text-sm text-gray-500">0 points</p>
       </div>
 
       {/* Earned Badges */}

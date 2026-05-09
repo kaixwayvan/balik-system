@@ -1,12 +1,12 @@
 import { Search, Waves, Clock, SquaresExclude, QrCode, UserSearch } from "lucide-react";
 
 const stats = [
-  { icon: Search, value: 248, label: "Total Lost Items", change: "+12%", css: "text-red-500 bg-red-200" },
-  { icon: Waves, value: 192, label: "Total Found Items", change: "+8%", css: "text-green-600 bg-green-200" },
-  { icon: Clock, value: 89, label: "Successful Claims", change: "+15%", css: "text-blue-700 bg-blue-200" },
-  { icon: SquaresExclude, value: 156, label: "AI Matches", change: "+22%", css: "text-purple-600 bg-purple-200" },
-  { icon: QrCode, value: 73, label: "QR Verified items", change: "+5%", css: "text-yellow-600 bg-yellow-200" },
-  { icon: UserSearch, value: 45, label: "Guest Found Reports", change: "-3%", css: "text-violet-600 bg-violet-200" },
+  { icon: Search, value: 0, label: "Total Lost Items", change: "0%", css: "text-red-500 bg-red-200" },
+  { icon: Waves, value: 0, label: "Total Found Items", change: "0%", css: "text-green-600 bg-green-200" },
+  { icon: Clock, value: 0, label: "Successful Claims", change: "0%", css: "text-blue-700 bg-blue-200" },
+  { icon: SquaresExclude, value: 0, label: "AI Matches", change: "0%", css: "text-purple-600 bg-purple-200" },
+  { icon: QrCode, value: 0, label: "QR Verified items", change: "0%", css: "text-yellow-600 bg-yellow-200" },
+  { icon: UserSearch, value: 0, label: "Guest Found Reports", change: "0%", css: "text-violet-600 bg-violet-200" },
 ];
 
 export default function StatCards() {

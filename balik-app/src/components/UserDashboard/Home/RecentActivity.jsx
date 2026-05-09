@@ -7,38 +7,7 @@ import {
   SearchCheck,
 } from "lucide-react";
 
-const activities = [
-  {
-    text: "Lost item reported: iPhone 15 Pro",
-    history: "Yesterday, 3:45 PM",
-    icon: Smartphone,
-  },
-  {
-    text: "Reported found item",
-    history: "12 minutes ago",
-    icon: Package,
-  },
-  {
-    text: "Edited a lost report",
-    history: "1 hour ago",
-    icon: Edit3,
-  },
-  {
-    text: "Submitted a claiming request",
-    history: "Janury 22, 2026",
-    icon: ClipboardCheck,
-  },
-  {
-    text: "Updated profile",
-    history: "3 hours ago",
-    icon: User,
-  },
-  {
-    text: "Item claiming request has been approved",
-    history: "7 hours ago",
-    icon: SearchCheck,
-  },
-];
+const activities = [];
 
 const colors = [
   { bubble: "bg-red-100", icon: "text-red-600" },
@@ -68,8 +37,8 @@ export default function RecentActivity() {
         {activities.map((a, i) => {
           const Icon = a.icon;
 
-          // Pick a random color
-          const color = colors[Math.floor(Math.random() * colors.length)];
+          // Pick a stable color based on index
+          const color = colors[i % colors.length];
 
           return (
             <li key={i} className="flex items-center gap-3">

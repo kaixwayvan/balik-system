@@ -10,41 +10,7 @@ import { SquaresExclude } from "lucide-react";
 
 const headers = ["Lost Item", "Found Item", "Confidence", "Status", "Actions"];
 
-const defaultMatches = [
-  {
-    id: 1,
-    lost: "Blue Nike Backpack",
-    lostEmail: "john.doe@gmail.com",
-    lostDate: "1/15/2024",
-    found: "Blue Backpack",
-    foundEmail: "jane.smith@gmail.com",
-    foundDate: "1/16/2024",
-    confidence: 95,
-    status: "Pending",
-  },
-  {
-    id: 2,
-    lost: "Blue Nike Backpack",
-    lostEmail: "john.doe@gmail.com",
-    lostDate: "1/15/2024",
-    found: "Blue Backpack",
-    foundEmail: "jane.smith@gmail.com",
-    foundDate: "1/16/2024",
-    confidence: 88,
-    status: "Pending",
-  },
-  {
-    id: 3,
-    lost: "Blue Nike Backpack",
-    lostEmail: "john.doe@gmail.com",
-    lostDate: "1/15/2024",
-    found: "Blue Backpack",
-    foundEmail: "jane.smith@gmail.com",
-    foundDate: "1/16/2024",
-    confidence: 95,
-    status: "Approved",
-  },
-];
+const defaultMatches = [];
 
 export default function AIMatchesTable({ matches }) {
   const data = matches?.length ? matches : defaultMatches;

@@ -8,22 +8,22 @@ import {
 const stats = [
   {
     label: "Items Claimed",
-    value: 8,
+    value: 0,
     icon: Trophy,
   },
   {
     label: "Lost Items",
-    value: 9,
+    value: 0,
     icon: Search,
   },
   {
     label: "Found Items",
-    value: 9,
+    value: 0,
     icon: Package,
   },
   {
     label: "Total Reports",
-    value: 9,
+    value: 0,
     icon: BarChart3,
   },
 ];

@@ -1,22 +1,22 @@
 export const statsData = [
   {
     title: "Total Users",
-    value: 127,
+    value: 0,
     type: "users",
   },
   {
     title: "Active Today",
-    value: 89,
+    value: 0,
     type: "active",
   },
   {
     title: "Rewards Issued",
-    value: 23,
+    value: 0,
     type: "rewards",
   },
   {
     title: "Avg. Task Completion",
-    value: 68,
+    value: 0,
     type: "completion",
   },
 ];
@@ -25,17 +25,17 @@ export const badgesData = [
   {
     title: "First Report",
     description: "Auto-awarded after first verified report",
-    users: 90,
+    users: 0,
   },
   {
     title: "Trusted User",
     description: "90% Successful claims",
-    users: 40,
+    users: 0,
   },
   {
     title: "Consistent Reporter",
     description: "5 verified reports",
-    users: 60,
+    users: 0,
   },
 ];
 
@@ -70,8 +70,4 @@ export const levelRulesData = [
   },
 ];
 
-export const auditLogsData = [
-  "User #104 reached Level 3",
-  "Trusted Finder Certificate issued to User #112",
-  "Consistent Reporter Badge issued to User #087",
-];
+export const auditLogsData = [];

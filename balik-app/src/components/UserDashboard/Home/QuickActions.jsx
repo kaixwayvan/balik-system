@@ -2,9 +2,13 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { Plus, Search, MapPin, History, User, AlertTriangle } from "lucide-react";
+import ReportFoundItemModal from "./ReportFoundItemModal";
+import ReportLostItemModal from "./ReportLostItemModal";
 
 export default function QuickActions() {
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showFoundModal, setShowFoundModal] = useState(false);
+  const [showLostModal, setShowLostModal] = useState(false);
   const navigate = useNavigate();
 
   const actions = [
@@ -45,7 +49,7 @@ export default function QuickActions() {
         </div>
       </div>
 
-      {/* MODAL */}
+      {/* CHOOSE REPORT TYPE MODAL */}
       {showReportModal && (
         <div
           className="h-full fixed inset-0 z-50 flex items-center justify-center"
@@ -54,7 +58,7 @@ export default function QuickActions() {
           <div className="bg-white border border-gray-300 w-full max-w-lg rounded-xl p-6 shadow-2xl">
             <h3 className="text-xl font-bold mb-2">Choose Report Type</h3>
 
-            <div className="flex items-start gap-3 bg-red-40 border border-red-200 rounded-lg p-3 mb-6">
+            <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-lg p-3 mb-6">
               <div className="bg-red-500 text-white rounded-full p-2 flex items-center justify-center">
                 <AlertTriangle size={16} />
               </div>
@@ -66,27 +70,45 @@ export default function QuickActions() {
             </div>
 
             <div className="space-y-3">
-              <Link to="/submitreport">
-                <button className="cursor-pointer w-full bg-red-700 text-white py-3 rounded-lg mb-4">
-                  + Report Lost Item
-                </button>
-              </Link>
+              <button 
+                onClick={() => {
+                  setShowReportModal(false);
+                  setShowLostModal(true);
+                }}
+                className="cursor-pointer w-full bg-red-700 text-white py-3 rounded-lg mb-4 hover:bg-red-800 transition"
+              >
+                + Report Lost Item
+              </button>
 
-              <Link to="/submitreport">
-                <button className="cursor-pointer w-full bg-blue-600 text-white py-3 rounded-lg mb-4">
-                  + Report Found Item
-                </button>
-              </Link>
+              <button 
+                onClick={() => {
+                  setShowReportModal(false);
+                  setShowFoundModal(true);
+                }}
+                className="cursor-pointer w-full bg-blue-600 text-white py-3 rounded-lg mb-4 hover:bg-blue-700 transition"
+              >
+                + Report Found Item
+              </button>
 
               <button
                 onClick={() => setShowReportModal(false)}
-                className="cursor-pointer w-full bg-gray-200 font-bold text-gray-700 py-2 rounded-lg"
+                className="cursor-pointer w-full bg-gray-200 font-bold text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition"
               >
                 Cancel
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* FOUND ITEM MODAL */}
+      {showFoundModal && (
+        <ReportFoundItemModal onClose={() => setShowFoundModal(false)} />
+      )}
+
+      {/* LOST ITEM MODAL */}
+      {showLostModal && (
+        <ReportLostItemModal onClose={() => setShowLostModal(false)} />
       )}
     </>
   );
