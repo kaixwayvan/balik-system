@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
 import { motion } from "framer-motion";
@@ -27,6 +27,10 @@ import ColorPicker from "../shared/components/ColorPicker";
 import MapPicker from "../shared/components/MapPicker";
 
 function Home() {
+  useEffect(() => {
+    document.title = "BALIK — Lost & Found System";
+  }, []);
+
   const [formData, setFormData] = useState({
     whatWasFound: "",
     itemCategory: "",
@@ -142,7 +146,7 @@ function Home() {
           >
             <Link
               to="/login"
-              className="block text-center whitespace-nowrap cursor-pointer md:-translate-y-2 lg:-translate-y-12 md:translate-x-0 lg:translate-x-5 bg-[#E30000] text-white text-base md:text-sm lg:text-lg font-bold px-10 lg:px-15 py-4 rounded-full shadow-lg border border-[#a11010] hover:bg-[#230000de] hover:shadow-2xl transition-all duration-300 w-full"
+              className="block text-center whitespace-nowrap cursor-pointer md:-translate-y-2 lg:-translate-y-12 md:translate-x-0 lg:translate-x-5 bg-[#E30000] text-white text-base md:text-lg lg:text-lg font-bold px-10 md:px-12 lg:px-15 py-4 rounded-full shadow-lg border border-[#a11010] hover:bg-[#230000de] hover:shadow-2xl transition-all duration-300 w-full"
             >
               Report Lost Item
             </Link>

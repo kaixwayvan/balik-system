@@ -4,6 +4,7 @@ import RootLayout from "./shared/components/layouts/RootLayout";
 import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
+import ForgotPassword from "./pages/auth/ForgotPassword";
 
 import DashboardHome from "./pages/user-dashboard/DashboardHome";
 import DashboardSearch from "./components/UserDashboard/SearchItems/SearchItems";
@@ -49,6 +50,7 @@ function App() {
         {/* Pages without layout */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/comingsoon" element={<ComingSoonPage />} />
         <Route path="/submitreport" element={<SubmitReport />} />
         <Route path="/adminreport" element={<AdminReport />} />

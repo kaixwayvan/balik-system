@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
+import { createPortal } from "react-dom";
 import { useState } from "react";
 import BALIKLogo from "../../../assets/BALIK.png";
 import { X } from "lucide-react";
@@ -14,7 +15,7 @@ function Header() {
   };
 
   return (
-    <header className="top-0 z-50 relative">
+    <header className="top-0 z-100 relative">
       <nav className="absolute top-0 left-0 w-full flex items-center justify-between px-6 py-4">
         {/* Logo */}
         <Link to="/">
@@ -67,7 +68,7 @@ function Header() {
 
       {/* Fullscreen Mobile Menu */}
       {menuOpen && (
-        <div className="fixed inset-0 z-[100] flex flex-col font-sans overflow-y-auto overflow-x-hidden bg-[#FCF8F5]">
+        <div className="fixed inset-0 flex flex-col font-sans overflow-y-auto overflow-x-hidden bg-[#FCF8F5] z-[999] !important">
           {/* --- BACKGROUND ARCHITECTURE --- */}
           <div className="absolute inset-0 pointer-events-none z-0">
             {/* 1. Base Mesh/Atmosphere */}
@@ -116,7 +117,7 @@ function Header() {
           </div>
 
           {/* --- CONTENT LAYER --- */}
-          <div className="relative z-10 flex flex-col min-h-screen max-w-6xl mx-auto w-full px-8 md:px-16 py-12">
+          <div className="relative flex flex-col min-h-screen max-w-6xl mx-auto w-full px-8 md:px-16 py-12">
             {/* Top Bar: Logo & Close */}
             <div className="flex justify-between items-center mb-20">
               <Link to="/" onClick={() => setMenuOpen(false)}>

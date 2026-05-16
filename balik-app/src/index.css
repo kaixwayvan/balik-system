@@ -16,6 +16,7 @@
   color-scheme: light dark;
   color: #230000de;
   background-color: #ffffff;
+  overscroll-behavior: none;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;

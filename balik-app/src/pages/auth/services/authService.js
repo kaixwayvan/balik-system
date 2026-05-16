@@ -1,7 +1,7 @@
 import axios from "axios"
 
-export const loginWithGoogle = async (accessToken) => {
-  return axios.post("http://localhost:5000/api/auth/google", {
+export const loginWithMicrosoft = async (accessToken) => {
+  return axios.post("http://localhost:5000/api/auth/microsoft", {
     access_token: accessToken,
   })
 }
