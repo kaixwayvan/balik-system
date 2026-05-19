@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from "react";
 import {
-  ShieldCheck,
-  Lock,
-  Eye,
-  Users,
+  Globe,
   Database,
-  FileText,
-  Settings,
-  Bell,
-  HelpCircle,
-  ChevronRight,
+  Workflow,
+  Scale,
+  Share2,
+  Archive,
+  ShieldCheck,
+  UserCog,
+  Cookie,
+  Bot,
+  Boxes,
+  ShieldAlert,
+  RefreshCw,
+  Info,
   CheckCircle2,
   Menu,
   X,
@@ -28,20 +32,20 @@ export default function PrivacyPolicy() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const sections = [
-    { id: "scope", title: "Scope of This Policy", icon: Eye },
+    { id: "scope", title: "Scope of This Policy", icon: Globe },
     { id: "collection", title: "Information We Collect", icon: Database },
-    { id: "usage", title: "How We Use Your Information", icon: Settings },
-    { id: "legal", title: "Legal Basis for Processing", icon: ShieldCheck },
-    { id: "sharing", title: "Data Sharing and Disclosure", icon: Users },
-    { id: "retention", title: "Data Retention Policy", icon: Lock },
+    { id: "usage", title: "How We Use Your Information", icon: Workflow },
+    { id: "legal", title: "Legal Basis for Processing", icon: Scale },
+    { id: "sharing", title: "Data Sharing and Disclosure", icon: Share2 },
+    { id: "retention", title: "Data Retention Policy", icon: Archive },
     { id: "security", title: "Data Security Measures", icon: ShieldCheck },
-    { id: "rights", title: "User Rights and Control", icon: Settings },
-    { id: "cookies", title: "Cookies and Tracking", icon: FileText },
-    { id: "gamification", title: "Gamification & Automation", icon: Settings },
-    { id: "thirdparty", title: "Third-Party Services", icon: Users },
+    { id: "rights", title: "User Rights and Control", icon: UserCog },
+    { id: "cookies", title: "Cookies and Tracking", icon: Cookie },
+    { id: "gamification", title: "Gamification & Automation", icon: Bot },
+    { id: "thirdparty", title: "Third-Party Services", icon: Boxes },
     { id: "liability", title: "Limitations of Liability", icon: ShieldCheck },
-    { id: "updates", title: "Updates to This Policy", icon: Bell },
-    { id: "contact", title: "Contact Information", icon: HelpCircle },
+    { id: "updates", title: "Updates to This Policy", icon: ShieldAlert },
+    { id: "contact", title: "Contact Information", icon: Info },
   ];
 
   const scrollToSection = (id) => {
@@ -84,9 +88,11 @@ export default function PrivacyPolicy() {
 
   return (
     <div className="min-h-screen bg-[#FDF8F5] font-sans text-slate-900 selection:bg-[#F2E4DC] selection:text-[#520000] overflow-x-hidden relative">
+      {/* Imported Header */}
       <Header />
-      {/* Top Header Background Elements */}
-      <div className="absolute top-0 left-0 w-full h-[100px] sm:h-[120px] md:h-[125px] lg:h-[130px] bg-white border-b border-[#B0570C]/40 overflow-hidden pointer-events-none z-40">
+      
+      {/* Header Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-[140px] sm:h-[120px] md:h-[150px] lg:h-[150px] bg-white border-b border-[#B0570C]/40 overflow-hidden pointer-events-none z-40">
         <div className="absolute -top-10 left-[10%] w-[400px] h-[400px] bg-[#F2E4DC]/40 rounded-full blur-3xl"></div>
 
         <div className="absolute top-[-50px] right-[20%] w-[300px] h-[300px] bg-[#520000]/5 rounded-full blur-3xl"></div>
@@ -102,9 +108,9 @@ export default function PrivacyPolicy() {
         ></div>
       </div>
 
-      {/* HERO SECTION */}
+      {/* Hero Section */}
       <div
-        className="relative w-full h-[400px] bg-white/20 backdrop-blur-2xl overflow-hidden flex flex-col items-center justify-center pt-20 border-b border-gray-200"
+        className="relative w-full mt-10 h-[400px] bg-white/20 backdrop-blur-2xl overflow-hidden flex flex-col items-center justify-center pt-20 border-b border-gray-200"
         style={{
           backgroundColor: "#f4dcdc",
           backgroundImage: `
@@ -132,7 +138,7 @@ export default function PrivacyPolicy() {
           ></div>
 
           {/* Background Text "LOST" */}
-          <div className="font-['Zalando_Sans_Expanded'] absolute top-[80px] md:top-[130px] left-[10%] md:left-[6%] lg:left-[6%] text-[100px] font-black text-[#F0CFC2] transform rotate-0 md:-rotate-4 lg:-rotate-5 opacity-90 select-none tracking-tighter">
+          <div className="font-['Zalando_Sans_Expanded'] absolute top-[80px] md:top-[130px] left-[10%] md:left-[3%] lg:left-[6%] text-[100px] font-black text-[#F0CFC2] transform rotate-0 md:-rotate-4 lg:-rotate-5 opacity-90 select-none tracking-tighter">
             LOST
           </div>
 
@@ -147,8 +153,8 @@ export default function PrivacyPolicy() {
           </div>
         </div>
 
-        {/* CONTENT */}
-        <div className="relative z-10 text-center mt-4 md:mt-20 lg:mt-20 bg-white/10 backdrop-blur-2xl py-8 px-10 mx-12 lg:mx-0 md:mx-0 md:px-14 rounded-[3rem] border border-white/20 shadow-2xl shadow-black/10">
+        {/* Content */}
+        <div className="relative z-10 text-center mt-4 md:mt-10 lg:mt-20 bg-white/10 backdrop-blur-2xl py-8 px-10 mx-12 lg:mx-0 md:mx-0 md:px-14 rounded-[3rem] border border-white/20 shadow-2xl shadow-black/10">
           <h1 className="font-['Zalando_Sans_Expanded'] text-5xl md:text-[54px] font-black tracking-tight text-[#333333] mb-3">
             Privacy Policy
           </h1>
@@ -158,25 +164,25 @@ export default function PrivacyPolicy() {
         </div>
       </div>
 
-      {/* MOBILE TOC BUTTON */}
+      {/* Mobile Button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="cursor-pointer lg:hidden fixed bottom-6 right-6 z-99 bg-[#520000] text-white p-4 rounded-full shadow-2xl shadow-[#520000]/30 hover:scale-105 transition-all"
+        className="cursor-pointer lg:hidden fixed bottom-6 right-6 z-98 bg-[#520000] text-white p-4 rounded-full shadow-2xl shadow-[#520000]/30 hover:scale-105 transition-all"
       >
         <Menu size={24} />
       </button>
 
       <div className="font-['Plus_Jakarta_Sans'] container mx-auto px-6 py-12 relative">
         <div className="flex flex-col lg:flex-row gap-16 relative">
-          {/* FULL HEIGHT SIDEBAR (LEFT SIDE) */}
+          {/* Sidebar Blur (Mobile) */}
           <div
             onClick={() => setSidebarOpen(false)}
-            className={`lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-100 transition-all duration-300 ${
+            className={`lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] transition-all duration-300 ${
               sidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"
             }`}
           />
 
-          {/* SIDEBAR */}
+          {/* Sidebar */}
           <aside
             className={`
               fixed lg:sticky
@@ -184,7 +190,7 @@ export default function PrivacyPolicy() {
               left-0
               h-screen lg:h-fit
               w-[85%] max-w-[340px] lg:w-80
-              z-101
+              z-[101]
               bg-[#FDF8F5]/95
               backdrop-blur-2xl
               border-r lg:border border-[#DBC9C0]/40
@@ -197,7 +203,7 @@ export default function PrivacyPolicy() {
               ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
             `}
           >
-            {/* HEADER */}
+            {/* Header */}
             <div className="p-6 pb-3 flex items-center justify-between">
               <p className="text-[10px] font-black text-[#520000]/40 uppercase tracking-[0.2em]">
                 On this page
@@ -211,7 +217,7 @@ export default function PrivacyPolicy() {
               </button>
             </div>
 
-            {/* NAVIGATION */}
+            {/* Navigation */}
             <nav className="space-y-1 px-2">
               {sections.map((section) => (
                 <button
@@ -242,7 +248,7 @@ export default function PrivacyPolicy() {
               ))}
             </nav>
 
-            {/* FOOTER CARD */}
+            {/* Sidebar Footer */}
             <div className="mt-6 p-6 pt-7 border-t border-[#F2E4DC]">
               <div className="bg-white p-4 rounded-2xl border border-[#DBC9C0]/30">
                 <p className="text-[10px] font-semibold text-[#520000]/40 uppercase tracking-widest mb-2">
@@ -259,7 +265,7 @@ export default function PrivacyPolicy() {
             </div>
           </aside>
 
-          {/* MAIN CONTENT AREA */}
+          {/* Articles */}
           <article className="flex-1 max-w-4xl space-y-24 pb-32">
             {/* INTRODUCTION CARD */}
             <section className="bg-white rounded-[2.5rem] p-10 md:p-14 shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-[#DBC9C0]/30">
@@ -747,7 +753,7 @@ export default function PrivacyPolicy() {
         </div>
       </div>
 
-      {/* FOOTER IMPORTED FROM PARTIALS */}
+      {/* Imported Footer */}
       <Footer />
 
       <style>{`

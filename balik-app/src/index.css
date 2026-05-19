@@ -15,7 +15,6 @@
   line-height: 1.5;
   color-scheme: light dark;
   color: #230000de;
-  background-color: #ffffff;
   overscroll-behavior: none;
 
   font-synthesis: none;
@@ -25,7 +24,14 @@
 }
 
 body {
+  background-color: #f7e6dc;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+.w-full.flex.flex-col.flex-1 {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
 }

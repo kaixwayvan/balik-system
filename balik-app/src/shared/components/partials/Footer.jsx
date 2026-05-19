@@ -1,7 +1,30 @@
-import { Link } from "react-router-dom"; // Added missing import
+import { Link } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
+import { motion } from "framer-motion"; // Added motion import
 import BALIKLogo from "../../../assets/BALIK.png";
 import { Navigation, Phone, Mail } from "lucide-react";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+};
 
 function Footer() {
   const footerSections = [
@@ -21,11 +44,18 @@ function Footer() {
 
   return (
     <footer id="footer" className="bg-[#F2E4DC] border-t border-[#DBC9C0]">
-      <div className="max-w-8xl mx-auto py-16 px-6 md:px-10">
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-80px" }}
+        className="max-w-8xl mx-auto py-16 px-6 md:px-10"
+      >
         {/* Top Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-9 gap-8">
-          {/* Brand */}
-          <div className="lg:col-span-2">
+          
+          {/* Branding */}
+          <motion.div variants={itemVariants} className="lg:col-span-2">
             <HashLink smooth to="/#home">
               <img
                 src={BALIKLogo}
@@ -38,17 +68,17 @@ function Footer() {
               Reuniting people with their belongings through AI-powered smart
               matching and verified community reporting.
             </p>
-          </div>
+          </motion.div>
 
+          {/* Link Columns */}
           {footerSections.map((section, index) => (
-            <div key={index} className="lg:col-span-1">
+            <motion.div key={index} variants={itemVariants} className="lg:col-span-1">
               <h4 className="font-bold text-lg text-[#520000] mb-4">
                 {section.title}
               </h4>
               <ul className="space-y-3 text-gray-700">
                 {section.links.map((link, i) => {
                   const linkMap = {
-                    // Adjusted these to match standard scrolling behavior
                     "How It Works": "/#how-it-works", 
                     FAQs: "/#faqs",
                     "Success Stories": "/#success-stories",
@@ -57,8 +87,6 @@ function Footer() {
                     "Terms of Use": "/terms-of-service",
                   };
                   const href = linkMap[link] || "#";
-                  
-                  // Use HashLink for anchors, Link for separate pages
                   const isAnchor = href.includes("#");
                   
                   return (
@@ -83,11 +111,11 @@ function Footer() {
                   );
                 })}
               </ul>
-            </div>
+            </motion.div>
           ))}
 
           {/* Contact Section */}
-          <div className="lg:col-span-2">
+          <motion.div variants={itemVariants} className="lg:col-span-2">
             <h4 className="font-bold text-lg text-[#520000] mb-4">Contact</h4>
             <ul className="space-y-4 text-gray-700">
               <li className="flex items-start gap-3">
@@ -108,10 +136,10 @@ function Footer() {
                 </a>
               </li>
             </ul>
-          </div>
+          </motion.div>
 
           {/* Operating Hours Section */}
-          <div className="lg:col-span-2">
+          <motion.div variants={itemVariants} className="lg:col-span-2">
             <h4 className="font-bold text-lg text-[#520000] mb-4">
               Operating Hours
             </h4>
@@ -129,16 +157,19 @@ function Footer() {
               </li>
               <li className="pt-2 mt-2 text-sm italic">Items kept for 30 days</li>
             </ul>
-          </div>
+          </motion.div>
         </div>
 
-        {/* Bottom */}
-        <div className="border-t border-[#DBC9C0] mt-12 pt-6 flex justify-center">
+        {/* Copyright Section */}
+        <motion.div 
+          variants={itemVariants}
+          className="border-t border-[#DBC9C0] mt-12 pt-6 flex justify-center"
+        >
           <p className="text-gray-600 text-sm font-medium text-center">
             © 2026 BALIK. All rights reserved.
           </p>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </footer>
   );
 }

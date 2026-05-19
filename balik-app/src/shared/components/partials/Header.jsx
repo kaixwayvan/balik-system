@@ -1,22 +1,95 @@
 import { Link } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
-import { createPortal } from "react-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import BALIKLogo from "../../../assets/BALIK.png";
 import { X } from "lucide-react";
 
+const overlayVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      duration: 0.4,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+  exit: {
+    opacity: 0,
+    transition: {
+      duration: 0.35,
+      ease: [0.16, 1, 0.3, 1],
+      when: "afterChildren",
+    },
+  },
+};
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.1,
+    },
+  },
+  exit: {
+    opacity: 0,
+    transition: {
+      staggerChildren: 0.05,
+      staggerDirection: -1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 35, filter: "blur(4px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.6,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: -20,
+    filter: "blur(2px)",
+    transition: {
+      duration: 0.3,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+};
+
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  const scrollWithOffset = (el) => {
-    const yCoordinate = el.getBoundingClientRect().top + window.pageYOffset;
-    const yOffset = -80; 
-    window.scrollTo({ top: yCoordinate + yOffset, behavior: "smooth" });
-  };
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <header className="top-0 z-100 relative">
-      <nav className="absolute top-0 left-0 w-full flex items-center justify-between px-6 py-4">
+    <header 
+      className={`fixed top-0 left-0 w-full z-[99] md:lg:z-[102] lg:z-[102] transition-all duration-500 ease-in-out ${
+        isScrolled 
+          ? "bg-[#FCF8F5]/70 backdrop-blur-md border-b border-[#520000]/5 shadow-sm py-1" 
+          : "bg-transparent backdrop-blur-none py-3"
+      }`}
+    >
+      <nav className="relative top-0 left-0 w-full flex items-center justify-between px-6 py-4">
         {/* Logo */}
         <Link to="/">
           <img src={BALIKLogo} alt="BALIK Logo" className="h-20 sm:h-30 md:h-25 lg:h-30" />
@@ -55,7 +128,7 @@ function Header() {
           </Link>
         </div>
 
-        {/* Hamburger Button */}
+        {/* Button */}
         <button
           className="cursor-pointer md:hidden flex flex-col gap-1 z-50"
           onClick={() => setMenuOpen(true)}
@@ -66,111 +139,108 @@ function Header() {
         </button>
       </nav>
 
-      {/* Fullscreen Mobile Menu */}
-      {menuOpen && (
-        <div className="fixed inset-0 flex flex-col font-sans overflow-y-auto overflow-x-hidden bg-[#FCF8F5] z-[999] !important">
-          {/* --- BACKGROUND ARCHITECTURE --- */}
-          <div className="absolute inset-0 pointer-events-none z-0">
-            {/* 1. Base Mesh/Atmosphere */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_#F2E4DC_0%,_transparent_50%)] opacity-70"></div>
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            variants={overlayVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="fixed inset-0 h-[100dvh] z-[999] bg-[#FCF8F5] overflow-hidden overscroll-none"
+          >
+            {/* Background*/}
+            <div className="absolute inset-0 pointer-events-none z-0">
+              {/* Base Mesh */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_#F2E4DC_0%,_transparent_50%)] opacity-70"></div>
 
-            {/* 2. Primary Animated Orbs (Cleaned up redundant divs) */}
-            <div className="absolute -top-[10%] -left-[10%] w-[500px] h-[500px] bg-white rounded-full mix-blend-overlay filter blur-[100px] opacity-80 animate-pulse"></div>
-            <div className="absolute top-[20%] -right-[10%] w-[600px] h-[600px] bg-[#E8D2C5] rounded-full mix-blend-multiply filter blur-[120px] opacity-40"></div>
+              {/* Primary Orbs */}
+              <div className="absolute -top-[10%] -left-[10%] w-[500px] h-[500px] bg-white rounded-full mix-blend-overlay filter blur-[100px] opacity-80 animate-pulse"></div>
+              <div className="absolute top-[20%] -right-[10%] w-[600px] h-[600px] bg-[#E8D2C5] rounded-full mix-blend-multiply filter blur-[120px] opacity-40"></div>
 
-            {/* 3. Sophisticated Textures */}
-            {/* Subtle Dot Grid - cleaner than the notebook grid */}
-            <div
-              className="absolute inset-0 opacity-[0.08]"
-              style={{
-                backgroundImage:
-                  "radial-gradient(#520000 1px, transparent 1px)",
-                backgroundSize: "32px 32px",
-              }}
-            ></div>
+              {/* Textures */}
+              <div
+                className="absolute inset-0 opacity-[0.08]"
+                style={{
+                  backgroundImage: "radial-gradient(#520000 1px, transparent 1px)",
+                  backgroundSize: "32px 32px",
+                }}
+              ></div>
 
-            {/* 4. Geometric Accents (The "Great" shapes) */}
-            {/* Thin Floating Ring */}
-            <div className="absolute top-[15%] right-[15%] w-64 h-64 border border-[#520000]/10 rounded-full"></div>
+              {/* Geometric Accents */}
+              <div className="absolute top-[15%] right-[15%] w-64 h-64 border border-[#520000]/10 rounded-full"></div>
+              <div className="absolute bottom-[10%] right-[10%] w-72 h-72 bg-white/30 backdrop-blur-2xl rounded-[3rem] border border-white/50 rotate-6 shadow-2xl shadow-[#520000]/5"></div>
 
-            {/* Glassmorphism Card Element - provides depth */}
-            <div className="absolute bottom-[10%] right-[10%] w-72 h-72 bg-white/30 backdrop-blur-2xl rounded-[3rem] border border-white/50 rotate-6 shadow-2xl shadow-[#520000]/5"></div>
-
-            {/* 5. The Signature Curves */}
-            <svg
-              className="absolute top-0 left-0 w-full h-full opacity-[0.06]"
-              viewBox="0 0 1440 800"
-            >
-              <path
-                d="M-100 200 C 300 500, 800 -100, 1500 300"
-                fill="none"
-                stroke="#520000"
-                strokeWidth="2"
-              />
-              <path
-                d="M-100 500 C 500 800, 600 200, 1500 600"
-                fill="none"
-                stroke="#520000"
-                strokeWidth="1"
-              />
-            </svg>
-          </div>
-
-          {/* --- CONTENT LAYER --- */}
-          <div className="relative flex flex-col min-h-screen max-w-6xl mx-auto w-full px-8 md:px-16 py-12">
-            {/* Top Bar: Logo & Close */}
-            <div className="flex justify-between items-center mb-20">
-              <Link to="/" onClick={() => setMenuOpen(false)}>
-                <img
-                  src={BALIKLogo}
-                  alt="BALIK Logo"
-                  className="h-25"
-                />
-              </Link>
-              <button
-                className="cursor-pointer group relative p-3 text-[#520000] hover:scale-110 transition-all"
-                onClick={() => setMenuOpen(false)}
-              >
-                <div className="absolute inset-0 bg-[#520000]/5 rounded-full scale-0 group-hover:scale-100 transition-transform"></div>
-                <X size={32} strokeWidth={1.5} className="relative" />
-              </button>
+              {/* Curves */}
+              <svg className="absolute top-0 left-0 w-full h-full opacity-[0.06]" viewBox="0 0 1440 800">
+                <path d="M-100 200 C 300 500, 800 -100, 1500 300" fill="none" stroke="#520000" strokeWidth="2" />
+                <path d="M-100 500 C 500 800, 600 200, 1500 600" fill="none" stroke="#520000" strokeWidth="1" />
+              </svg>
             </div>
 
-            {/* Nav Links: Focus on white-space and bold typography */}
-            <nav className="flex flex-col items-start gap-10 md:gap-10">
-              {/* MOBILE LINKS */}
-              <Link to="/about-us" className="group flex items-center gap-6" onClick={() => setMenuOpen(false)}>
-                <span className="font-['Zalando_Sans_Expanded'] text-2xl md:text-7xl font-black text-[#520000] tracking-tighter">ABOUT</span>
-                <div className="h-[4px] w-0 bg-[#cb7300] transition-all group-hover:w-16 rounded-full opacity-40"></div>
-              </Link>
-
-              <HashLink smooth to="/#footer" className="group flex items-center gap-6" onClick={() => setMenuOpen(false)}>
-                <span className="font-['Zalando_Sans_Expanded'] text-2xl md:text-7xl font-black text-[#520000] tracking-tighter">CONTACTS</span>
-                <div className="h-[4px] w-0 bg-[#cb7300] transition-all group-hover:w-16 rounded-full opacity-40"></div>
-              </HashLink>
-
-              <HashLink smooth to="/#faqs" className="group flex items-center gap-6" onClick={() => setMenuOpen(false)}>
-                <span className="font-['Zalando_Sans_Expanded'] text-2xl md:text-7xl font-black text-[#520000] tracking-tighter">LEARN MORE</span>
-                <div className="h-[4px] w-0 bg-[#cb7300] transition-all group-hover:w-16 rounded-full opacity-40"></div>
-              </HashLink>
-
-              {/* CTA Section */}
-              <div className="mt-12 pt-12 border-t border-[#520000]/10 w-full max-w-full">
-                <Link
-                  to="/login"
-                  className="font-['Zalando_Sans_Expanded'] inline-flex items-center justify-center w-full md:w-auto text-xl font-bold text-white bg-[#520000] px-12 py-4 rounded-full shadow-xl shadow-[#520000]/20 hover:-translate-y-1 hover:shadow-2xl active:scale-95 transition-all"
+            {/* Content */}
+            <div className="relative flex flex-col min-h-screen max-w-6xl mx-auto w-full px-8 md:px-16 py-12">
+              {/* Top Bar: Logo & Close */}
+              <div className="flex justify-between items-center mb-20">
+                <Link to="/" onClick={() => setMenuOpen(false)}>
+                  <img src={BALIKLogo} alt="BALIK Logo" className="h-25" />
+                </Link>
+                <button
+                  className="cursor-pointer group relative p-3 text-[#520000] hover:scale-110 transition-all"
                   onClick={() => setMenuOpen(false)}
                 >
-                  LOG IN
-                </Link>
-                <p className="text-center mt-8 text-[#520000]/40 font-medium tracking-widest text-xs uppercase">
-                  Empowering Campus Connections
-                </p>
+                  <div className="absolute inset-0 bg-[#520000]/5 rounded-full scale-0 group-hover:scale-100 transition-transform"></div>
+                  <X size={32} strokeWidth={1.5} className="relative" />
+                </button>
               </div>
-            </nav>
-          </div>
-        </div>
-      )}
+
+              {/* Motion Navigation Links */}
+              <motion.nav
+                variants={containerVariants}
+                className="flex flex-col items-start gap-10 md:gap-10"
+              >
+                {/* About */}
+                <motion.div variants={itemVariants} className="w-full">
+                  <Link to="/about-us" className="group flex items-center gap-6" onClick={() => setMenuOpen(false)}>
+                    <span className="font-['Zalando_Sans_Expanded'] text-2xl md:text-7xl font-black text-[#520000] tracking-tighter">ABOUT</span>
+                    <div className="h-[4px] w-0 bg-[#cb7300] transition-all group-hover:w-16 rounded-full opacity-40"></div>
+                  </Link>
+                </motion.div>
+
+                {/* Contacts */}
+                <motion.div variants={itemVariants} className="w-full">
+                  <HashLink smooth to="/#footer" className="group flex items-center gap-6" onClick={() => setMenuOpen(false)}>
+                    <span className="font-['Zalando_Sans_Expanded'] text-2xl md:text-7xl font-black text-[#520000] tracking-tighter">CONTACTS</span>
+                    <div className="h-[4px] w-0 bg-[#cb7300] transition-all group-hover:w-16 rounded-full opacity-40"></div>
+                  </HashLink>
+                </motion.div>
+
+                {/* Learn More */}
+                <motion.div variants={itemVariants} className="w-full">
+                  <HashLink smooth to="/#faqs" className="group flex items-center gap-6" onClick={() => setMenuOpen(false)}>
+                    <span className="font-['Zalando_Sans_Expanded'] text-2xl md:text-7xl font-black text-[#520000] tracking-tighter">LEARN MORE</span>
+                    <div className="h-[4px] w-0 bg-[#cb7300] transition-all group-hover:w-16 rounded-full opacity-40"></div>
+                  </HashLink>
+                </motion.div>
+
+                {/* Log-in */}
+                <motion.div variants={itemVariants} className="mt-12 pt-12 border-t border-[#520000]/10 w-full">
+                  <Link
+                    to="/login"
+                    className="font-['Zalando_Sans_Expanded'] inline-flex items-center justify-center w-full md:w-auto text-xl font-bold text-white bg-[#520000] px-12 py-4 rounded-full shadow-xl shadow-[#520000]/20 hover:-translate-y-1 hover:shadow-2xl active:scale-95 transition-all"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    LOG IN
+                  </Link>
+                  <p className="text-center mt-8 text-[#520000]/40 font-medium tracking-widest text-xs uppercase md:text-left">
+                    Empowering Campus Connections
+                  </p>
+                </motion.div>
+              </motion.nav>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

@@ -1,5 +1,7 @@
 import { Routes, Route, useLocation } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
+import { PageWrapper } from "./pages/transition/PageWrapper";
+
 import RootLayout from "./shared/components/layouts/RootLayout";
 import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
@@ -41,26 +43,27 @@ function App() {
 
   return (
     <AnimatePresence mode="wait">
-      <Routes>
-        {/* Pages with layout */}
+      <Routes location={location} key={location.pathname}>
+        
+        {/* Pages with layout (Layout wraps internal outlets) */}
         <Route element={<RootLayout />}>
           <Route path="/" element={<Home />} />
+          <Route path="/about-us" element={<PageWrapper><AboutUs /></PageWrapper>} />
         </Route>
 
-        {/* Pages without layout */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/comingsoon" element={<ComingSoonPage />} />
-        <Route path="/submitreport" element={<SubmitReport />} />
-        <Route path="/adminreport" element={<AdminReport />} />
+        {/* Independent standalone layouts wrap custom cards */}
+        <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />
+        <Route path="/signup" element={<PageWrapper><Signup /></PageWrapper>} />
+        <Route path="/forgot-password" element={<PageWrapper><ForgotPassword /></PageWrapper>} />
+        <Route path="/comingsoon" element={<PageWrapper><ComingSoonPage /></PageWrapper>} />
+        <Route path="/submitreport" element={<PageWrapper><SubmitReport /></PageWrapper>} />
+        <Route path="/adminreport" element={<PageWrapper><AdminReport /></PageWrapper>} />
 
-        {/* Footer Routes */}
-        <Route path="/about-us" element={<AboutUs />} />
+        {/* Footer info pages */}
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-service" element={<TermsOfUse />} />
 
-        {/* Dashboard with its own layout */}
+        {/* Dashboard layouts handle page wrapper switches seamlessly */}
         <Route element={<UserDashboardLayout />}>
           <Route path="/dashboard" element={<DashboardHome />} />
           <Route path="/dashboard/search" element={<DashboardSearch />} />
@@ -72,8 +75,9 @@ function App() {
           <Route path="/dashboard/profile" element={<DashboardProfile />} />
         </Route>
 
-        <Route path="/admin" element={<AdminDashboardLayout />}>
-          <Route index element={<AdminDashboardHome />} />
+        {/* Admin Dashboard layout sets layout wrappers */}
+        <Route element={<AdminDashboardLayout />}>
+          <Route path="/admin" element={<AdminDashboardHome />} />
           <Route path="/admin/lost-manage" element={<LostItems />} />
           <Route path="/admin/found-manage" element={<FoundItems />} />
           <Route path="/admin/matching" element={<AIMatches />} />
@@ -84,6 +88,7 @@ function App() {
           <Route path="/admin/logs" element={<ActivityLogs />} />
           <Route path="/admin/settings" element={<SettingsPage />} />
         </Route>
+        
       </Routes>
     </AnimatePresence>
   );

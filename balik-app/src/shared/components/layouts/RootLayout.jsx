@@ -1,12 +1,17 @@
 import { Outlet } from "react-router-dom"
+import { PageWrapper } from "../../../pages/transition/PageWrapper";
 import Header from "../partials/Header"
 import Footer from "../partials/Footer"
 
 function RootLayout() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="min-h-screen flex flex-col bg-white">
       <Header />
-      <Outlet />
+      <main className="flex-1 flex flex-col">
+        <PageWrapper>
+          <Outlet />
+        </PageWrapper>
+      </main>
       <Footer />
     </div>
   )

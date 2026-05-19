@@ -85,7 +85,7 @@ export default function ColorPicker({ value, onChange, label = "Item Color" }) {
           <div className="absolute z-[110] mt-3 w-full sm:w-[420px] bg-white rounded-[2rem] shadow-2xl border border-slate-100 p-6 animate-in fade-in zoom-in-95 duration-200 origin-top left-0 sm:left-auto sm:right-0">
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Color Palette</h4>
-              <button onClick={() => setIsOpen(false)} className="p-1 hover:bg-slate-100 rounded-full text-slate-400 transition-colors">
+              <button onClick={() => setIsOpen(false)} className="cursor-pointer p-1 hover:bg-slate-100 rounded-full text-slate-400 transition-colors">
                 <X size={18} />
               </button>
             </div>
@@ -97,7 +97,7 @@ export default function ColorPicker({ value, onChange, label = "Item Color" }) {
                   type="button"
                   onClick={() => handleSelect(color)}
                   title={color.name}
-                  className={`group relative aspect-square rounded-md transition-all duration-150 ${
+                  className={`cursor-pointer group relative aspect-square rounded-md transition-all duration-150 ${
                     (value === color.name || value === color.hex)
                       ? 'scale-110 z-10 ring-2 ring-white ring-offset-2 ring-offset-blue-500 shadow-lg' 
                       : 'hover:scale-110 hover:z-10 hover:shadow-md'
@@ -127,7 +127,7 @@ export default function ColorPicker({ value, onChange, label = "Item Color" }) {
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="px-8 py-3 bg-slate-900 text-white text-xs font-black rounded-full hover:bg-slate-800 transition-all active:scale-95 shadow-xl shadow-slate-900/20 uppercase tracking-widest"
+                className="cursor-pointer px-8 py-3 bg-slate-900 text-white text-xs font-black rounded-full hover:bg-slate-800 transition-all active:scale-95 shadow-xl shadow-slate-900/20 uppercase tracking-widest"
               >
                 Apply
               </button>

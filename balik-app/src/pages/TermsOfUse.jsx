@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from "react";
 import {
   ShieldCheck,
-  Lock,
-  Eye,
-  Users,
-  Database,
-  FileText,
-  Settings,
-  Bell,
-  HelpCircle,
-  CheckCircle2,
+  Target,
+  UserCheck,
+  BadgeCheck,
+  DatabaseZap,
+  Trophy,
+  KeyRound,
+  ShieldAlert,
+  Ban,
+  UserX,
+  RefreshCw,
+  Scale,
+  Info,
   Menu,
   X,
+  CheckCircle2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "../shared/components/partials/Header";
@@ -28,18 +32,18 @@ export default function TermsOfUse() {
 
   const sections = [
     { id: "acceptance", title: "Acceptance of Terms", icon: ShieldCheck },
-    { id: "purpose", title: "Purpose of Platform", icon: Eye },
-    { id: "responsibilities", title: "User Responsibilities", icon: Users },
-    { id: "verification", title: "Item Claiming & Verification", icon: Lock },
-    { id: "accuracy", title: "System Accuracy", icon: Database },
-    { id: "gamification", title: "Gamification Features", icon: Settings },
-    { id: "account", title: "Account and Access", icon: Lock },
-    { id: "liability", title: "Limitation of Liability", icon: ShieldCheck },
-    { id: "prohibited", title: "Prohibited Activities", icon: Eye },
-    { id: "termination", title: "Termination of Access", icon: Lock },
-    { id: "changes", title: "Changes to Terms", icon: Bell },
-    { id: "governing", title: "Governing Rules", icon: FileText },
-    { id: "contact", title: "Contact Information", icon: HelpCircle },
+    { id: "purpose", title: "Purpose of Platform", icon: Target },
+    { id: "responsibilities", title: "User Responsibilities", icon: UserCheck },
+    { id: "verification", title: "Item Claiming & Verification", icon: BadgeCheck },
+    { id: "accuracy", title: "System Accuracy", icon: DatabaseZap },
+    { id: "gamification", title: "Gamification Features", icon: Trophy },
+    { id: "account", title: "Account and Access", icon: KeyRound },
+    { id: "liability", title: "Limitation of Liability", icon: ShieldAlert },
+    { id: "prohibited", title: "Prohibited Activities", icon: Ban },
+    { id: "termination", title: "Termination of Access", icon: UserX },
+    { id: "changes", title: "Changes to Terms", icon: RefreshCw },
+    { id: "governing", title: "Governing Rules", icon: Scale },
+    { id: "contact", title: "Contact Information", icon: Info },
   ];
 
   const scrollToSection = (id) => {
@@ -82,9 +86,11 @@ export default function TermsOfUse() {
 
   return (
     <div className="min-h-screen bg-[#FDF8F5] font-sans text-slate-900 selection:bg-[#F2E4DC] selection:text-[#520000] overflow-x-hidden relative">
+      {/* Imported Header */}
       <Header />
-      {/* Top Header Background Elements */}
-      <div className="absolute top-0 left-0 w-full h-[100px] sm:h-[120px] md:h-[125px] lg:h-[130px] bg-white border-b border-[#B0570C]/40 overflow-hidden pointer-events-none z-40">
+      
+      {/* Header Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-[140px] sm:h-[120px] md:h-[150px] lg:h-[150px] bg-white border-b border-[#B0570C]/40 overflow-hidden pointer-events-none z-40">
         <div className="absolute -top-10 left-[10%] w-[400px] h-[400px] bg-[#F2E4DC]/40 rounded-full blur-3xl"></div>
 
         <div className="absolute top-[-50px] right-[20%] w-[300px] h-[300px] bg-[#520000]/5 rounded-full blur-3xl"></div>
@@ -100,9 +106,9 @@ export default function TermsOfUse() {
         ></div>
       </div>
 
-      {/* HERO SECTION */}
+      {/* Hero Section */}
       <div
-        className="relative w-full h-[400px] bg-white/20 backdrop-blur-2xl overflow-hidden flex flex-col items-center justify-center pt-20 border-b border-gray-200"
+        className="relative w-full mt-10 h-[400px] bg-white/20 backdrop-blur-2xl overflow-hidden flex flex-col items-center justify-center pt-20 border-b border-gray-200"
         style={{
           backgroundColor: "#f4dcdc",
           backgroundImage: `
@@ -116,7 +122,7 @@ export default function TermsOfUse() {
         <div className="absolute inset-0 pointer-events-none z-0">
           {/* Top Left Shape */}
           <div
-            className="absolute top-[-10px] left-[-20px] md:left-[-40px] lg:w-[600px] md:w-[500px] h-[300px] bg-[#F0D5C9] rounded-[50px] rotate-[-10deg] md:rotate-[-5deg] shadow-inner"
+            className="absolute top-[-10px] left-[-20px] md:left-[-20px] lg:w-[600px] md:w-[600px] h-[300px] bg-[#F0D5C9] rounded-[50px] rotate-[-10deg] md:rotate-[-5deg] shadow-inner"
             style={{ clipPath: "polygon(0 0, 100% 0, 80% 100%, 0% 100%)" }}
           ></div>
 
@@ -129,12 +135,12 @@ export default function TermsOfUse() {
             }}
           ></div>
 
-          {/* Background Text "LOST" */}
-          <div className="font-['Zalando_Sans_Expanded'] absolute top-[90px] md:top-[130px] left-[3%] md:left-[6%] lg:left-[2%] text-[75px] md:text-[100px] lg:text-[100px] font-black text-[#F0CFC2] transform rotate-0 md:-rotate-4 lg:-rotate-5 opacity-90 select-none tracking-tighter">
+          {/* Background Text "TERMS" */}
+          <div className="font-['Zalando_Sans_Expanded'] absolute top-[90px] md:top-[130px] left-[3%] md:left-[3%] lg:left-[2%] text-[75px] md:text-[100px] lg:text-[100px] font-black text-[#F0CFC2] transform rotate-0 md:-rotate-4 lg:-rotate-5 opacity-90 select-none tracking-tighter">
             TERMS
           </div>
 
-          {/* Background Text "FOUND" */}
+          {/* Background Text "RULES" */}
           <div
             className="font-['Zalando_Sans_Expanded'] absolute bottom-[-2px] md:bottom-[-10px] lg:bottom-[-10px] right-[4%] lg:right-[4%] md:right-[1%] -rotate-13 md:-rotate-2 lg:-rotate-0 text-[80px] lg:text-[110px] md:text-[90px] font-black text-[#F0CFC2] opacity-50 select-none tracking-tighter"
             style={{
@@ -145,8 +151,8 @@ export default function TermsOfUse() {
           </div>
         </div>
 
-        {/* CONTENT */}
-        <div className="relative z-10 text-center mt-4 md:mt-20 lg:mt-20 bg-white/10 backdrop-blur-2xl py-8 px-10 mx-12 lg:mx-0 md:mx-0 md:px-14 rounded-[3rem] border border-white/20 shadow-2xl shadow-black/10">
+        {/* Content */}
+        <div className="relative z-10 text-center mt-4 md:mt-10 lg:mt-20 bg-white/10 backdrop-blur-2xl py-8 px-10 mx-12 lg:mx-0 md:mx-0 md:px-14 rounded-[3rem] border border-white/20 shadow-2xl shadow-black/10">
           <h1 className="font-['Zalando_Sans_Expanded'] text-5xl md:text-[54px] font-black tracking-tight text-[#333333] mb-3">
             Terms of Use
           </h1>
@@ -156,25 +162,25 @@ export default function TermsOfUse() {
         </div>
       </div>
 
-      {/* MOBILE TOC BUTTON */}
+      {/* Mobile Button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="cursor-pointer lg:hidden fixed bottom-6 right-6 z-99 bg-[#520000] text-white p-4 rounded-full shadow-2xl shadow-[#520000]/30 hover:scale-105 transition-all"
+        className="cursor-pointer lg:hidden fixed bottom-6 right-6 z-98 bg-[#520000] text-white p-4 rounded-full shadow-2xl shadow-[#520000]/30 hover:scale-105 transition-all"
       >
         <Menu size={24} />
       </button>
 
       <div className="font-['Plus_Jakarta_Sans'] container mx-auto px-6 py-12 relative">
         <div className="flex flex-col lg:flex-row gap-16 relative">
-          {/* FULL HEIGHT SIDEBAR (LEFT SIDE) */}
+          {/* Sidebar Blur (Mobile) */}
           <div
             onClick={() => setSidebarOpen(false)}
-            className={`lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-100 transition-all duration-300 ${
+            className={`lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] transition-all duration-300 ${
               sidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"
             }`}
           />
 
-          {/* SIDEBAR */}
+          {/* Sidebar */}
           <aside
             className={`
               fixed lg:sticky
@@ -182,7 +188,7 @@ export default function TermsOfUse() {
               left-0
               h-screen lg:h-fit
               w-[85%] max-w-[340px] lg:w-80
-              z-101
+              z-[101]
               bg-[#FDF8F5]/95
               backdrop-blur-2xl
               border-r lg:border border-[#DBC9C0]/40
@@ -195,7 +201,7 @@ export default function TermsOfUse() {
               ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
             `}
           >
-            {/* HEADER */}
+            {/* Header */}
             <div className="p-6 pb-3 flex items-center justify-between">
               <p className="text-[10px] font-black text-[#520000]/40 uppercase tracking-[0.2em]">
                 On this page
@@ -209,7 +215,7 @@ export default function TermsOfUse() {
               </button>
             </div>
 
-            {/* NAVIGATION */}
+            {/* Navigation */}
             <nav className="space-y-1 px-2">
               {sections.map((section) => (
                 <button
@@ -240,7 +246,7 @@ export default function TermsOfUse() {
               ))}
             </nav>
 
-            {/* FOOTER CARD */}
+            {/* Sidebar Footer */}
             <div className="mt-6 p-6 pt-7 border-t border-[#F2E4DC]">
               <div className="bg-white p-4 rounded-2xl border border-[#DBC9C0]/30">
                 <p className="text-[10px] font-semibold text-[#520000]/40 uppercase tracking-widest mb-2">
@@ -255,9 +261,9 @@ export default function TermsOfUse() {
             </div>
           </aside>
 
-          {/* MAIN CONTENT AREA */}
+          {/* Articles */}
           <article className="flex-1 max-w-4xl space-y-24 pb-32">
-            {/* INTRODUCTION CARD */}
+            {/* Introduction */}
             <section className="bg-white rounded-[2.5rem] p-10 md:p-14 shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-[#DBC9C0]/30">
               <h2 className="text-3xl md:text-4xl text-[#520000] mb-8 leading-tight">
                 <strong className="font-black">BALIK</strong>: Belongings
@@ -641,7 +647,7 @@ export default function TermsOfUse() {
         </div>
       </div>
 
-      {/* FOOTER IMPORTED FROM PARTIALS */}
+      {/* Imported Footer */}
       <Footer />
 
       <style>{`
