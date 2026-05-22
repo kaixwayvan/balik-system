@@ -16,6 +16,7 @@ import DashboardFound from "./components/UserDashboard/FoundItems/FoundItems";
 import DashboardClaims from "./components/UserDashboard/MyClaims/MyClaims";
 import DashboardHistory from "./components/UserDashboard/ActivityHistory/ActivityHistory";
 import DashboardProfile from "./components/UserDashboard/UserProfile/UserProfile";
+import DashboardNotification from "./components/UserDashboard/UserProfile/NotificationPage";
 
 import AdminDashboardHome from "./pages/admin-dashboard/AdminDashboardHome";
 import LostItems from "./components/AdminDashboard/LostItems/LostItems";
@@ -34,6 +35,7 @@ import AdminDashboardLayout from "./shared/components/layouts/AdminDashboardLayo
 import SubmitReport from "./components/UserDashboard/Home/SubmitReport";
 import AdminReport from "./components/AdminDashboard/AdminHome/AdminReport";
 import ComingSoonPage from "./pages/ComingSoonPage";
+import HelpCenter from "./pages/HelpCenter";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfUse from "./pages/TermsOfUse";
 import AboutUs from "./pages/AboutUs";
@@ -62,17 +64,19 @@ function App() {
         {/* Footer info pages */}
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-service" element={<TermsOfUse />} />
+        <Route path="/help" element={<HelpCenter />} />
 
         {/* Dashboard layouts handle page wrapper switches seamlessly */}
         <Route element={<UserDashboardLayout />}>
-          <Route path="/dashboard" element={<DashboardHome />} />
-          <Route path="/dashboard/search" element={<DashboardSearch />} />
-          <Route path="/dashboard/track" element={<DashboardtTrack />} />
-          <Route path="/dashboard/reports" element={<DashboardReport />} />
-          <Route path="/dashboard/found" element={<DashboardFound />} />
-          <Route path="/dashboard/myclaims" element={<DashboardClaims />} />
-          <Route path="/dashboard/history" element={<DashboardHistory />} />
-          <Route path="/dashboard/profile" element={<DashboardProfile />} />
+          <Route path="/dashboard" element={<PageWrapper><DashboardHome /></PageWrapper>} />
+          <Route path="/dashboard/search" element={<PageWrapper><DashboardSearch /></PageWrapper>} />
+          <Route path="/dashboard/track" element={<PageWrapper><DashboardtTrack /></PageWrapper>} />
+          <Route path="/dashboard/reports" element={<PageWrapper><DashboardReport /></PageWrapper>} />
+          <Route path="/dashboard/found" element={<PageWrapper><DashboardFound /></PageWrapper>} />
+          <Route path="/dashboard/myclaims" element={<PageWrapper><DashboardClaims /></PageWrapper>} />
+          <Route path="/dashboard/history" element={<PageWrapper><DashboardHistory /></PageWrapper>} />
+          <Route path="/dashboard/profile" element={<PageWrapper><DashboardProfile /></PageWrapper>} />
+          <Route path="/dashboard/notifications" element={<PageWrapper><DashboardNotification /></PageWrapper>} />
         </Route>
 
         {/* Admin Dashboard layout sets layout wrappers */}
