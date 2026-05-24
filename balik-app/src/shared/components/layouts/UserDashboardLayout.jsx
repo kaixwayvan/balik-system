@@ -16,7 +16,7 @@ export default function UserDashboardLayout() {
         onMenuClick={() => setIsSidebarOpen(true)} 
       />
       <div className="flex-1 pt-30 lg:pl-72 transition-all duration-300 ease-in-out">
-        <main className="max-w-7xl mx-auto min-h-[calc(100vh-5rem)]">
+        <main className="max-w-full mx-auto min-h-[calc(100vh-5rem)]">
           <Outlet />
         </main>
       </div>
