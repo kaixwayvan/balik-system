@@ -244,6 +244,7 @@ export default function TrackItems() {
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 lg:mb-10">
             <StatCard
+              index={0} // Plays immediately
               title="Total Items"
               subtitle="All reported items"
               value={items.length}
@@ -256,6 +257,7 @@ export default function TrackItems() {
               trend="+12% active"
             />
             <StatCard
+              index={1} // Delays 150ms
               title="Lost Items"
               subtitle="Currently lost"
               value={items.filter((i) => i.type === "Lost").length}
@@ -268,6 +270,7 @@ export default function TrackItems() {
               trend="+4% unresolved"
             />
             <StatCard
+              index={2} // Delays 300ms
               title="Found Items"
               subtitle="Recovered items"
               value={items.filter((i) => i.type === "Found").length}
@@ -280,6 +283,7 @@ export default function TrackItems() {
               trend="+8% matched"
             />
             <StatCard
+              index={3} // Delays 450ms
               title="Resolved"
               subtitle="Items claimed"
               value={items.filter((i) => i.type === "Resolved").length}
@@ -850,6 +854,19 @@ export default function TrackItems() {
       <style>{`
         .scrollbar-none::-webkit-scrollbar { display: none; }
         .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes slideUpFade {
+          from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        .animate-slide-up-fade {
+          animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
       `}</style>
     </div>
   );
@@ -866,9 +883,16 @@ function StatCard({
   textGrad,
   chartColor,
   trend,
+  index = 0,
 }) {
   return (
-    <div className="group relative w-full rounded-[2rem] bg-white border border-[#E8E3D9] shadow-sm hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-500 overflow-hidden">
+    <div
+      className="group relative w-full rounded-[2rem] bg-white border border-[#E8E3D9] shadow-sm hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-500 overflow-hidden animate-slide-up-fade"
+      style={{
+        animationDelay: `${index * 150}ms`,
+        animationFillMode: "both",
+      }}
+    >
       {/* Effects */}
       <div
         className={`absolute -top-10 -right-10 w-40 h-40 ${glowA} rounded-full mix-blend-multiply filter blur-[3rem] opacity-10 group-hover:opacity-30 transition-opacity duration-700`}
