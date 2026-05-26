@@ -79,7 +79,9 @@ export default function SubmitReport({ isOpen, initialType, onClose }) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 overflow-y-auto"
+      className={`fixed inset-0 z-[9999] bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 overflow-y-auto 
+    transition-opacity duration-300 ease-out
+    ${isOpen ? "opacity-100" : "opacity-0"}`}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -428,7 +430,7 @@ export default function SubmitReport({ isOpen, initialType, onClose }) {
                     </label>
                     <span className="text-slate-400 text-[11px] sm:text-sm font-medium">(Optional)</span>
                   </div>
-                  <span className="text-[10px] sm:text-xs text-slate-400 font-normal block mt-0.5">
+                  <span className="text-[12px] sm:text-[11px] text-gray-400 font-medium block mt-0.5 mb-1">
                     Formats: JPG, PNG • Max: 5 MB
                   </span>
                 </div>
@@ -437,7 +439,7 @@ export default function SubmitReport({ isOpen, initialType, onClose }) {
                   id="photoEvidence"
                   accept="image/*"
                   onChange={handleFileChange}
-                  className="cursor-pointer w-full h-auto p-1 border border-slate-200 rounded-xl bg-slate-50 file:mr-2 file:py-1 file:px-2.5 file:cursor-pointer file:rounded-lg file:border-0 file:text-[10px] sm:file:text-xs file:font-bold file:bg-[#331e0c]/10 file:text-[#331e0c] uppercase text-[11px] sm:text-sm text-slate-500 font-medium file:transition-all hover:file:bg-[#331e0c]/15 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-700"
+                  className="cursor-pointer w-full min-h-[34px] sm:min-h-[38px] file:items-center file:min-h-[34px] p-1 py-1 border border-slate-200 rounded-xl bg-slate-50 file:mr-2 file:py-1 file:px-2.5 file:cursor-pointer file:rounded-xl file:border-0 file:text-[10px] sm:file:text-xs file:font-bold file:bg-[#331e0c]/10 file:text-[#331e0c] uppercase text-[11px] sm:text-sm text-slate-500 font-medium file:transition-all hover:file:bg-[#331e0c]/15 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-700"
                 />
               </div>
 
