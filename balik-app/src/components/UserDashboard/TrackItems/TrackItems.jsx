@@ -230,7 +230,7 @@ export default function TrackItems() {
     <div className="min-h-screen bg-[#F9F6F0] p-8 transition-all duration-300">
       {/* Main Content */}
       <main className="flex-1">
-        <section className="max-w-7xl mx-auto">
+        <section className="mx-auto">
           {/* Header Container - Hidden on lg and above */}
           <div className="mb-6 lg:hidden animate-fade-in">
             <h1 className="text-3xl font-black tracking-tight text-[#66240E]">

@@ -299,7 +299,7 @@ export default function FoundItems() {
 
   return (
     <div className="p-8 sm:p-8 md:p-8 lg:p-8 bg-[#F9F6F0] min-h-screen transition-all duration-300 antialiased overflow-x-hidden w-full">
-      <div className="max-w-7xl mx-auto w-full">
+      <div className="w-full">
         
         {/* Filter / Action Buttons */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-5 w-full mb-6">
