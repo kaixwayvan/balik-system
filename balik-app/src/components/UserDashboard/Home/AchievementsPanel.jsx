@@ -134,7 +134,7 @@ export default function AchievementsPanel() {
                   ) : (
                     <div className="mt-2">
                       <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
-                        <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden border border-gray-50">
+                        <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden border border-gray-50">
                           <div
                             className="h-full bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full transition-all duration-500"
                             style={{ width: `${progressPercentage}%` }}
