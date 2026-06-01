@@ -34,7 +34,8 @@ import {
   UserCheck,
   X,
   Check,
-  PauseCircle,
+  PauseCircle, 
+  Download
 } from "lucide-react";
 
 /* Backend Simulation */
@@ -918,24 +919,109 @@ function ChallengesSection() {
   );
 }
 
-function CertificatesSection() {
+const defaultCertificates = [
+  {
+    id: 1,
+    title: "Eco Warrior",
+    date: "6/1/2026",
+    status: "Verified pass",
+  },
+  // Add more here to see the grid expand
+];
+
+function CertificatesSection({ certificates = defaultCertificates }) {
   return (
-    <div className="bg-white border border-[#E2DCD0] rounded-4xl p-5 sm:p-6 shadow-sm space-y-4">
-      <h3 className="text-base sm:text-lg font-extrabold text-[#66240E] uppercase tracking-wider flex items-center gap-2">
-        <Award size={16} /> Verifiable Certificates
-      </h3>
-      <div className="flex flex-col items-center justify-center py-10 text-center space-y-3">
-        <div className="p-4 bg-slate-50 text-slate-300 rounded-full border border-slate-100">
-          <Lock size={28} />
-        </div>
-        <p className="font-bold text-sm sm:text-base text-slate-700">
-          No Certificates Released Yet
-        </p>
-        <p className="text-xs text-slate-500 max-w-sm font-medium leading-relaxed">
-          Maintain a high successful validation rate to automatically download
-          system-stamped integrity records.
-        </p>
+    <div className="bg-white border border-[#E2DCD0] rounded-[2rem] p-5 sm:p-6 shadow-sm space-y-6">
+      {/* Header Section */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-base sm:text-lg font-extrabold text-[#66240E] uppercase tracking-wider flex items-center gap-2.5">
+          <Award size={20} strokeWidth={2.5} /> 
+          Verifiable Certificates
+        </h3>
+        
+        {/* Certificate Counter Badge */}
+        {certificates.length > 0 && (
+          <span className="flex items-center justify-center bg-[#66240E]/10 text-[#66240E] text-sm font-black px-3 py-1 rounded-full">
+            {certificates.length}
+          </span>
+        )}
       </div>
+
+      {/* Dynamic Content Rendering */}
+      {certificates.length === 0 ? (
+        
+        /* --- EMPTY STATE --- */
+        <div className="flex flex-col items-center justify-center py-10 text-center space-y-3 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
+          <div className="p-4 bg-white text-slate-300 rounded-2xl border border-slate-100 shadow-sm">
+            <Lock size={28} strokeWidth={2} />
+          </div>
+          <p className="font-bold text-sm sm:text-base text-slate-700">
+            No Certificates Released Yet
+          </p>
+          <p className="text-xs text-slate-500 max-w-sm font-medium leading-relaxed">
+            Maintain a high successful validation rate to automatically download
+            system-stamped integrity records.
+          </p>
+        </div>
+
+      ) : (
+
+        /* --- States --- */
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {certificates.map((cert) => (
+            <div
+              key={cert.id}
+              className="group relative flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-3xl bg-gradient-to-b from-white to-slate-50/80 border border-[#E8E3D9] shadow-sm hover:shadow-md hover:border-[#66240E]/30 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden"
+            >
+              {/* Subtle background flair */}
+              <div className="absolute -right-8 -top-8 w-24 h-24 bg-amber-100/40 rounded-full blur-2xl group-hover:bg-amber-200/50 transition-colors pointer-events-none" />
+
+              {/* NEW WRAPPER: Keeps Icon and Details side-by-side on mobile */}
+              <div className="flex items-center gap-4 w-full sm:flex-1 min-w-0 z-10">
+                
+                {/* Left: Elegant Certificate Icon Pod */}
+                <div className="relative w-12 h-12 rounded-[1rem] bg-gradient-to-br from-amber-50 to-orange-50/50 flex items-center justify-center shrink-0 border border-amber-200/60 shadow-inner group-hover:scale-110 transition-transform duration-500">
+                  <Award
+                    size={24}
+                    className="text-amber-600 drop-shadow-sm"
+                    strokeWidth={2}
+                  />
+                </div>
+
+                {/* Middle: Certificate Details */}
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-base sm:text-lg font-extrabold text-slate-800 truncate tracking-tight">
+                    {cert.title}
+                  </h4>
+                  <p className="text-[11px] sm:text-xs text-slate-500 font-semibold mt-0.5 uppercase tracking-wider">
+                    Unlocked {cert.date}
+                  </p>
+
+                  {/* Status Badge */}
+                  <div className="flex items-center mt-2.5">
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider rounded-3xl border border-emerald-200/60 shadow-sm">
+                      <CheckCircle2 size={14} strokeWidth={2.5} />
+                      {cert.status}
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Right: Download Action */}
+              <button className="cursor-pointer w-full sm:w-auto mt-2 sm:mt-0 p-3 sm:p-3 bg-white border border-[#E2DCD0] text-slate-500 rounded-3xl hover:bg-[#66240E] hover:text-white hover:border-[#66240E] transition-all duration-300 flex items-center justify-center gap-2 group/btn z-10 shadow-sm shrink-0">
+                <Download
+                  size={18}
+                  className="group-hover/btn:-translate-y-0.5 transition-transform duration-300"
+                />
+                <span className="sm:hidden text-xs font-bold uppercase tracking-wider">
+                  Download Certificate
+                </span>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
