@@ -59,7 +59,7 @@ function App() {
         <Route path="/forgot-password" element={<PageWrapper><ForgotPassword /></PageWrapper>} />
         <Route path="/comingsoon" element={<PageWrapper><ComingSoonPage /></PageWrapper>} />
         <Route path="/submitreport" element={<PageWrapper><SubmitReport /></PageWrapper>} />
-        <Route path="/adminreport" element={<PageWrapper><AdminReport /></PageWrapper>} />
+        <Route path="/admin/report" element={<PageWrapper><AdminReport /></PageWrapper>} />
 
         {/* Footer info pages */}
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />

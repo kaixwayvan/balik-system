@@ -64,13 +64,13 @@ export default function AdminDashboardLayout() {
       <div className="flex flex-col flex-1 h-full w-full overflow-hidden relative z-10">
         <AdminDashboardHeader onMenuClick={() => setIsSidebarOpen(true)} />
         
-        <main className="flex-1 overflow-y-auto p-6 sm:p-6 lg:p-6 custom-scrollbar pb-24">
+        <main className="flex-1 flex flex-col overflow-hidden p-6 sm:p-5 lg:p-4 lg:pl-1 mb-2 rounded-[3rem]">
           <motion.div 
             key={location.pathname}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="mx-auto max-w-[1400px] h-full"
+            className="mx-auto max-w-[1400px] h-full w-full flex flex-col overflow-hidden"
           >
             <Outlet />
           </motion.div>
