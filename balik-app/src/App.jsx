@@ -28,6 +28,7 @@ import UserManagement from "./components/AdminDashboard/UserManagement/UsersPage
 import Gamification from "./components/AdminDashboard/Gamification/GamificationPage";
 import ActivityLogs from "./components/AdminDashboard/ActivityLogs/ActivityLogs";
 import SettingsPage from "./components/AdminDashboard/Settings/SettingsPage";
+import ClaimRequests from "./components/AdminDashboard/ClaimRequests/ClaimRequests";
 
 import UserDashboardLayout from "./shared/components/layouts/UserDashboardLayout";
 import AdminDashboardLayout from "./shared/components/layouts/AdminDashboardLayout";
@@ -86,6 +87,7 @@ function App() {
           <Route path="/admin/found-manage" element={<FoundItems />} />
           <Route path="/admin/matching" element={<AIMatches />} />
           <Route path="/admin/qr-verify" element={<QRVerification />} />
+          <Route path="/admin/claim-requests" element={<ClaimRequests />} />
           <Route path="/admin/track-items" element={<TrackItems />} />
           <Route path="/admin/users-manage" element={<UserManagement />} />
           <Route path="/admin/gamification" element={<Gamification />} />
