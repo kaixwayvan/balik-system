@@ -1,103 +1,121 @@
-import StatsCard from "./StatsCard";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { ScanBarcode, FileCheck, FileExclamationPoint, CirclePercent } from "lucide-react";
+import StatsCards from "./StatsCard";
 import QRScannerCard from "./QRScannerCard";
 import PendingList from "./PendingList";
 import RecentVerificationsTable from "./RecentVerificationsTable";
 
-import { ScanBarcode, FileCheck, FileExclamationPoint, CirclePercent } from "lucide-react";
-
 export default function QRVerification() {
-  const stats = [
-    {
-      label: "Total Scans",
-      value: 342,
-      icon: ScanBarcode,
-      bg: "bg-blue-100",
-      color: "text-blue-600",
-    },
-    {
-      label: "Approved",
-      value: 298,
-      icon: FileCheck,
-      bg: "bg-green-100",
-      color: "text-green-600",
-    },
-    {
-      label: "Rejected",
-      value: 44,
-      icon: FileExclamationPoint,
-      bg: "bg-red-100",
-      color: "text-red-600",
-    },
-    {
-      label: "Pending",
-      value: 12,
-      icon: CirclePercent,
-      bg: "bg-yellow-100",
-      color: "text-yellow-600",
-    },
-  ];
+  useEffect(() => {
+    document.title = "QR Verify | BALIK Admin";
 
-  const pendingItems = [
-    {
-      id: 1,
-      name: "Blue Nike Backpack",
-      category: "Bags",
-      qr: "BALIK-001-2024",
-      status: "Pending",
-      owner: "john.doe@university.edu",
-      claimer: "john.doe@university.edu",
-      date: "Jan 16, 2024",
-      image: "https://www.citybeach.com/on/demandware.static/-/Sites-fewstoneMaster/default/dw761ecaa1/images/20365170/20365170-03-FT-XL.jpg",
-    },
-    {
-      id: 2,
-      name: "Blue Nike Backpack",
-      category: "Bags",
-      qr: "BALIK-002-2024",
-      status: "Pending",
-      owner: "john.doe@university.edu",
-      claimer: "john.doe@university.edu",
-      date: "Jan 16, 2024",
-      image: "https://www.citybeach.com/on/demandware.static/-/Sites-fewstoneMaster/default/dw761ecaa1/images/20365170/20365170-03-FT-XL.jpg",
-    },
-  ];
+    return () => {
+      document.title = "BALIK Admin";
+    };
+  }, []);
 
-  const recentData = [
-    {
-      id: 1,
-      name: "Red Wallet",
-      category: "Personal Items",
-      qr: "BALIK-003",
-      owner: "mike@uni.edu",
-      claimer: "Same as owner",
-      status: "Approved",
-      verifiedAt: "Jan 16, 2024",
-      points: 30,
-      image: "https://via.placeholder.com/40",
-    },
-  ];
+  const [stats, setStats] = useState([
+    { label: "Total Scans", value: 0, icon: ScanBarcode },
+    { label: "Approved", value: 0, icon: FileCheck },
+    { label: "Rejected", value: 0, icon: FileExclamationPoint },
+    { label: "Pending", value: 0, icon: CirclePercent },
+  ]);
+
+  const [pendingItems, setPendingItems] = useState([]);
+  const [recentData, setRecentData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Simulated Data Fetch
+  useEffect(() => {
+    setLoading(true);
+    const fetchQRData = () => {
+      setTimeout(() => {
+        // Mocked Stats
+        setStats([
+          { label: "Total Scans", value: 142, icon: ScanBarcode },
+          { label: "Approved", value: 98, icon: FileCheck },
+          { label: "Rejected", value: 12, icon: FileExclamationPoint },
+          { label: "Pending", value: 32, icon: CirclePercent },
+        ]);
+
+        // Mocked Pending Items
+        setPendingItems([
+          {
+            id: "1",
+            name: "MacBook Pro M2",
+            category: "Electronics",
+            qr: "BALIK-MBP812",
+            status: "Ready",
+            owner: "Alex Reyes",
+            claimer: "Alex Reyes",
+            date: "Oct 24, 2026",
+            image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=150&h=150&fit=crop",
+          },
+          {
+            id: "2",
+            name: "HydroFlask 32oz",
+            category: "Personal Items",
+            qr: "BALIK-HYD001",
+            status: "Pending",
+            owner: "Unknown",
+            claimer: "Samira Cruz",
+            date: "Oct 23, 2026",
+            image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=150&h=150&fit=crop",
+          }
+        ]);
+
+        // Mocked Recent Data
+        setRecentData([
+          {
+            id: "101",
+            name: "Leather Wallet",
+            category: "Personal Items",
+            qr: "BALIK-LWT443",
+            owner: "John Doe",
+            claimer: "John Doe",
+            status: "Released",
+            verifiedAt: "Oct 24, 2026",
+            image: "https://images.unsplash.com/photo-1627123424574-724758594e93?w=150&h=150&fit=crop",
+          },
+          {
+            id: "102",
+            name: "Honda Car Keys",
+            category: "Keys",
+            qr: "BALIK-KEY991",
+            owner: "Mike Tan",
+            claimer: "Mike Tan",
+            status: "Released",
+            verifiedAt: "Oct 22, 2026",
+            image: "https://images.unsplash.com/photo-1582139329536-e7284fece509?w=150&h=150&fit=crop",
+          }
+        ]);
+
+        setLoading(false);
+      }, 800);
+    };
+
+    fetchQRData();
+  }, []);
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-1">
-            QR Verification
-          </h1>
-          <p className="text-gray-500 text-sm">
-            Scan and validate QR codes for item return verification
-          </p>
-        </div>
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      transition={{ duration: 0.4 }}
+      className="flex flex-col h-full bg-white/80 backdrop-blur-xl p-4 sm:p-6 lg:p-8 rounded-[2rem] shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-slate-200/60 overflow-y-auto custom-scrollbar space-y-6 sm:space-y-8 pb-10"
+    >
+      {/* Stats Cards */}
+      <StatsCards stats={stats} loading={loading} />
+
+      {/* Main Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 shrink-0">
+        <QRScannerCard />
+        <PendingList items={pendingItems} loading={loading} />
       </div>
 
-      <StatsCard stats={stats} />
-
-      <div className="grid grid-cols-2 gap-6">
-        <QRScannerCard onStart={() => console.log("Start scanning")} />
-        <PendingList items={pendingItems} />
-      </div>
-
-      <RecentVerificationsTable data={recentData} />
-    </div>
+      {/* Recent Verifications Table */}
+      <RecentVerificationsTable data={recentData} loading={loading} />
+    </motion.div>
   );
 }
