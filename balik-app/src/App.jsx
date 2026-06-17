@@ -91,7 +91,7 @@ function App() {
           <Route path="/admin/track-items" element={<TrackItems />} />
           <Route path="/admin/users-manage" element={<UserManagement />} />
           <Route path="/admin/gamification" element={<Gamification />} />
-          <Route path="/admin/logs" element={<ActivityLogs />} />
+          <Route path="/admin/activity-logs" element={<ActivityLogs />} />
           <Route path="/admin/settings" element={<SettingsPage />} />
         </Route>
         
