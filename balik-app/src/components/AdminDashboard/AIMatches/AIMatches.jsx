@@ -100,6 +100,16 @@ export default function AIMatches() {
     init();
   }, [fetchNlpMatches]);
 
+  // --- Dynamic Document Title ---
+  useEffect(() => {
+    document.title = `AI Matches (${filteredMatches.length}) | BALIK Admin`;
+
+    return () => {
+      document.title = "BALIK Admin";
+    };
+  }, [filteredMatches.length]);
+  // ------------------------------
+
   // Framer Motion Variants
   const notifVariants = {
     hidden: { opacity: 0, height: 0, scale: 0.95, marginBottom: 0 },

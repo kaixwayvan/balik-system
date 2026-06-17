@@ -170,6 +170,16 @@ export default function ClaimRequests() {
     fetchClaims();
   }, []);
 
+  // --- Dynamic Document Title ---
+  useEffect(() => {
+    document.title = `Claim Requests (${claims.length}) | BALIK Admin`;
+
+    return () => {
+      document.title = "BALIK Admin";
+    };
+  }, [claims.length]);
+  // ------------------------------
+
   const updateStatus = async (claimId, newStatus) => {
     setUpdatingId(claimId);
     try {
