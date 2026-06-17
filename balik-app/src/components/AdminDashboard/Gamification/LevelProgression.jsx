@@ -1,39 +1,40 @@
-import { ChartNoAxesCombined, CircleArrowRight } from "lucide-react";
+import { Layers, MoveRight } from "lucide-react";
 
 export default function LevelProgression({ rules }) {
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 mt-6">
+    <div className="bg-white border border-slate-200/80 rounded-4xl p-5 sm:p-6 w-full">
       <div className="flex items-center gap-2 mb-2">
-        <ChartNoAxesCombined size={22} className="text-gray-700" />
-        <h3 className="font-bold text-lg">
-          Level Progression Rules
+        <Layers className="w-5 h-5 text-indigo-600" />
+        <h3 className="font-black text-slate-800 text-lg sm:text-xl tracking-tight">
+          Level Progression Milestones
         </h3>
       </div>
-
-      <p className="text-sm text-gray-500 mb-4">
-        Level progression is determined automatically based on points earned and activity completed.
+      <p className="text-sm text-slate-400 mb-5 leading-relaxed">
+        Levels increase automatically as users accrue score values and process valid notifications.
       </p>
 
-      <div className="space-y-4">
+      <div className="space-y-3 w-full">
         {rules.map((rule, index) => (
           <div
             key={index}
-            className="border border-gray-300 shadow-sm rounded-xl p-5 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between"
+            className="border border-slate-200/60 bg-slate-50/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:border-slate-300/80 transition-colors"
           >
-            <div className="text-blue-800 flex items-center gap-2 text-lg font-bold">
-              {rule.from} <CircleArrowRight size={15}/> {rule.to}
+            <div className="flex items-center gap-2 text-sm sm:text-base font-black tracking-tight shrink-0">
+              <span className="text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-xl text-sm font-bold">{rule.from}</span>
+              <MoveRight className="w-4 h-4 text-slate-400" strokeWidth={2.5} />
+              <span className="text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-xl text-sm font-black">{rule.to}</span>
             </div>
 
-            <div className="text-base text-gray-700 font-semibold italic mt-2 md:mt-0">
+            <div className="text-xs sm:text-sm text-slate-600 font-bold italic tracking-tight sm:text-right">
               {rule.requirement}
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-6 mb-2">
-        <span className="px-5 py-2 rounded-lg bg-gray-200 text-gray-700 text-sm">
-          Automatically evaluated by system
+      <div className="mt-5 pt-4 border-t border-slate-50">
+        <span className="inline-block text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 px-4 py-1 rounded-xl shadow-md border border-slate-100">
+          Evaluated via Engine Runtime
         </span>
       </div>
     </div>
