@@ -56,7 +56,7 @@ export default function AdminDashboardHeader({ onMenuClick }) {
         </button>
         
         <div className="min-w-0 flex flex-col justify-center lg:pl-2 pl-0">
-          <h1 className="text-2xl sm:text-3xl font-black text-[#570903] tracking-tight truncate flex items-center gap-2.5">
+          <h1 className="text-2xl sm:text-3xl font-black text-[#570903] tracking-tight flex items-center gap-2.5">
             {title} 
           </h1>
           <p className="hidden sm:block text-md font-semibold text-slate-500 truncate mt-0.5">
