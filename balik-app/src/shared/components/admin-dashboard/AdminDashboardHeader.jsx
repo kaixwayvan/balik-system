@@ -18,6 +18,7 @@ const getPageDetails = (pathname) => {
     "/admin/matching": { title: "AI Matches", desc: "AI-generated matches between lost and found items" },
     "/admin/qr-verify": { title: "QR Verification", desc: "Scan and validate QR codes for item return verification" },
     "/admin/claim-requests": { title: "Claim Requests", desc: "Manage and verify item claim applications" },
+    "/admin/unclaims": { title: "Unclaimed Items", desc: "Monitor found items that have not yet been claimed by their owners." },
     "/admin/track-items": { title: "Item Tracking", desc: "Monitor, review, and manage all reports" },
     "/admin/users-manage": { title: "Users Management", desc: "Manage registered users across the platform" },
     "/admin/gamification": { title: "Gamification Engine", desc: "Motivate users through interactive challenges and rewards" },

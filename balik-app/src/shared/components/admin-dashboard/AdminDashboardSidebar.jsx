@@ -17,6 +17,7 @@ export default function AdminDashboardSidebar({ isOpen, closeSidebar }) {
     { path: "/admin/matching", icon: FileText, label: "AI Matches" },
     { path: "/admin/qr-verify", icon: ScanQrCode, label: "QR Verify" },
     { path: "/admin/claim-requests", icon: ClipboardList, label: "Claims" },
+    { path: "/admin/unclaims", icon: ClipboardList, label: "Unclaimed Items" },
     { path: "/admin/track-items", icon: MapPin, label: "Track Items" },
     { path: "/admin/users-manage", icon: Users, label: "Users" },
     { path: "/admin/gamification", icon: Trophy, label: "Gamification" },
